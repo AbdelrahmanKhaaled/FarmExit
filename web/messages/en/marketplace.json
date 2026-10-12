@@ -1,0 +1,143 @@
+{
+  "metaTitle": "Explore Farms · FarmExit",
+  "metaDescription": "Discover professionally reviewed agricultural opportunities across Egypt.",
+  "breadcrumb": {
+    "label": "Breadcrumb",
+    "home": "Home",
+    "farms": "Farms"
+  },
+  "title": "Explore Farms",
+  "description": "Discover professionally reviewed agricultural opportunities across Egypt.",
+  "search": {
+    "label": "Search farms",
+    "modesLabel": "Buy or rent",
+    "location": {
+      "label": "Location",
+      "any": "All Egypt"
+    },
+    "farmType": {
+      "label": "Farm type",
+      "any": "All farm types"
+    },
+    "area": {
+      "label": "Area",
+      "any": "Any size"
+    },
+    "price": {
+      "label": "Price range",
+      "any": "Any price"
+    },
+    "submit": "Search farms"
+  },
+  "results": {
+    "count": "{count, plural, =0 {No sample listings} one {Showing # sample listing} other {Showing # sample listings}}",
+    "meta": "Sample data · every listing is reviewed by FarmExit before it is published",
+    "pageStatus": "{count, plural, one {Showing # sample listing} other {Showing # sample listings}} · page {page}",
+    "loadMore": "Load more farms",
+    "listLabel": "Farm listings"
+  },
+  "sort": {
+    "label": "Sort by",
+    "newest": "Newest listings",
+    "priceAsc": "Price: low to high",
+    "priceDesc": "Price: high to low"
+  },
+  "trust": {
+    "title": "Every FarmExit listing is reviewed before publishing.",
+    "body": "Listings appear on FarmExit only after our team has reviewed them.",
+    "link": "How FarmExit works"
+  },
+  "filters": {
+    "title": "Filters",
+    "label": "Filter listings",
+    "clearAll": "Clear all",
+    "button": "Filters · {count}",
+    "summary": "{applied} applied · {results, plural, one {# sample listing} other {# sample listings}}",
+    "show": "{count, plural, =0 {No sample listings} one {Show # sample listing} other {Show # sample listings}}",
+    "appliedLabel": "Applied filters",
+    "toggleSection": "Show or hide {section}",
+    "sections": {
+      "transaction": "Transaction",
+      "size": "Farm size (area)",
+      "farmType": "Farm type",
+      "location": "Location",
+      "water": "Water source",
+      "irrigation": "Irrigation method",
+      "energy": "Energy source",
+      "crop": "Crop type",
+      "price": "Price range"
+    },
+    "governorate": {
+      "label": "Governorate",
+      "any": "All governorates"
+    },
+    "area": {
+      "label": "Area",
+      "any": "Any area"
+    },
+    "min": "Min",
+    "max": "Max",
+    "minFor": "Minimum {section}",
+    "maxFor": "Maximum {section}",
+    "sizeValue": "{value} fed.",
+    "sizeRange": "{min}–{max} fed.",
+    "priceValue": "EGP {value}",
+    "priceRange": "EGP {min} – {max}"
+  },
+  "options": {
+    "purpose": {
+      "sale": "Buy",
+      "rent": "Rent"
+    },
+    "farmTypes": {
+      "vegetable": "Vegetable farms",
+      "fruit": "Fruit farms",
+      "livestock": "Livestock",
+      "mixed": "Mixed farms"
+    },
+    "waterSources": {
+      "well": "Well",
+      "canal": "Canal"
+    },
+    "irrigationMethods": {
+      "drip": "Drip irrigation",
+      "sprinkler": "Sprinkler irrigation",
+      "gravity": "Gravity irrigation"
+    },
+    "energySources": {
+      "electricity": "Electricity",
+      "solar": "Solar energy",
+      "diesel": "Diesel"
+    },
+    "cropTypes": {
+      "fruits": "Fruits",
+      "citrus": "Citrus",
+      "fieldCrops": "Field crops",
+      "palms": "Palms",
+      "exportCrops": "Export crops"
+    }
+  },
+  "governorates": {
+    "beheira": "Beheira",
+    "ismailia": "Ismailia",
+    "menoufia": "Menoufia",
+    "qalyubia": "Qalyubia",
+    "giza": "Giza",
+    "sharqia": "Sharqia",
+    "beniSuef": "Beni Suef",
+    "minya": "Minya",
+    "fayoum": "Fayoum"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "Previous page",
+    "next": "Next page",
+    "page": "Page {page}"
+  },
+  "empty": {
+    "title": "No farms match these filters yet",
+    "body": "Try widening the price range or adding nearby governorates. New farms appear after FarmExit has reviewed them.",
+    "clear": "Clear all filters",
+    "alerts": "Get alerts for new farms"
+  }
+}

@@ -1,0 +1,29 @@
+/*
+ * Photo shades and band gradients from the approved Figma homepage. These are plain Figma fills (not variables),
+ * so they live here as named utilities instead of inline styles. All gradients run top → bottom unless noted.
+ */
+
+/* Hero › Hero Shade (Website Screens → Homepage / Desktop 1440 / EN). */
+@utility fx-shade-hero {
+  background-image: linear-gradient(180deg, #0b1f129e 0%, #0b1f122e 38%, #1a241059 62%, #08180eeb 100%);
+}
+
+/* Photo › Fade on immersive images and Farm Card photos (the card uses it at 60% opacity). */
+@utility fx-shade-photo {
+  background-image: linear-gradient(180deg, #08180e00 45%, #08180e8c 100%);
+}
+
+/* CTA / Feature › Shade. */
+@utility fx-shade-cta {
+  background-image: linear-gradient(180deg, #08180e47 0%, #08180e8c 45%, #08180ee5 100%);
+}
+
+/* Section / How It Works fill: brand/deep → brand/primary, diagonal (Figma transform ≈ 121°, stops at 18% / 82%). */
+@utility fx-band-depth {
+  background-image: linear-gradient(121deg, var(--color-brand-deep) 18%, var(--color-brand-primary) 82%);
+}
+
+/* Farm Details › Request Band fill (Surface/Green Depth): brand/deep → brand/primary at ≈165°, stops 14% / 86%. */
+@utility fx-band-request {
+  background-image: linear-gradient(165deg, var(--color-brand-deep) 14.286%, var(--color-brand-primary) 85.714%);
+}

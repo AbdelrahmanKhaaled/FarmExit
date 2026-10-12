@@ -1,0 +1,46 @@
+{
+  "primaryLabel": "الرئيسية",
+  "homeLabel": "الصفحة الرئيسية لـ FarmExit",
+  "links": {
+    "farms": "المزارع",
+    "management": "الإدارة",
+    "partnerships": "الشراكات",
+    "howItWorks": "إزاي بتشتغل",
+    "marketInsights": "مؤشرات السوق"
+  },
+  "signIn": "تسجيل الدخول",
+  "listYourFarm": "اعرض مزرعتك",
+  "menu": {
+    "open": "افتح القائمة",
+    "title": "القائمة"
+  },
+  "account": {
+    "notifications": "الإشعارات",
+    "unread": "عندك إشعارات جديدة",
+    "myFarmExit": "حسابي"
+  },
+  "footer": {
+    "label": "تذييل الصفحة",
+    "about": "سوق المزارع والإدارة الزراعية المحترفة في مصر.",
+    "columns": {
+      "farms": "المزارع",
+      "management": "الإدارة",
+      "company": "الشركة"
+    },
+    "links": {
+      "buyFarms": "اشترِ مزرعة",
+      "rentFarms": "أجّر مزرعة",
+      "marketInsights": "مؤشرات السوق",
+      "requestManager": "اطلب مدير",
+      "openRequests": "الطلبات المفتوحة",
+      "joinAsManager": "انضم كمدير",
+      "ownerPortal": "بوابة أصحاب المزارع",
+      "about": "عنّا",
+      "careers": "الوظائف",
+      "contact": "تواصل معنا",
+      "terms": "الشروط"
+    },
+    "copyright": "‏© 2026 FarmExit. جميع الحقوق محفوظة.",
+    "location": "القاهرة، مصر"
+  }
+}

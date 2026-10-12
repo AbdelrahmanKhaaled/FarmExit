@@ -1,0 +1,15 @@
+{
+  "requestCard": {
+    "badge": "طلب إدارة",
+    "reviewed": "مراجَع من FarmExit",
+    "specs": {
+      "area": "المساحة",
+      "activity": "النشاط",
+      "term": "المدة"
+    },
+    "scope": "النطاق المطلوب",
+    "ownerRequirements": "طلبات صاحب المزرعة",
+    "apply": "قدّم كمدير",
+    "applyFor": "قدّم كمدير: {title}"
+  }
+}

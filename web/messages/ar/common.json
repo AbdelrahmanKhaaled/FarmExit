@@ -1,0 +1,12 @@
+{
+  "brandName": "FarmExit",
+  "language": {
+    "switchTo": "English",
+    "switchLabel": "التبديل إلى الإنجليزية"
+  },
+  "actions": {
+    "close": "إغلاق",
+    "back": "رجوع",
+    "removeFilter": "إزالة الفلتر: {label}"
+  }
+}

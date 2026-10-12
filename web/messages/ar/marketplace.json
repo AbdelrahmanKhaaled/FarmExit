@@ -1,0 +1,143 @@
+{
+  "metaTitle": "تصفّح المزارع · FarmExit",
+  "metaDescription": "اكتشف فرص زراعية متراجعة باحتراف في كل مصر.",
+  "breadcrumb": {
+    "label": "مسار التصفح",
+    "home": "الرئيسية",
+    "farms": "المزارع"
+  },
+  "title": "تصفّح المزارع",
+  "description": "اكتشف فرص زراعية متراجعة باحتراف في كل مصر.",
+  "search": {
+    "label": "دوّر على مزارع",
+    "modesLabel": "شراء أو إيجار",
+    "location": {
+      "label": "الموقع",
+      "any": "كل مصر"
+    },
+    "farmType": {
+      "label": "نوع المزرعة",
+      "any": "كل أنواع المزارع"
+    },
+    "area": {
+      "label": "المساحة",
+      "any": "أي مساحة"
+    },
+    "price": {
+      "label": "نطاق السعر",
+      "any": "أي سعر"
+    },
+    "submit": "دوّر على مزرعة"
+  },
+  "results": {
+    "count": "{count, plural, =0 {مفيش إعلانات تجريبية} one {عرض إعلان تجريبي واحد} two {عرض إعلانين تجريبيين} few {عرض # إعلانات تجريبية} many {عرض # إعلان تجريبي} other {عرض # إعلان تجريبي}}",
+    "meta": "بيانات تجريبية · كل إعلان بتراجعه FarmExit قبل ما يتنشر",
+    "pageStatus": "{count, plural, one {عرض إعلان تجريبي واحد} two {عرض إعلانين تجريبيين} few {عرض # إعلانات تجريبية} many {عرض # إعلان تجريبي} other {عرض # إعلان تجريبي}} · صفحة {page}",
+    "loadMore": "اعرض مزارع أكتر",
+    "listLabel": "إعلانات المزارع"
+  },
+  "sort": {
+    "label": "رتّب حسب",
+    "newest": "الأحدث",
+    "priceAsc": "السعر: من الأقل للأعلى",
+    "priceDesc": "السعر: من الأعلى للأقل"
+  },
+  "trust": {
+    "title": "كل إعلان على FarmExit بيتراجع قبل النشر.",
+    "body": "الإعلانات بتظهر على FarmExit بعد ما فريقنا يراجعها بس.",
+    "link": "إزاي FarmExit بتشتغل"
+  },
+  "filters": {
+    "title": "الفلاتر",
+    "label": "فلترة الإعلانات",
+    "clearAll": "امسح الكل",
+    "button": "الفلاتر · {count}",
+    "summary": "{applied} مطبّق · {results, plural, one {إعلان تجريبي واحد} two {إعلانين تجريبيين} few {# إعلانات تجريبية} many {# إعلان تجريبي} other {# إعلان تجريبي}}",
+    "show": "{count, plural, =0 {مفيش إعلانات تجريبية} one {اعرض إعلان تجريبي واحد} two {اعرض إعلانين تجريبيين} few {اعرض # إعلانات تجريبية} many {اعرض # إعلان تجريبي} other {اعرض # إعلان تجريبي}}",
+    "appliedLabel": "الفلاتر المطبّقة",
+    "toggleSection": "اعرض أو اخفي {section}",
+    "sections": {
+      "transaction": "نوع التعامل",
+      "size": "مساحة المزرعة",
+      "farmType": "نوع الزراعة",
+      "location": "الموقع",
+      "water": "مصدر المياه",
+      "irrigation": "طريقة الري",
+      "energy": "مصدر الطاقة",
+      "crop": "نوع المحصول",
+      "price": "نطاق السعر"
+    },
+    "governorate": {
+      "label": "المحافظة",
+      "any": "كل المحافظات"
+    },
+    "area": {
+      "label": "المنطقة",
+      "any": "أي منطقة"
+    },
+    "min": "الأدنى",
+    "max": "الأقصى",
+    "minFor": "الحد الأدنى لـ{section}",
+    "maxFor": "الحد الأقصى لـ{section}",
+    "sizeValue": "{value} فدان",
+    "sizeRange": "{min}–{max} فدان",
+    "priceValue": "{value} ج.م",
+    "priceRange": "{min} – {max} ج.م"
+  },
+  "options": {
+    "purpose": {
+      "sale": "شراء",
+      "rent": "إيجار"
+    },
+    "farmTypes": {
+      "vegetable": "مزارع خضار",
+      "fruit": "مزارع فاكهة",
+      "livestock": "إنتاج حيواني",
+      "mixed": "مزارع متنوعة"
+    },
+    "waterSources": {
+      "well": "بئر",
+      "canal": "ترعة"
+    },
+    "irrigationMethods": {
+      "drip": "الري بالتنقيط",
+      "sprinkler": "الري بالرش",
+      "gravity": "الري بالراحة"
+    },
+    "energySources": {
+      "electricity": "كهرباء",
+      "solar": "طاقة شمسية",
+      "diesel": "سولار"
+    },
+    "cropTypes": {
+      "fruits": "فاكهة",
+      "citrus": "موالح",
+      "fieldCrops": "محاصيل حقلية",
+      "palms": "نخيل",
+      "exportCrops": "محاصيل تصدير"
+    }
+  },
+  "governorates": {
+    "beheira": "البحيرة",
+    "ismailia": "الإسماعيلية",
+    "menoufia": "المنوفية",
+    "qalyubia": "القليوبية",
+    "giza": "الجيزة",
+    "sharqia": "الشرقية",
+    "beniSuef": "بني سويف",
+    "minya": "المنيا",
+    "fayoum": "الفيوم"
+  },
+  "pagination": {
+    "label": "الصفحات",
+    "previous": "الصفحة السابقة",
+    "next": "الصفحة التالية",
+    "page": "صفحة {page}"
+  },
+  "empty": {
+    "title": "مفيش مزارع مطابقة للفلاتر دي لسه",
+    "body": "جرّب توسّع نطاق السعر أو تضيف محافظات قريبة. المزارع الجديدة بتظهر بعد ما FarmExit تراجعها.",
+    "clear": "امسح كل الفلاتر",
+    "alerts": "فعّل تنبيهات المزارع الجديدة"
+  }
+}

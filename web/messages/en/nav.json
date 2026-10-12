@@ -1,0 +1,46 @@
+{
+  "primaryLabel": "Main",
+  "homeLabel": "FarmExit home",
+  "links": {
+    "farms": "Farms",
+    "management": "Management",
+    "partnerships": "Partnerships",
+    "howItWorks": "How it works",
+    "marketInsights": "Market insights"
+  },
+  "signIn": "Sign in",
+  "listYourFarm": "List your farm",
+  "menu": {
+    "open": "Open menu",
+    "title": "Menu"
+  },
+  "account": {
+    "notifications": "Notifications",
+    "unread": "You have unread notifications",
+    "myFarmExit": "My FarmExit"
+  },
+  "footer": {
+    "label": "Footer",
+    "about": "The marketplace for farms and professional farm management in Egypt.",
+    "columns": {
+      "farms": "Farms",
+      "management": "Management",
+      "company": "Company"
+    },
+    "links": {
+      "buyFarms": "Buy farms",
+      "rentFarms": "Rent farms",
+      "marketInsights": "Market insights",
+      "requestManager": "Request a manager",
+      "openRequests": "Open requests",
+      "joinAsManager": "Join as a manager",
+      "ownerPortal": "Owner portal",
+      "about": "About",
+      "careers": "Careers",
+      "contact": "Contact",
+      "terms": "Terms"
+    },
+    "copyright": "© 2026 FarmExit. All rights reserved.",
+    "location": "Cairo, Egypt"
+  }
+}

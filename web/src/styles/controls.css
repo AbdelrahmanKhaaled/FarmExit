@@ -1,0 +1,63 @@
+/*
+ * Native form-control parts that utilities cannot reach. Logical properties only.
+ * Range Slider (Figma Group / Marketplace Filters): two stacked range inputs; only the thumbs take pointer events.
+ */
+@layer components {
+  .fx-range {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 20px;
+    margin: 0;
+    appearance: none;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .fx-range:focus-visible {
+    outline: none;
+  }
+
+  .fx-range::-webkit-slider-runnable-track {
+    background: transparent;
+    border: 0;
+  }
+
+  .fx-range::-moz-range-track {
+    background: transparent;
+    border: 0;
+  }
+
+  .fx-range::-webkit-slider-thumb {
+    inline-size: 21px;
+    block-size: 20px;
+    border: 2px solid var(--color-brand-primary);
+    border-radius: 999px;
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-premium-rest);
+    appearance: none;
+    cursor: grab;
+    pointer-events: auto;
+  }
+
+  .fx-range::-moz-range-thumb {
+    inline-size: 17px;
+    block-size: 16px;
+    border: 2px solid var(--color-brand-primary);
+    border-radius: 999px;
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-premium-rest);
+    cursor: grab;
+    pointer-events: auto;
+  }
+
+  .fx-range:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+  }
+
+  .fx-range:focus-visible::-moz-range-thumb {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+  }
+}

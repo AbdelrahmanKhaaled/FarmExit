@@ -1,0 +1,85 @@
+/*
+ * Overlay motion and scrim for Dialog and Sheet (native <dialog>). Logical properties only.
+ * Source of Truth 4m: dissolve 200 ms for dialogs, slide 300 ms ease-out for sheets, no bounce, no scaling.
+ * Scrim: brand/deep at 50% (Figma Auth "Scrim" layer).
+ */
+@layer components {
+  .fx-overlay {
+    opacity: 0;
+    transition:
+      opacity 200ms ease-out,
+      translate 300ms ease-out,
+      overlay 300ms allow-discrete,
+      display 300ms allow-discrete;
+  }
+
+  .fx-overlay[open] {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .fx-overlay::backdrop {
+    background-color: color-mix(in srgb, var(--color-brand-deep) 50%, transparent);
+    opacity: 0;
+    transition:
+      opacity 200ms ease-out,
+      overlay 200ms allow-discrete,
+      display 200ms allow-discrete;
+  }
+
+  .fx-overlay[open]::backdrop {
+    opacity: 1;
+  }
+
+  /* Sheets slide; the end sheet comes from the inline end, so it mirrors in RTL. */
+  .fx-sheet {
+    opacity: 1;
+  }
+
+  .fx-sheet[data-side='bottom']:not([open]) {
+    translate: 0 100%;
+  }
+
+  .fx-sheet[data-side='end']:not([open]) {
+    translate: 100% 0;
+  }
+
+  .fx-sheet[data-side='end']:not([open]):dir(rtl) {
+    translate: -100% 0;
+  }
+
+  @starting-style {
+    .fx-dialog[open] {
+      opacity: 0;
+    }
+
+    .fx-sheet[data-side='bottom'][open] {
+      translate: 0 100%;
+    }
+
+    .fx-sheet[data-side='end'][open] {
+      translate: 100% 0;
+    }
+
+    .fx-sheet[data-side='end'][open]:dir(rtl) {
+      translate: -100% 0;
+    }
+
+    .fx-overlay[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  /* The page behind a modal must not scroll. */
+  html:has(.fx-overlay[open]) {
+    overflow: hidden;
+  }
+}
+
+/* An inline English island inside Arabic UI (e.g. the "English" language toggle) uses the English font,
+   as the Figma Language collection does per frame. */
+@layer base {
+  :root:lang(ar) [lang='en'] {
+    --fx-font-family: var(--font-manrope), system-ui, sans-serif;
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "card": {
+    "listing": {
+      "sale": "For sale",
+      "rent": "For rent"
+    },
+    "priceLabel": {
+      "sale": "Asking price",
+      "rent": "Annual rent"
+    },
+    "illustrative": "Illustrative image",
+    "save": "Save {name}",
+    "viewDetails": "View details",
+    "viewDetailsFor": "View details for {name}",
+    "attributes": "Farm details",
+    "areaLabel": "Farm area",
+    "activityLabel": "Activity",
+    "waterLabel": "Water source",
+    "irrigationLabel": "Irrigation method",
+    "notStated": "Not stated in listing",
+    "areaValue": "{count, plural, one {# feddan} other {# feddans}}",
+    "price": "EGP {amount}",
+    "pricePerFeddan": "EGP {amount} per feddan",
+    "pricePerFeddanNotStated": "Price per feddan: Not stated in listing",
+    "rentPerFeddan": "per feddan / year",
+    "location": "{area}, {governorate}"
+  },
+  "score": {
+    "label": "FarmExit Score",
+    "note": "FarmExit's own evaluation — not a customer rating",
+    "outOf": "/5",
+    "a11y": "FarmExit Score {score} out of 5. FarmExit's own evaluation, not a customer rating.",
+    "line": "FarmExit Score {score} /5"
+  },
+  "details": {
+    "metaTitle": "{name} · FarmExit",
+    "metaDescription": "{name} — {area}, {location}. Request farm details through FarmExit.",
+    "back": "Back to results",
+    "breadcrumb": {
+      "label": "Breadcrumb",
+      "farms": "Farms"
+    },
+    "gallery": {
+      "label": "Farm photos",
+      "counter": "{current} / {total}",
+      "viewAll": "View all photos",
+      "more": "+{count}",
+      "showPhoto": "Show photo {index} of {total}",
+      "allTitle": "All photos",
+      "allDescription": "{count, plural, one {# photo} other {# photos}} of {name}"
+    },
+    "listed": "Listed {date} · ID {id}",
+    "keyFacts": {
+      "label": "Key facts",
+      "area": "Area",
+      "activity": "Activity",
+      "irrigation": "Irrigation"
+    },
+    "highlights": "Listing highlights",
+    "price": {
+      "saleLabel": "Asking price",
+      "rentLabel": "Expected annual rent per feddan",
+      "amount": "{unit, select, million {EGP {value}M} thousand {EGP {value}K} other {EGP {value}}}",
+      "perFeddan": "{amount} / feddan",
+      "perFeddanNotStated": "Price per feddan: Not stated in listing",
+      "rentUnit": "per feddan / year",
+      "area": "{count, plural, one {# feddan} other {# feddans}}",
+      "sub": "{first} · {area}"
+    },
+    "actions": {
+      "requestSale": "Request farm details",
+      "requestRent": "Request rental information",
+      "stickySale": "Request details",
+      "stickyRent": "Request rental info",
+      "contact": "Contact owner via FarmExit",
+      "contactShort": "Contact owner",
+      "save": "Save farm",
+      "saved": "Saved",
+      "saveLabel": "Save {name}",
+      "privacy": "Contact is handled through FarmExit. Your details reach the owner only after you agree.",
+      "barLabel": "Farm actions"
+    },
+    "specs": {
+      "eyebrow": "Specifications",
+      "title": "Farm specifications",
+      "farmSize": "Farm size",
+      "location": "Location",
+      "farmType": "Farm type",
+      "activity": "Agricultural activity",
+      "cropType": "Crop type",
+      "water": "Water source",
+      "irrigation": "Irrigation method",
+      "energy": "Energy source",
+      "soil": "Soil type",
+      "infrastructure": "Infrastructure"
+    },
+    "farmTypes": {
+      "vegetable": "Vegetable farm",
+      "fruit": "Fruit farm",
+      "livestock": "Livestock farm",
+      "mixed": "Mixed farm"
+    },
+    "facilities": {
+      "eyebrow": "On the farm",
+      "title": "Facilities & equipment"
+    },
+    "location": {
+      "eyebrow": "Location",
+      "title": "Location & access",
+      "mapLabel": "Map of the approximate farm area",
+      "approx": "Approximate area · exact pin shared on request",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "nearby": "Nearby",
+      "access": "Accessibility",
+      "distance": "≈ {km} km",
+      "note": "Distances and access details are provided by the owner and confirmed during the FarmExit review."
+    },
+    "documents": {
+      "eyebrow": "Listing",
+      "title": "Documents",
+      "subtitle": "Documents included with this listing.",
+      "ownership": "Ownership documents",
+      "land": "Land information",
+      "shared": "{detail} · shared after your request is approved",
+      "note": "Full copies are shared through FarmExit once your request is approved by the owner."
+    },
+    "band": {
+      "eyebrow": "Next step",
+      "title": "Interested in this farm?",
+      "body": "Send a request through FarmExit. FarmExit confirms your interest with the owner and shares the farm information through FarmExit. Your contact details stay private.",
+      "steps": {
+        "one": "Send your request",
+        "two": "FarmExit confirms with the owner",
+        "three": "Farm information"
+      },
+      "note": "Owner contact is handled by FarmExit",
+      "reply": "Typical reply within 1 working day"
+    },
+    "similar": {
+      "eyebrow": "More opportunities",
+      "title": "Similar farms",
+      "areaShort": "{count} fed."
+    }
+  }
+}

@@ -1,0 +1,459 @@
+{
+  "metaTitle": "FarmExit — Egypt’s marketplace for farms",
+  "metaDescription": "Buy or rent farms that FarmExit has reviewed before publishing, or connect your farm with experienced managers who can run it for you.",
+  "hero": {
+    "pill": "Egypt’s marketplace for farms",
+    "headline": "Reviewed farms.\nTrusted opportunities.\nProfessional management.",
+    "subhead": "Buy or rent farms that FarmExit has reviewed before publishing, or connect your farm with experienced managers who can run it for you.",
+    "owner": {
+      "title": "Own a farm? List it for sale or rent.",
+      "caption": "FarmExit reviews your farm before it’s shown to buyers and renters.",
+      "cta": "List your farm"
+    },
+    "search": {
+      "label": "Search farms and management requests",
+      "modesLabel": "What are you looking for?",
+      "modes": {
+        "buy": "Buy",
+        "rent": "Rent",
+        "management": "Management"
+      },
+      "location": {
+        "label": "Location",
+        "any": "All Egypt"
+      },
+      "activity": {
+        "label": "Activity",
+        "any": "All activities"
+      },
+      "area": {
+        "label": "Area",
+        "any": "Any size"
+      },
+      "budget": {
+        "label": "Budget",
+        "any": "Any budget"
+      },
+      "scope": {
+        "label": "Scope",
+        "any": "Any scope"
+      },
+      "submit": {
+        "farms": "Search farms",
+        "requests": "Find requests"
+      }
+    },
+    "proof": {
+      "header": "FarmExit in numbers · sample figures",
+      "farms": {
+        "value": "340+",
+        "label": "Listed farms"
+      },
+      "feddans": {
+        "value": "28,500",
+        "label": "Listed feddans"
+      },
+      "opportunities": {
+        "value": "120",
+        "label": "Available opportunities"
+      },
+      "governorates": {
+        "value": "14",
+        "label": "Governorates covered"
+      }
+    }
+  },
+  "options": {
+    "governorates": {
+      "beheira": "Beheira",
+      "ismailia": "Ismailia",
+      "menoufia": "Menoufia",
+      "minya": "Minya",
+      "fayoum": "Fayoum"
+    },
+    "activities": {
+      "vegetables": "Vegetables",
+      "fieldCrops": "Field crops"
+    }
+  },
+  "about": {
+    "eyebrow": "About FarmExit",
+    "statement": "Farmland is a long-term decision. We make every opportunity clear.",
+    "lead": "FarmExit is Egypt’s marketplace for agricultural land and farm operations. Before anything is published, FarmExit reviews it — so buyers, renters, owners and managers work from the same information.",
+    "imageAlt": "An Egyptian farmer tending vegetable rows beside a canal, date palms behind",
+    "card": {
+      "eyebrow": "Reviewed before publishing",
+      "title": "Every listing is reviewed by FarmExit before it is published.",
+      "farms": {
+        "value": "340+",
+        "label": "Listed farms"
+      },
+      "governorates": {
+        "value": "14",
+        "label": "Governorates"
+      },
+      "review": {
+        "value": "3 days",
+        "label": "Working-day review"
+      }
+    },
+    "pillars": {
+      "one": {
+        "number": "01",
+        "title": "Reviewed agricultural opportunities",
+        "body": "Every farm for sale or rent is reviewed by FarmExit before it is published — so buyers and renters start from clear information."
+      },
+      "two": {
+        "number": "02",
+        "title": "Clear farm information",
+        "body": "Each listing shows the farm’s area, activity, water source and price as stated in the listing — missing details are marked clearly."
+      },
+      "three": {
+        "number": "03",
+        "title": "Farm management services",
+        "body": "Owners short on time or expertise post a management request. FarmExit reviews it, and experienced managers apply with a proposal to run the farm."
+      }
+    }
+  },
+  "journeys": {
+    "eyebrow": "Start here",
+    "title": "One marketplace, three ways in",
+    "subtitle": "Whether you are looking for land, need help running a farm, or manage farms professionally, every listing and request is reviewed by FarmExit first.",
+    "find": {
+      "audience": "Buyers & renters",
+      "title": "Find a Farm",
+      "description": "Buy or rent agricultural properties reviewed by FarmExit.",
+      "cta": "Browse farms",
+      "imageAlt": "Green fields in the Nile Valley with date palms and a desert ridge"
+    },
+    "manage": {
+      "audience": "Farm owners",
+      "title": "Manage Your Farm",
+      "description": "Connect with experienced professionals to operate your farm.",
+      "cta": "Request a manager",
+      "imageAlt": "A farmer beside a wooden waterwheel at the edge of a wheat field"
+    },
+    "offer": {
+      "audience": "Farm managers",
+      "title": "Offer Management Services",
+      "description": "Help farm owners operate and grow their farms.",
+      "cta": "See open requests",
+      "imageAlt": "Three farm managers walking between crop rows beside an irrigation channel"
+    }
+  },
+  "farms": {
+    "eyebrow": "Farm listings",
+    "title": "Farms for sale and rent",
+    "subtitle": "Every listing is reviewed by FarmExit before it is published.",
+    "filtersLabel": "Show listings",
+    "filters": {
+      "all": "All",
+      "sale": "For sale",
+      "rent": "For rent"
+    },
+    "sort": {
+      "label": "Sort by",
+      "newest": "Newest listings",
+      "priceAsc": "Price: low to high",
+      "priceDesc": "Price: high to low"
+    },
+    "browse": "Browse farms",
+    "items": {
+      "wadiElNatrun": {
+        "name": "Wadi El Natrun Vegetable Estate",
+        "location": "Wadi El Natrun, Beheira",
+        "area": "120 fed.",
+        "crop": "Vegetables",
+        "water": "Drip · 2 wells",
+        "price": "EGP 54M",
+        "priceSub": "EGP 450K / feddan",
+        "imageAlt": "Rows of vegetables between date palms"
+      },
+      "nubaria": {
+        "name": "Nubaria Potato & Peanut Farm",
+        "location": "Nubaria, Beheira",
+        "area": "180 fed.",
+        "crop": "Field crops",
+        "water": "Canal + well",
+        "price": "EGP 81M",
+        "priceSub": "EGP 450K / feddan",
+        "imageAlt": "Aerial view of irrigated field plots and canals"
+      },
+      "abuSuwayr": {
+        "name": "Abu Suwayr Legume Farm",
+        "location": "Abu Suwayr, Ismailia",
+        "area": "42 fed.",
+        "crop": "Field crops",
+        "water": "Ismailia canal",
+        "price": "EGP 28M",
+        "priceSub": "EGP 667K / feddan",
+        "imageAlt": "Green legume fields under a cloudy sky"
+      },
+      "sadatCity": {
+        "name": "Sadat City Nursery Land",
+        "location": "Sadat City, Menoufia",
+        "area": "35 fed.",
+        "crop": "Vegetables",
+        "water": "Deep well",
+        "price": "EGP 21K",
+        "priceSub": "per feddan / year",
+        "imageAlt": "Nursery rows at sunset with a palm tree"
+      },
+      "mallawi": {
+        "name": "Mallawi Corn & Wheat Farm",
+        "location": "Mallawi, Minya",
+        "area": "60 fed.",
+        "crop": "Field crops",
+        "water": "Nile canal",
+        "price": "EGP 14.5K",
+        "priceSub": "per feddan / year",
+        "imageAlt": "Aerial view of terraced fields beside the Nile"
+      },
+      "tamiya": {
+        "name": "Tamiya Herb & Greens Farm",
+        "location": "Tamiya, Fayoum",
+        "area": "25 fed.",
+        "crop": "Vegetables",
+        "water": "Sprinkler",
+        "price": "EGP 18K",
+        "priceSub": "per feddan / year",
+        "imageAlt": "Herb and greens rows below desert hills"
+      }
+    }
+  },
+  "management": {
+    "eyebrow": "Farm management marketplace",
+    "title": "Farm owners meet professional managers",
+    "subtitle": "Owners post management requests. FarmExit reviews each request before publishing it, and experienced managers apply with a proposal.",
+    "imageAlt": "Two farmers working in a vegetable field at sunrise",
+    "owners": {
+      "audience": "For farm owners",
+      "title": "Short on time or expertise? Post a management request.",
+      "listLabel": "Your request includes",
+      "items": {
+        "one": "Farm information, location and area",
+        "two": "Agricultural activity and current situation",
+        "three": "Required management scope",
+        "four": "Your expectations and requirements"
+      },
+      "cta": "Submit a request"
+    },
+    "managers": {
+      "audience": "For farm managers",
+      "title": "Browse reviewed requests and apply with a proposal.",
+      "listLabel": "You apply with",
+      "items": {
+        "one": "Your experience and expertise",
+        "two": "Farms you have managed before",
+        "three": "A management proposal for the farm",
+        "four": "Availability and references"
+      },
+      "cta": "Browse requests"
+    },
+    "requests": {
+      "title": "Open management requests",
+      "all": "All requests",
+      "items": {
+        "olive": {
+          "title": "150 Feddan Olive Farm",
+          "location": "Wadi El Natrun, Beheira",
+          "area": "150 fed.",
+          "activity": "Olives",
+          "term": "3 years",
+          "scope": "Full farm operation management",
+          "services": {
+            "one": "Irrigation",
+            "two": "Labor",
+            "three": "Harvest",
+            "four": "Marketing"
+          },
+          "requirements": "5+ years managing olive farms. On site at least 4 days a week.",
+          "applicants": "7 managers applied"
+        },
+        "citrus": {
+          "title": "60 Feddan Citrus Orchard",
+          "location": "Sadat City, Menoufia",
+          "area": "60 fed.",
+          "activity": "Citrus",
+          "term": "1 year",
+          "scope": "Technical supervision",
+          "services": {
+            "one": "Fertigation plan",
+            "two": "Pest control",
+            "three": "Export quality"
+          },
+          "requirements": "Agronomy degree and GlobalG.A.P. experience.",
+          "applicants": "4 managers applied"
+        },
+        "wheat": {
+          "title": "220 Feddan Wheat & Corn Farm",
+          "location": "Samalut, Minya",
+          "area": "220 fed.",
+          "activity": "Field crops",
+          "term": "Winter season",
+          "scope": "Seasonal operation",
+          "services": {
+            "one": "Land preparation",
+            "two": "Planting",
+            "three": "Harvest"
+          },
+          "requirements": "Own machinery preferred. Weekly reporting to the owner.",
+          "applicants": "11 managers applied"
+        }
+      }
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "How FarmExit works",
+    "title": "A clear path for every side of the marketplace",
+    "tabsLabel": "Choose your journey",
+    "tabs": {
+      "buyers": "Buyers & renters",
+      "owners": "Farm owners",
+      "managers": "Farm managers"
+    },
+    "steps": {
+      "buyers": {
+        "one": {
+          "title": "Browse farms",
+          "description": "Filter by location, area, activity and price."
+        },
+        "two": {
+          "title": "View farm details",
+          "description": "Photos, specifications, facilities and location."
+        },
+        "three": {
+          "title": "Review the listing details",
+          "description": "See the farm’s area, activity, water and price as stated in the listing."
+        },
+        "four": {
+          "title": "Contact the owner",
+          "description": "Request details or a site visit through FarmExit."
+        }
+      },
+      "owners": {
+        "one": {
+          "title": "List your farm",
+          "description": "Add your farm information, photos and documents."
+        },
+        "two": {
+          "title": "Choose sale or rent",
+          "description": "Set the listing purpose and submit it to FarmExit."
+        },
+        "three": {
+          "title": "FarmExit review",
+          "description": "FarmExit reviews your listing before it is published."
+        },
+        "four": {
+          "title": "Get published",
+          "description": "Approved listings go live. If changes are requested, edit and resubmit."
+        }
+      },
+      "managers": {
+        "one": {
+          "title": "Create your profile",
+          "description": "Add your expertise, experience and governorates."
+        },
+        "two": {
+          "title": "Get verified",
+          "description": "FarmExit verifies your professional credentials."
+        },
+        "three": {
+          "title": "Apply to requests",
+          "description": "Preview reviewed management requests and apply with a proposal."
+        },
+        "four": {
+          "title": "Get selected",
+          "description": "FarmExit forwards your application to the owner, who shortlists and selects."
+        }
+      }
+    }
+  },
+  "insights": {
+    "eyebrow": "Market insights",
+    "title": "Farmland prices by governorate",
+    "subtitle": "Sample averages — to be replaced with live FarmExit data.",
+    "caption": "Sample average farmland prices by governorate",
+    "columns": {
+      "governorate": "Governorate",
+      "sale": "Avg. sale / feddan",
+      "rent": "Avg. rent / feddan / yr",
+      "listings": "Listings"
+    },
+    "rows": {
+      "beheira": {
+        "name": "Beheira",
+        "sale": "EGP 455K",
+        "rent": "EGP 15.5K",
+        "listings": "84"
+      },
+      "ismailia": {
+        "name": "Ismailia",
+        "sale": "EGP 620K",
+        "rent": "EGP 18K",
+        "listings": "41"
+      },
+      "minya": {
+        "name": "Minya",
+        "sale": "EGP 390K",
+        "rent": "EGP 13K",
+        "listings": "57"
+      },
+      "fayoum": {
+        "name": "Fayoum",
+        "sale": "EGP 340K",
+        "rent": "EGP 12K",
+        "listings": "33"
+      },
+      "menoufia": {
+        "name": "Menoufia",
+        "sale": "EGP 710K",
+        "rent": "EGP 21K",
+        "listings": "29"
+      }
+    }
+  },
+  "testimonials": {
+    "eyebrow": "Testimonials",
+    "title": "From owners, renters and managers",
+    "previous": "Previous testimonial",
+    "next": "Next testimonial",
+    "items": {
+      "ahmed": {
+        "tag": "Farm owner",
+        "quote": "The FarmExit review gave buyers confidence from the first call. We sold our Beheira farm in under two months.",
+        "name": "Ahmed Mansour",
+        "place": "Wadi El Natrun"
+      },
+      "hany": {
+        "tag": "Farm owner",
+        "quote": "I posted a management request for my orchard and had four qualified proposals within two weeks. The manager I chose now sends weekly reports.",
+        "name": "Hany Selim",
+        "place": "Sadat City"
+      },
+      "karim": {
+        "tag": "Farm manager",
+        "quote": "The requests are clear about scope and expectations, so I only apply where my experience fits. I now manage two farms through FarmExit.",
+        "name": "Karim Farouk",
+        "place": "Minya"
+      }
+    }
+  },
+  "cta": {
+    "feature": {
+      "badge": "For buyers & renters",
+      "title": "Find a farm to buy or rent",
+      "body": "Browse farms reviewed by FarmExit across Egypt.",
+      "button": "Browse farms",
+      "imageAlt": "A palm-lined estate with young vegetable rows"
+    },
+    "panel": {
+      "badge": "For farm owners",
+      "title": "List your farm or find a manager",
+      "body": "Submit your farm for sale or rent, or post a management request. We review it and publish it to the right people.",
+      "listFarm": "List your farm",
+      "requestManagement": "Request farm management",
+      "managerLink": "Are you a farm manager? See open requests"
+    }
+  }
+}

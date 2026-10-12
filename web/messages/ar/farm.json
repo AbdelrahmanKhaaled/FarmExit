@@ -1,0 +1,146 @@
+{
+  "card": {
+    "listing": {
+      "sale": "للبيع",
+      "rent": "للإيجار"
+    },
+    "priceLabel": {
+      "sale": "السعر المطلوب",
+      "rent": "الإيجار السنوي"
+    },
+    "illustrative": "صورة توضيحية",
+    "save": "احفظ {name}",
+    "viewDetails": "شوف التفاصيل",
+    "viewDetailsFor": "شوف تفاصيل {name}",
+    "attributes": "بيانات المزرعة",
+    "areaLabel": "مساحة المزرعة",
+    "activityLabel": "النشاط",
+    "waterLabel": "مصدر المياه",
+    "irrigationLabel": "طريقة الري",
+    "notStated": "غير مذكورة في الإعلان",
+    "areaValue": "{count} فدان",
+    "price": "{amount} ج.م",
+    "pricePerFeddan": "{amount} ج.م للفدان",
+    "pricePerFeddanNotStated": "قيمة الفدان: غير مذكورة في الإعلان",
+    "rentPerFeddan": "للفدان / سنويًا",
+    "location": "{area}، {governorate}"
+  },
+  "score": {
+    "label": "تقييم FarmExit",
+    "note": "تقييم FarmExit الداخلي — مش تقييم عملاء",
+    "outOf": "من 5",
+    "a11y": "تقييم FarmExit {score} من 5. تقييم داخلي من FarmExit، مش تقييم عملاء.",
+    "line": "تقييم FarmExit {score} من 5"
+  },
+  "details": {
+    "metaTitle": "{name} · FarmExit",
+    "metaDescription": "{name} — {area}، {location}. اطلب تفاصيل المزرعة عن طريق FarmExit.",
+    "back": "رجوع للنتائج",
+    "breadcrumb": {
+      "label": "مسار التصفح",
+      "farms": "المزارع"
+    },
+    "gallery": {
+      "label": "صور المزرعة",
+      "counter": "{current} / {total}",
+      "viewAll": "شوف كل الصور",
+      "more": "+{count}",
+      "showPhoto": "اعرض الصورة {index} من {total}",
+      "allTitle": "كل الصور",
+      "allDescription": "{count, plural, zero {مفيش صور} one {صورة واحدة} two {صورتين} few {# صور} many {# صورة} other {# صورة}} لـ{name}"
+    },
+    "listed": "معروضة {date} · رقم {id}",
+    "keyFacts": {
+      "label": "بيانات أساسية",
+      "area": "المساحة",
+      "activity": "النشاط",
+      "irrigation": "الري"
+    },
+    "highlights": "مميزات الإعلان",
+    "price": {
+      "saleLabel": "السعر المطلوب",
+      "rentLabel": "الإيجار السنوي المتوقع للفدان",
+      "amount": "{unit, select, million {{value} مليون ج.م} thousand {{value} ألف ج.م} other {{value} ج.م}}",
+      "perFeddan": "{amount} / فدان",
+      "perFeddanNotStated": "قيمة الفدان: غير مذكورة في الإعلان",
+      "rentUnit": "للفدان / سنويًا",
+      "area": "{count} فدان",
+      "sub": "{first} · {area}"
+    },
+    "actions": {
+      "requestSale": "اطلب تفاصيل المزرعة",
+      "requestRent": "اطلب بيانات الإيجار",
+      "stickySale": "اطلب التفاصيل",
+      "stickyRent": "اطلب بيانات الإيجار",
+      "contact": "تواصل مع صاحب المزرعة عن طريق FarmExit",
+      "contactShort": "تواصل مع صاحب المزرعة",
+      "save": "احفظ المزرعة",
+      "saved": "محفوظة",
+      "saveLabel": "احفظ {name}",
+      "privacy": "التواصل بيتم عن طريق FarmExit. بياناتك مش بتوصل لصاحب المزرعة غير بعد موافقتك.",
+      "barLabel": "إجراءات المزرعة"
+    },
+    "specs": {
+      "eyebrow": "المواصفات",
+      "title": "مواصفات المزرعة",
+      "farmSize": "مساحة المزرعة",
+      "location": "الموقع",
+      "farmType": "نوع المزرعة",
+      "activity": "النشاط الزراعي",
+      "cropType": "نوع المحصول",
+      "water": "مصدر المياه",
+      "irrigation": "طريقة الري",
+      "energy": "مصدر الطاقة",
+      "soil": "نوع التربة",
+      "infrastructure": "البنية التحتية"
+    },
+    "farmTypes": {
+      "vegetable": "مزرعة خضار",
+      "fruit": "مزرعة فاكهة",
+      "livestock": "مزرعة إنتاج حيواني",
+      "mixed": "مزرعة متنوعة"
+    },
+    "facilities": {
+      "eyebrow": "في المزرعة",
+      "title": "المرافق والمعدات"
+    },
+    "location": {
+      "eyebrow": "الموقع",
+      "title": "الموقع والوصول",
+      "mapLabel": "خريطة المنطقة التقريبية للمزرعة",
+      "approx": "المنطقة تقريبية · الموقع الدقيق بيتبعت عند الطلب",
+      "zoomIn": "تكبير",
+      "zoomOut": "تصغير",
+      "nearby": "قريب",
+      "access": "سهولة الوصول",
+      "distance": "≈ {km} كم",
+      "note": "المسافات وتفاصيل الوصول من صاحب المزرعة، واتأكدنا منها أثناء مراجعة FarmExit."
+    },
+    "documents": {
+      "eyebrow": "الإعلان",
+      "title": "المستندات",
+      "subtitle": "المستندات المرفقة مع الإعلان ده.",
+      "ownership": "مستندات الملكية",
+      "land": "بيانات الأرض",
+      "shared": "{detail} · بيتشارك بعد الموافقة على طلبك",
+      "note": "النسخ الكاملة بتتبعت عن طريق FarmExit بعد ما صاحب المزرعة يوافق على طلبك."
+    },
+    "band": {
+      "eyebrow": "الخطوة الجاية",
+      "title": "مهتم بالمزرعة دي؟",
+      "body": "ابعت طلب عن طريق FarmExit. FarmExit بتأكد اهتمامك مع صاحب المزرعة وبتشاركك بيانات المزرعة عن طريقها. بياناتك بتفضل خاصة.",
+      "steps": {
+        "one": "ابعت طلبك",
+        "two": "‏FarmExit بتأكد مع صاحب المزرعة",
+        "three": "بيانات المزرعة"
+      },
+      "note": "التواصل مع صاحب المزرعة عن طريق FarmExit",
+      "reply": "عادةً الرد خلال يوم عمل"
+    },
+    "similar": {
+      "eyebrow": "فرص تانية",
+      "title": "مزارع مشابهة",
+      "areaShort": "{count} فدان"
+    }
+  }
+}

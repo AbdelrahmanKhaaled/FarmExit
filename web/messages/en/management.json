@@ -1,0 +1,15 @@
+{
+  "requestCard": {
+    "badge": "Management request",
+    "reviewed": "Reviewed by FarmExit",
+    "specs": {
+      "area": "Area",
+      "activity": "Activity",
+      "term": "Term"
+    },
+    "scope": "Required scope",
+    "ownerRequirements": "Owner requirements",
+    "apply": "Apply as manager",
+    "applyFor": "Apply as manager: {title}"
+  }
+}

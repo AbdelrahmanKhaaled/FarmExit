@@ -1,0 +1,697 @@
+Project FarmExit_Final_Implementation {
+  database_type: 'MySQL'
+  Note: 'FarmExit updated logical ERD. FarmExit brokers introductions and mediates all buyer/renter-owner messaging. Sale/rent contracting, transfer and ALL payments happen OFF-PLATFORM. No payment, settlement, commission, online contract or in-platform offer modules. Optional admin-recorded off-platform outcomes are informational only. No global customer roles; farm roles are contextual. FarmExit Score is a STAFF evaluation, not a user rating. Evaluation methodology is not yet approved; publish only after documented evidence and review policy.'
+}
+
+// =========================
+// IDENTITY & ACCESS
+// =========================
+Table users {
+  id bigint [pk, increment]
+  full_name varchar(150) [not null]
+  mobile_e164 varchar(20) [unique, not null]
+  mobile_verified_at timestamp
+  email varchar(255) [unique]
+  avatar_storage_key varchar(500)
+  account_status varchar(30) [not null, default: 'active', note: 'active, suspended, blocked']
+  last_login_at timestamp
+  created_at timestamp
+  updated_at timestamp
+  Note: 'Single account. No global owner/buyer/renter/manager/engineer role column. Context is derived from farm relationships, professional capabilities and activity.'
+}
+
+Table user_sessions {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  session_token_hash varchar(128) [unique, not null]
+  device_name varchar(120)
+  user_agent text
+  ip_address varchar(45)
+  expires_at timestamp [not null]
+  last_seen_at timestamp
+  revoked_at timestamp
+  created_at timestamp
+  indexes {
+    (user_id, revoked_at, expires_at)
+  }
+}
+
+Table otp_verifications {
+  id bigint [pk, increment]
+  user_id bigint
+  mobile_e164 varchar(20) [not null]
+  purpose varchar(30) [not null, note: 'sign_in, registration, verification']
+  code_hash varchar(128) [not null]
+  attempts int [not null, default: 0]
+  expires_at timestamp [not null]
+  consumed_at timestamp
+  created_at timestamp
+  indexes {
+    (mobile_e164, purpose, created_at)
+    (user_id, purpose, created_at)
+  }
+  Note: 'Never store the raw OTP. Resend timer is configurable; default UX is 60 seconds.'
+}
+
+Table staff_memberships {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  staff_role varchar(40) [not null, note: 'admin, case_agent, reviewer']
+  status varchar(20) [not null, default: 'active']
+  created_at timestamp
+  indexes {
+    (user_id, staff_role) [unique]
+  }
+}
+
+// =========================
+// FARMS & FARM RELATIONSHIPS
+// =========================
+Table farms {
+  id bigint [pk, increment]
+  name varchar(200) [not null]
+  description text
+  farm_type varchar(40) [not null, note: 'Vegetable, Fruit, Livestock, Mixed']
+  main_activity varchar(255)
+  area_feddan decimal(12,2) [not null]
+  governorate varchar(120) [not null]
+  area_name varchar(120)
+  public_map_latitude decimal(10,8) [note: 'Coarse/approved public location only, never precise private coordinates']
+  public_map_longitude decimal(11,8) [note: 'Coarse/approved public location only']
+  private_pin_latitude decimal(10,8)
+  private_pin_longitude decimal(11,8)
+  approximate_area text
+  water_source varchar(40) [note: 'Well, Canal; business validation may extend']
+  irrigation_method varchar(40) [note: 'Drip, Sprinkler, Gravity']
+  energy_source varchar(40) [note: 'Electricity, Solar, Diesel']
+  soil_type varchar(120)
+  production_details json
+  access_details json
+  facilities json
+  farm_status varchar(30) [not null, default: 'active']
+  created_by bigint
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  indexes {
+    (governorate, area_name)
+    (farm_type, area_feddan)
+    (water_source, irrigation_method, energy_source)
+    (farm_status)
+  }
+  Note: 'Exact farm coordinates are private; expose only public_map_* where explicitly approved. Facilities remain owner-stated unless reviewed.'
+}
+
+Table farm_relationships {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  farm_id bigint [not null]
+  relationship_role varchar(40) [not null, note: 'owner, partner, manager, agricultural_engineer, tenant']
+  relationship_status varchar(20) [not null, default: 'active', note: 'active, pending, inactive']
+  starts_at timestamp
+  ends_at timestamp
+  created_at timestamp
+  indexes {
+    (farm_id, user_id, relationship_role) [unique]
+    (user_id, relationship_role)
+    (farm_id, relationship_role)
+  }
+  Note: 'This is the source of contextual farm roles. Buyer/renter are not global roles.'
+}
+
+// Crop categories are multi-valued; values must follow the approved marketplace taxonomy.
+Table farm_crop_types {
+  id bigint [pk, increment]
+  farm_id bigint [not null]
+  crop_type varchar(80) [not null]
+  created_at timestamp
+  indexes {
+    (farm_id, crop_type) [unique]
+    (crop_type, farm_id)
+  }
+  Note: 'Only record crop types actually stated by the owner or reviewed from farm data; no inferred tags.'
+}
+
+Table farm_media {
+  id bigint [pk, increment]
+  farm_id bigint [not null]
+  uploaded_by bigint [not null]
+  media_type varchar(30) [not null, note: 'photo, video, plan']
+  storage_key varchar(500) [not null]
+  alt_en varchar(255)
+  alt_ar varchar(255)
+  width int
+  height int
+  focal_x decimal(5,4)
+  focal_y decimal(5,4)
+  is_illustrative boolean [not null, default: false]
+  licence_status varchar(30) [not null, default: 'pending_confirmation']
+  sort_order int [not null, default: 0]
+  created_at timestamp
+}
+
+// =========================
+// UNIFIED REQUEST WORKFLOW
+// =========================
+Table requests {
+  id bigint [pk, increment]
+  request_number varchar(40) [unique, not null]
+  request_type varchar(40) [not null, note: 'farm_listing, farm_management, partnership, professional_verification, professional_application, partnership_application, farm_details']
+  created_by bigint [not null]
+  farm_id bigint
+  parent_request_id bigint
+  status varchar(50) [not null, default: 'draft']
+  visibility varchar(20) [not null, default: 'private', note: 'private, public']
+  current_step smallint [not null, default: 1]
+  submitted_at timestamp
+  published_at timestamp
+  closed_at timestamp
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (request_type, status, published_at)
+    (created_by, created_at)
+    (farm_id, request_type, status)
+    (parent_request_id, request_type, status)
+  }
+  Note: 'Root requests: farm_listing, farm_management, partnership, professional_verification. Child requests: professional_application -> management, partnership_application -> partnership, farm_details -> farm_listing.'
+}
+
+Table farm_listing_details {
+  request_id bigint [pk]
+  slug varchar(220) [unique, not null]
+  listing_type varchar(10) [not null, note: 'sale, rent']
+  asking_price decimal(15,2)
+  annual_rent_per_feddan decimal(15,2)
+  stated_sale_price_per_feddan decimal(15,2) [note: 'Optional owner-stated/reviewed value; do not fabricate when absent']
+  currency char(3) [not null, default: 'EGP']
+  availability varchar(60)
+  listing_description text
+  highlights json
+  extra_details json
+  indexes {
+    (listing_type, asking_price)
+    (listing_type, annual_rent_per_feddan)
+    (availability)
+  }
+  Note: 'Sale uses asking_price; rent uses annual_rent_per_feddan. Never apply the EGP 5m-100m sale price filter to rent. Prices are listing information, not online payments. Missing values display Not stated in listing.'
+}
+
+Table farm_management_details {
+  request_id bigint [pk]
+  professional_need varchar(30) [not null, note: 'farmManager, agriculturalEngineer, both']
+  management_types json
+  term varchar(100)
+  current_team json
+  current_situation text
+  challenges json
+  goals json
+  outcomes text
+  responsibilities json
+  experience_level varchar(30)
+  crop_expertise json
+  on_site_presence varchar(100)
+  team_leadership varchar(100)
+  resources_and_facilities json
+  additional_information text
+}
+
+Table partnership_details {
+  request_id bigint [pk]
+  objective json
+  description text
+  accepted_partner_types json [note: 'individual, company']
+  partner_background json
+  looking_for json
+  contribution_sought json
+  contribution_details text
+  current_team json
+  operations text
+  sales_channel varchar(255)
+  extra_information text
+  owner_documents_required json
+  Note: 'No ROI, financial-return percentages or guarantees are stored as assumed business data.'
+}
+
+Table request_application_details {
+  request_id bigint [pk]
+  applicant_kind varchar(20) [note: 'individual, company; partnership applications only']
+  professional_capability_id bigint [note: 'For professional applications, must point to a verified professional capability at submission time.']
+  application_message text
+  why_good_fit text
+  relevant_experience text
+  approach text
+  working_style text
+  additional_information text
+  company_name varchar(200)
+  company_registration_number varchar(100)
+  company_contact_name varchar(150)
+  company_contact_role varchar(100)
+  company_sector varchar(150)
+  proposal_details json
+  Note: 'Company identity is captured as application snapshot; there is no separate company account/role.'
+}
+
+Table request_documents {
+  id bigint [pk, increment]
+  request_id bigint [not null]
+  uploaded_by bigint [not null]
+  slot_key varchar(60) [not null, note: 'Generic Required document 1..N until official names are approved']
+  document_type varchar(120)
+  original_name varchar(255)
+  storage_key varchar(500) [not null]
+  mime_type varchar(120)
+  file_size_bytes bigint
+  review_status varchar(30) [not null, default: 'pending', note: 'required, uploading, uploaded, under_review, changes_requested, approved, unsupported, rejected']
+  reviewed_by bigint
+  reviewed_at timestamp
+  review_note text
+  created_at timestamp
+  indexes {
+    (request_id, slot_key)
+    (request_id, review_status)
+  }
+  Note: 'Private object-storage key; never expose the original applicant document directly to owners.'
+}
+
+Table request_reviews {
+  id bigint [pk, increment]
+  request_id bigint [not null]
+  reviewer_id bigint [not null]
+  decision varchar(30) [not null, note: 'approved, changes_requested, rejected']
+  comment text
+  created_at timestamp
+}
+
+Table request_status_history {
+  id bigint [pk, increment]
+  request_id bigint [not null]
+  from_status varchar(50)
+  to_status varchar(50) [not null]
+  changed_by bigint [not null]
+  reason text
+  created_at timestamp
+  indexes {
+    (request_id, created_at)
+  }
+}
+
+Table request_forwardings {
+  id bigint [pk, increment]
+  request_id bigint [not null]
+  recipient_user_id bigint [not null]
+  forwarded_by bigint [not null]
+  status varchar(30) [not null, default: 'sent', note: 'sent, viewed, decided, closed']
+  owner_decision varchar(30) [note: 'pending, accepted, declined']
+  decision_reason text
+  decided_by bigint
+  created_at timestamp
+  decided_at timestamp
+  indexes {
+    (request_id, recipient_user_id) [unique]
+    (recipient_user_id, status)
+  }
+  Note: 'Used when FarmExit forwards an approved/reviewed application or details request to the farm owner. Owner decision is stored here with actor/time.'
+}
+
+// =========================
+// FARMEXIT EVALUATIONS / SCORES (NOT CUSTOMER RATINGS)
+// =========================
+Table farm_evaluations {
+  id bigint [pk, increment]
+  farm_id bigint [not null]
+  listing_request_id bigint [note: 'Optional listing scope; must reference a farm_listing request for the same farm']
+  reviewed_by bigint [not null, note: 'Authorized FarmExit staff reviewer']
+  approved_by bigint [note: 'Authorized FarmExit staff approver']
+  score_value decimal(7,2) [note: 'Nullable until a documented scoring policy authorizes calculation']
+  score_max decimal(7,2) [note: 'Explicit scale, e.g. 5 or 100; never assume scale']
+  methodology_name varchar(150)
+  methodology_version varchar(60)
+  review_scope_en text [note: 'Only describe checks actually completed']
+  review_scope_ar text
+  public_summary_en text
+  public_summary_ar text
+  internal_notes text
+  status varchar(30) [not null, default: 'draft', note: 'draft, in_review, approved, published, withdrawn, superseded']
+  reviewed_at timestamp
+  approved_at timestamp
+  published_at timestamp
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (farm_id, status, published_at)
+    (listing_request_id, status)
+    (reviewed_by, created_at)
+  }
+  Note: 'Only FarmExit staff produces evaluations; NOT user reviews, not a blanket Verified badge. Preserve history. Public score is allowed only for an authorized published evaluation with an approved documented methodology and factual review scope; score_value must be within 0..score_max. Do not publish fictional sample scores as actual evaluations.'
+}
+
+Table farm_evaluation_checks {
+  id bigint [pk, increment]
+  evaluation_id bigint [not null]
+  check_key varchar(120) [not null, note: 'Approved criterion key; do not pre-populate hypothetical scoring criteria']
+  check_status varchar(30) [not null, default: 'not_reviewed', note: 'not_reviewed, reviewed, needs_information']
+  evidence_document_id bigint [note: 'Optional reviewed request document. Authorization required.']
+  reviewer_notes text
+  reviewed_at timestamp
+  indexes {
+    (evaluation_id, check_key) [unique]
+  }
+  Note: 'Tracks documented review scope/evidence without inventing criterion weights or formula.'
+}
+
+// =========================
+// PROFESSIONAL EXPERIENCE
+// =========================
+Table professional_profiles {
+  id bigint [pk, increment]
+  user_id bigint [unique, not null]
+  headline varchar(255)
+  bio text
+  base_governorate varchar(120)
+  years_experience smallint
+  experience_summary text
+  working_preferences json
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table professional_capabilities {
+  id bigint [pk, increment]
+  professional_profile_id bigint [not null]
+  professional_type varchar(40) [not null, note: 'farm_manager, agricultural_engineer']
+  verification_status varchar(30) [not null, default: 'verification_required', note: 'verification_required, draft, under_review, changes_requested, verified, not_approved']
+  verified_at timestamp
+  not_approved_reason text
+  indexes {
+    (professional_profile_id, professional_type) [unique]
+  }
+  Note: 'Farm Manager and Agricultural Engineer are verified independently. No Agricultural Specialist.'
+}
+
+Table professional_expertise {
+  id bigint [pk, increment]
+  professional_capability_id bigint [not null]
+  expertise_type varchar(80) [not null]
+  expertise_value varchar(150) [not null]
+  created_at timestamp
+  indexes {
+    (professional_capability_id, expertise_type, expertise_value) [unique]
+  }
+}
+
+Table professional_service_areas {
+  id bigint [pk, increment]
+  professional_capability_id bigint [not null]
+  governorate varchar(120) [not null]
+  created_at timestamp
+  indexes {
+    (professional_capability_id, governorate) [unique]
+  }
+}
+
+Table professional_verification_details {
+  request_id bigint [pk]
+  professional_capability_id bigint [not null]
+  profile_snapshot json [not null]
+  verification_summary text
+  created_at timestamp
+}
+
+// =========================
+// COMMUNICATION - FARMEXIT RELAY ONLY
+// =========================
+Table communication_cases {
+  id bigint [pk, increment]
+  request_id bigint [not null]
+  assigned_staff_id bigint [not null]
+  status varchar(30) [not null, default: 'open', note: 'open, waiting_customer, waiting_owner, closed']
+  created_at timestamp
+  closed_at timestamp
+  indexes {
+    (request_id, status)
+    (assigned_staff_id, status)
+  }
+}
+
+Table conversations {
+  id bigint [pk, increment]
+  case_id bigint [not null]
+  external_user_id bigint [not null]
+  status varchar(20) [not null, default: 'open']
+  created_at timestamp
+  closed_at timestamp
+  indexes {
+    (case_id, external_user_id) [unique]
+  }
+  Note: 'One external user per channel. No direct buyer/renter <-> owner conversation exists.'
+}
+
+Table messages {
+  id bigint [pk, increment]
+  conversation_id bigint [not null]
+  sender_id bigint [not null]
+  body text
+  sent_at timestamp
+  edited_at timestamp
+  deleted_at timestamp
+  indexes {
+    (conversation_id, sent_at)
+  }
+  Note: 'Sender must be either the channel external user or an authorized FarmExit staff member.'
+}
+
+Table message_relays {
+  id bigint [pk, increment]
+  source_message_id bigint [not null]
+  relayed_message_id bigint [unique, not null]
+  relayed_by bigint [not null]
+  relay_note text
+  relayed_at timestamp
+  Note: 'Explicit audit trail: customer message -> FarmExit review -> new FarmExit-authored message to the other side.'
+}
+
+Table message_attachments {
+  id bigint [pk, increment]
+  message_id bigint [not null]
+  storage_key varchar(500) [not null]
+  mime_type varchar(120)
+  file_size_bytes bigint
+  created_at timestamp
+}
+
+Table message_reads {
+  message_id bigint [not null]
+  user_id bigint [not null]
+  read_at timestamp [not null]
+  indexes {
+    (message_id, user_id) [pk]
+  }
+}
+
+// =========================
+// SAVED ITEMS
+// =========================
+Table saved_items {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  item_type varchar(40) [not null, note: 'farm, management_opportunity, partnership_opportunity']
+  target_key varchar(100) [not null, note: 'Stable kind:id key, e.g. farm:12 or management_opportunity:45, to enforce uniqueness despite nullable foreign keys']
+  farm_id bigint
+  opportunity_request_id bigint
+  saved_at timestamp
+  indexes {
+    (user_id, target_key) [unique]
+    (user_id, farm_id)
+    (user_id, opportunity_request_id)
+    (user_id, item_type, saved_at)
+  }
+  Note: 'Exactly one target: farm_id for farm, opportunity_request_id for management/partnership. Application enforces target type and target_key composition. UNIQUE(user_id,target_key) prevents duplicate saves with MySQL NULL semantics.'
+}
+
+// =========================
+// SITE VISITS & OFF-PLATFORM OUTCOME TRACKING
+// =========================
+Table site_visits {
+  id bigint [pk, increment]
+  request_id bigint [not null]
+  farm_id bigint [not null]
+  arranged_by bigint [not null]
+  visitor_user_id bigint [not null]
+  scheduled_at datetime
+  status varchar(30) [not null, default: 'proposed', note: 'proposed, scheduled, completed, cancelled']
+  notes text
+  created_at timestamp
+}
+
+Table request_outcomes {
+  id bigint [pk, increment]
+  request_id bigint [unique, not null]
+  recorded_by bigint [not null, note: 'Authorized FarmExit staff user']
+  outcome_type varchar(50) [not null, note: 'sale_completed_off_platform, rent_completed_off_platform, no_deal, withdrawn, other']
+  confirmation_status varchar(30) [not null, default: 'reported', note: 'reported, confirmed, disputed, corrected']
+  occurred_at datetime [note: 'Date reported by parties; not proof of legal transfer or payment']
+  recorded_at timestamp
+  confirmed_by bigint
+  confirmed_at timestamp
+  internal_notes text
+  updated_at timestamp
+  indexes {
+    (outcome_type, recorded_at)
+    (confirmation_status, recorded_at)
+  }
+  Note: 'Admin-only record of an OFF-PLATFORM outcome after FarmExit mediation. No in-app contract, payment processing, invoice, commission accrual, balances, settlement, or guarantees. This record does not prove transfer of ownership or payment.'
+}
+
+// =========================
+// AGRICULTURAL FACILITIES & FACTORIES
+// =========================
+Table agricultural_facilities {
+  id bigint [pk, increment]
+  owner_user_id bigint [not null]
+  farm_id bigint
+  facility_type varchar(80) [not null, note: 'cold_storage_freezing, produce_storage, agricultural_processing_packing, agricultural_service_facility; draft taxonomy pending validation']
+  name varchar(200) [not null]
+  description text
+  governorate varchar(120)
+  area_name varchar(120)
+  latitude decimal(10,8)
+  longitude decimal(11,8)
+  capacity_details json
+  services json
+  status varchar(30) [not null, default: 'draft', note: 'draft, under_review, approved, published, rejected, archived']
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  Note: 'Future-ready capability requested by the client; detailed UI/business rules are still pending validation.'
+}
+
+Table facility_media {
+  id bigint [pk, increment]
+  facility_id bigint [not null]
+  uploaded_by bigint [not null]
+  storage_key varchar(500) [not null]
+  media_type varchar(30) [not null, default: 'photo']
+  alt_en varchar(255)
+  alt_ar varchar(255)
+  sort_order int [not null, default: 0]
+  licence_status varchar(30) [not null, default: 'pending_confirmation']
+  created_at timestamp
+}
+
+// =========================
+// NOTIFICATIONS / AUDIT
+// =========================
+Table notifications {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  request_id bigint
+  notification_type varchar(60) [not null]
+  title varchar(200) [not null]
+  body text
+  actionable boolean [not null, default: false]
+  read_at timestamp
+  created_at timestamp
+  indexes {
+    (user_id, read_at, created_at)
+    (request_id)
+  }
+}
+
+Table audit_logs {
+  id bigint [pk, increment]
+  actor_user_id bigint
+  entity_type varchar(80) [not null]
+  entity_id bigint [not null]
+  action varchar(60) [not null]
+  changes json
+  ip_address varchar(45)
+  created_at timestamp
+  indexes {
+    (entity_type, entity_id, created_at)
+    (actor_user_id, created_at)
+  }
+}
+
+// =========================
+// RELATIONSHIPS
+// =========================
+Ref: user_sessions.user_id > users.id
+Ref: otp_verifications.user_id > users.id
+Ref: staff_memberships.user_id > users.id
+
+Ref: farms.created_by > users.id
+Ref: farm_relationships.user_id > users.id
+Ref: farm_relationships.farm_id > farms.id
+Ref: farm_crop_types.farm_id > farms.id
+Ref: farm_media.farm_id > farms.id
+Ref: farm_media.uploaded_by > users.id
+
+Ref: requests.created_by > users.id
+Ref: requests.farm_id > farms.id
+Ref: requests.parent_request_id > requests.id
+Ref: farm_listing_details.request_id - requests.id
+Ref: farm_management_details.request_id - requests.id
+Ref: partnership_details.request_id - requests.id
+Ref: request_application_details.request_id - requests.id
+Ref: request_application_details.professional_capability_id > professional_capabilities.id
+Ref: request_documents.request_id > requests.id
+Ref: request_documents.uploaded_by > users.id
+Ref: request_documents.reviewed_by > users.id
+Ref: request_reviews.request_id > requests.id
+Ref: request_reviews.reviewer_id > users.id
+Ref: request_status_history.request_id > requests.id
+Ref: request_status_history.changed_by > users.id
+Ref: request_forwardings.request_id > requests.id
+Ref: request_forwardings.recipient_user_id > users.id
+Ref: request_forwardings.forwarded_by > users.id
+Ref: request_forwardings.decided_by > users.id
+
+Ref: farm_evaluations.farm_id > farms.id
+Ref: farm_evaluations.listing_request_id > requests.id
+Ref: farm_evaluations.reviewed_by > users.id
+Ref: farm_evaluations.approved_by > users.id
+Ref: farm_evaluation_checks.evaluation_id > farm_evaluations.id
+Ref: farm_evaluation_checks.evidence_document_id > request_documents.id
+
+Ref: professional_profiles.user_id - users.id
+Ref: professional_capabilities.professional_profile_id > professional_profiles.id
+Ref: professional_expertise.professional_capability_id > professional_capabilities.id
+Ref: professional_service_areas.professional_capability_id > professional_capabilities.id
+Ref: professional_verification_details.request_id - requests.id
+Ref: professional_verification_details.professional_capability_id > professional_capabilities.id
+
+Ref: communication_cases.request_id > requests.id
+Ref: communication_cases.assigned_staff_id > users.id
+Ref: conversations.case_id > communication_cases.id
+Ref: conversations.external_user_id > users.id
+Ref: messages.conversation_id > conversations.id
+Ref: messages.sender_id > users.id
+Ref: message_relays.source_message_id > messages.id
+Ref: message_relays.relayed_message_id > messages.id
+Ref: message_relays.relayed_by > users.id
+Ref: message_attachments.message_id > messages.id
+Ref: message_reads.message_id > messages.id
+Ref: message_reads.user_id > users.id
+
+Ref: saved_items.user_id > users.id
+Ref: saved_items.farm_id > farms.id
+Ref: saved_items.opportunity_request_id > requests.id
+
+Ref: site_visits.request_id > requests.id
+Ref: site_visits.farm_id > farms.id
+Ref: site_visits.arranged_by > users.id
+Ref: site_visits.visitor_user_id > users.id
+
+Ref: request_outcomes.request_id - requests.id
+Ref: request_outcomes.recorded_by > users.id
+Ref: request_outcomes.confirmed_by > users.id
+
+Ref: agricultural_facilities.owner_user_id > users.id
+Ref: agricultural_facilities.farm_id > farms.id
+Ref: facility_media.facility_id > agricultural_facilities.id
+Ref: facility_media.uploaded_by > users.id
+
+Ref: notifications.user_id > users.id
+Ref: notifications.request_id > requests.id
+Ref: audit_logs.actor_user_id > users.id

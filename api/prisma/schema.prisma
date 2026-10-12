@@ -1,0 +1,14 @@
+// FarmExit database schema (MySQL). Connection settings live in prisma.config.ts.
+// No business models yet: they are added from the approved ERD (docs/erd/) in a later phase.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "cjs"
+  // Compiled by `nest build`: relative imports must point at the emitted .js files.
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "mysql"
+}

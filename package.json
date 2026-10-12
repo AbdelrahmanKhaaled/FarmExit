@@ -1,0 +1,38 @@
+{
+  "name": "farmexit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FarmExit: Next.js frontend (web/) and NestJS API (api/). Each app keeps its own package-lock.",
+  "scripts": {
+    "setup": "npm install && npm --prefix web ci && npm --prefix api ci",
+    "dev": "concurrently --kill-others-on-fail --names web,api --prefix-colors green,blue \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:web": "npm --prefix web run dev",
+    "dev:api": "npm --prefix api run start:dev",
+    "build": "npm run build:web && npm run build:api",
+    "build:web": "npm --prefix web run build",
+    "build:api": "npm --prefix api run build",
+    "start:web": "npm --prefix web run start",
+    "start:api": "npm --prefix api run start:prod",
+    "typecheck": "npm run typecheck:web && npm run typecheck:api",
+    "typecheck:web": "npm --prefix web run typecheck",
+    "typecheck:api": "npm --prefix api run typecheck",
+    "lint": "npm run lint:web && npm run lint:api",
+    "lint:web": "npm --prefix web run lint",
+    "lint:api": "npm --prefix api run lint",
+    "format:check": "npm --prefix web run format:check && npm --prefix api run format:check",
+    "test": "npm run test:api && npm run test:api:e2e && npm run test:web",
+    "test:web": "npm --prefix web run test:e2e",
+    "test:api": "npm --prefix api run test",
+    "test:api:e2e": "npm --prefix api run test:e2e",
+    "db:up": "docker compose up -d mysql",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f mysql",
+    "prisma:generate": "npm --prefix api run prisma:generate"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  },
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  }
+}

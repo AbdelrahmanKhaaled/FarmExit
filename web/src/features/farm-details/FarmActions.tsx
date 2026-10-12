@@ -67,7 +67,7 @@ export function RequestPanel({ name, purpose, price, score, requestHref }: Actio
         <BlockButtonLink href={requestHref} variant="primary">
           {purpose === 'sale' ? t('requestSale') : t('requestRent')}
         </BlockButtonLink>
-        <BlockButtonLink href={requestHref} variant="outline">
+        <BlockButtonLink href={requestHref} variant="outline" multiline>
           {t('contact')}
         </BlockButtonLink>
         <button

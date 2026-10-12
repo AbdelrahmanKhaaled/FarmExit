@@ -105,8 +105,11 @@ test.describe('farm marketplace', () => {
 
   test('sort changes the order', async ({ page }) => {
     const sort = page.getByLabel(t.sort);
-    await sort.selectOption('priceAsc');
-    await expect(visibleCards(page).first()).toContainText(t.cheapest);
+    // A change made before hydration is lost (the select is controlled), so repeat it until the list reorders.
+    await expect(async () => {
+      await sort.selectOption('priceAsc');
+      await expect(visibleCards(page).first()).toContainText(t.cheapest, { timeout: 1_000 });
+    }).toPass();
     await sort.selectOption('priceDesc');
     await expect(visibleCards(page).first()).toContainText(t.priciest);
     await expect(page).toHaveURL(/sort=priceDesc/);

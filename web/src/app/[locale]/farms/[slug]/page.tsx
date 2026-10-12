@@ -12,6 +12,10 @@ import { FarmDetailsView } from '@/features/farm-details/FarmDetailsView';
  * Farm Details — /[locale]/farms/[slug] (Figma: Farm Details page; Arabic: 08 · Arabic Web → AR / 01 Public /
  * Farm Details). Every published sample listing is prerendered; an unknown slug is a 404.
  */
+
+/* Without it, the first request for an unlisted slug gets the App Shell (200) while notFound() renders in the background. */
+export const ensureStatic = 'navigation';
+
 export function generateStaticParams() {
   return sampleFarmDetails.slugs().map((slug) => ({ slug }));
 }

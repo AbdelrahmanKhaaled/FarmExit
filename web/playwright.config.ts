@@ -40,16 +40,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 }, locale: 'ar-EG' },
       metadata: { locale: 'ar' },
     },
-    // Arabic tablet and mobile have no approved Figma frames yet; they run the Marketplace spec only (Phase 3).
+    // Arabic tablet and mobile run the Marketplace (Phase 3) and Farm Details (Phase 4) specs only.
     {
       name: 'tablet-ar',
-      testMatch: /marketplace\.spec\.ts/,
+      testMatch: /(marketplace|farm-details)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 1366 }, locale: 'ar-EG' },
       metadata: { locale: 'ar' },
     },
     {
       name: 'mobile-ar',
-      testMatch: /marketplace\.spec\.ts/,
+      testMatch: /(marketplace|farm-details)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 390, height: 844 },

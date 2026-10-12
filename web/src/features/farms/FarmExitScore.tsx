@@ -13,6 +13,9 @@ import { Icon } from '@/components/icons/Icon';
 
 const format = (score: number) => score.toFixed(1);
 
+/* Overline/Score is uppercase; Arabic script has no case, so in Arabic it would only turn the brand into "FARMEXIT". */
+const LABEL = 'type-overline-score rtl:normal-case';
+
 /* Score Segments: five 6px segments (r3, gap 4) on track/default; segment i fills min(max(score − i, 0), 1). */
 function ScoreSegments({ score }: { score: number }) {
   return (
@@ -49,7 +52,7 @@ export function FarmExitScore({ score, className }: { score: number; className?:
       <div className="flex items-center gap-10">
         <Icon name="verify-filled" size={28} className="text-brand-gold" />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <p className="type-overline-score text-text-brand">{t('label')}</p>
+          <p className={cn(LABEL, 'text-text-brand')}>{t('label')}</p>
           <p className="type-label-caption text-text-muted">{t('note')}</p>
         </div>
         <p aria-hidden="true" className="flex shrink-0 items-baseline gap-3">
@@ -78,7 +81,7 @@ export function ScoreGlass({ score, className }: { score: number; className?: st
       )}
     >
       <Icon name="verify-filled" size={24} className="text-brand-gold" />
-      <span aria-hidden="true" className="type-overline-score">
+      <span aria-hidden="true" className={LABEL}>
         {t('label')}
       </span>
       <span aria-hidden="true" className="flex items-baseline gap-3">

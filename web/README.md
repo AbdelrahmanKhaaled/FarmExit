@@ -2,7 +2,8 @@
 
 The FarmExit website: Next.js App Router, TypeScript (strict), Tailwind CSS v4 and next-intl.
 Phase 0.1 is the foundation; Phase 1 adds the shared design-system components; Phase 2 builds the Homepage
-(`/en`, `/ar`). Marketplace, Farm Details and the other feature pages come later.
+(`/en`, `/ar`); Phase 3 the Farm Marketplace (`/[locale]/farms`); Phase 4 Farm Details (`/[locale]/farms/[slug]`)
+with the FarmExit Score. The other feature pages come later.
 
 The legacy HTML prototype at the repository root (`../index.html`, `../app.js`, …) is kept untouched as a
 reference. The product Source of Truth is `../FARMEXIT_SOURCE_OF_TRUTH.md`.
@@ -24,7 +25,8 @@ First Playwright run on a new machine: `npx playwright install chromium`.
 ## Locales
 
 - `/en`: English, `dir="ltr"`, Manrope
-- `/ar`: Arabic, `dir="rtl"`, IBM Plex Sans Arabic (desktop 1440 is the only designed Arabic breakpoint in phase 1)
+- `/ar`: Arabic, `dir="rtl"`, IBM Plex Sans Arabic. Marketplace and Farm Details are tested in Arabic at all three
+  breakpoints; Homepage and shared components are tested in Arabic at desktop 1440 only
 - `/` redirects by cookie, then `Accept-Language`, then `en` (technical default; the product default is a pending decision)
 
 Copy lives in `messages/<locale>/<namespace>.json`. English is the reference shape; `npm run lint` fails if
@@ -80,7 +82,38 @@ build; `npm run test:e2e` sets it so the components are tested on `next build`. 
 - Images are the approved Figma image fills, unchanged, in `public/images/home/`. Photo shades and the How it works
   band gradient are Figma fills exposed as `fx-*` utilities in `src/styles/imagery.css`.
 - All figures (proof stats, prices, insights, applicants) are sample content from the design and must come from the
-  CMS in production. Links to pages that are not built yet (`/farms`, `/management`, …) return 404 for now.
+  CMS in production. Links to pages that are not built yet (`/management`, `/partnerships`, `/sign-in`,
+  `/list-your-farm`, …) return 404 for now.
+
+## Marketplace (Phase 3)
+
+- `/[locale]/farms`: search, filters (desktop sidebar; drawer on tablet and mobile), sort, pagination on desktop and
+  tablet, "Load more" on mobile. Code in `src/features/marketplace/`; card in `src/features/farms/MarketplaceFarmCard.tsx`.
+- The URL is the source of truth (`url-state.ts`): filtered views are shareable and survive back/forward. The latest
+  query is also kept in `sessionStorage` so Farm Details "Back to results" returns to it.
+- Listings come from `FarmMarketplaceSource` (`src/lib/data/marketplace.ts`); `src/lib/data/sample/farm-listings.ts`
+  is the sample adapter (9 sale + 3 rent listings) until the API exists.
+
+## Farm Details (Phase 4)
+
+- `/[locale]/farms/[slug]`: every sample listing is prerendered; an unknown slug is a 404 (`ensureStatic =
+'navigation'` makes the first request wait for `notFound()` instead of serving the App Shell).
+- Sections live in `src/features/farm-details/`: gallery with "View all photos" dialog, overview and key facts,
+  specifications, facilities, location preview (approximate area only, never the exact pin), documents, request band
+  and similar farms. Desktop has a sticky Request Panel; tablet and mobile have an inline Price & Actions card and a
+  fixed Sticky Action Bar (mobile always, tablet once the card scrolls away). The hearts share one Save state.
+- Owner contact always goes through FarmExit: requests start at `/sign-in?next=…`; no phone, email or WhatsApp links.
+- Read model: `FarmDetailsSource` (`src/lib/data/farm-details.ts`); sample adapter in
+  `src/lib/data/sample/farm-details.ts`. Wadi El Natrun is the designed farm with full content; the other listings
+  have marketplace data only, and any section without data is hidden.
+
+## FarmExit Score
+
+FarmExit's own evaluation of a farm, never a customer rating: every placement says so ("FarmExit's own evaluation —
+not a customer rating"). Components in `src/features/farms/FarmExitScore.tsx`: the score card (Homepage and
+Marketplace cards, Farm Details Request Panel and Price & Actions card), the glass chip on the gallery and the Sticky
+Action Bar line. Only listings with an approved sample value show a score (`score: null` hides it). There is no
+methodology, factor breakdown or verification claim: the scoring method is pending business validation.
 
 ## RTL rules
 
@@ -93,18 +126,18 @@ build; `npm run test:e2e` sets it so the components are tested on `next build`. 
 
 ```
 src/
-  app/[locale]/          locale root layout (lang, dir, fonts, intl provider), placeholder page, dev/tokens
+  app/[locale]/          locale root layout (lang, dir, fonts, intl provider), Homepage, farms, farms/[slug], dev pages
   components/            design-system primitives and layout (Phase 1)
-  features/              domain features (Phase 2+)
+  features/              domain features: home, marketplace, farms (cards, score), farm-details, …
   i18n/                  routing, request config, navigation, message loader
   lib/domain/            domain types, enums, statuses (contracts only)
-  lib/data/              repository interfaces (no adapters yet)
+  lib/data/              repository interfaces and read models; sample/ holds the sample adapters
   lib/auth/              authentication contracts (no provider chosen)
   lib/intent/            protected-action intent contracts
   styles/                generated tokens
   proxy.ts               next-intl locale routing (Next.js 16 "proxy", formerly middleware)
-messages/{en,ar}/        14 empty namespaces
+messages/{en,ar}/        14 namespaces (English is the reference shape)
 tokens/                  Figma token extract
 scripts/                 token generator and lint checks
-tests/e2e/               Playwright smoke and shared-component tests
+tests/e2e/               Playwright: smoke, components, home, marketplace, farm-details
 ```

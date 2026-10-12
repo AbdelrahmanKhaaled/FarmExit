@@ -121,34 +121,57 @@ const BLOCK_SIZES = {
   md: 'h-48 px-20 rounded-lg',
 } as const;
 
+/* `multiline`: the label wraps instead of truncating; a one-line label keeps the same height. */
+const BLOCK_SIZES_MULTILINE = {
+  lg: 'min-h-52 py-12 px-22 rounded-xl',
+  md: 'min-h-48 py-10 px-20 rounded-lg',
+} as const;
+
 const BLOCK_VARIANTS: Record<BlockVariant, string> = {
   primary: 'bg-brand-primary text-text-on-dark hover:bg-brand-primary-hover active:bg-brand-primary-pressed',
   outline: 'border-[1.5px] border-brand-primary text-text-brand hover:bg-bg-hover active:bg-bg-success-soft',
   inverse: 'bg-bg-surface text-text-brand hover:bg-bg-hover active:bg-bg-success-soft',
 };
 
-export function blockClasses({ variant = 'primary', size = 'lg' }: { variant?: BlockVariant; size?: 'lg' | 'md' }) {
+export function blockClasses({
+  variant = 'primary',
+  size = 'lg',
+  multiline,
+}: {
+  variant?: BlockVariant;
+  size?: 'lg' | 'md';
+  multiline?: boolean;
+}) {
   return cn(
     'flex w-full items-center justify-between gap-12 transition-colors duration-150 type-label-medium',
-    BLOCK_SIZES[size],
+    multiline ? BLOCK_SIZES_MULTILINE[size] : BLOCK_SIZES[size],
     BLOCK_VARIANTS[variant],
   );
 }
 
-type BlockOwnProps = { variant?: BlockVariant; size?: 'lg' | 'md'; children: ReactNode };
+type BlockOwnProps = { variant?: BlockVariant; size?: 'lg' | 'md'; multiline?: boolean; children: ReactNode };
+
+function BlockContent({ multiline, children }: { multiline?: boolean; children: ReactNode }) {
+  return (
+    <>
+      <span className={multiline ? 'min-w-0 text-start' : 'truncate'}>{children}</span>
+      <Icon name="arrow-right" size={16} className="shrink-0" />
+    </>
+  );
+}
 
 export function BlockButton({
   variant,
   size,
+  multiline,
   className,
   type = 'button',
   children,
   ...rest
 }: BlockOwnProps & Omit<ComponentProps<'button'>, 'children'>) {
   return (
-    <button type={type} className={cn(blockClasses({ variant, size }), className)} {...rest}>
-      <span className="truncate">{children}</span>
-      <Icon name="arrow-right" size={16} />
+    <button type={type} className={cn(blockClasses({ variant, size, multiline }), className)} {...rest}>
+      <BlockContent multiline={multiline}>{children}</BlockContent>
     </button>
   );
 }
@@ -156,14 +179,14 @@ export function BlockButton({
 export function BlockButtonLink({
   variant,
   size,
+  multiline,
   className,
   children,
   ...rest
 }: BlockOwnProps & Omit<ComponentProps<typeof Link>, 'children'>) {
   return (
-    <Link className={cn(blockClasses({ variant, size }), className)} {...rest}>
-      <span className="truncate">{children}</span>
-      <Icon name="arrow-right" size={16} />
+    <Link className={cn(blockClasses({ variant, size, multiline }), className)} {...rest}>
+      <BlockContent multiline={multiline}>{children}</BlockContent>
     </Link>
   );
 }

@@ -28,12 +28,20 @@ export class FarmAccessService {
     const relationships = await this.prisma.farmRelationship.findMany({
       where: { userId, farmId, relationshipStatus: FarmRelationshipStatus.active },
     });
-    const effective = relationships.filter(
-      (r) =>
-        (r.startsAt === null || r.startsAt.getTime() <= now.getTime()) &&
-        (r.endsAt === null || r.endsAt.getTime() > now.getTime()),
-    );
+    const effective = relationships.filter((r) => isEffective(r, now));
     return [...new Set(effective.map((r) => r.relationshipRole))].sort();
+  }
+
+  /** All farms where the user currently holds an effective role: farmId -> sorted unique roles. */
+  async activeRolesByFarm(userId: bigint, now = new Date()): Promise<Map<bigint, FarmRelationshipRole[]>> {
+    const relationships = await this.prisma.farmRelationship.findMany({
+      where: { userId, relationshipStatus: FarmRelationshipStatus.active },
+    });
+    const byFarm = new Map<bigint, Set<FarmRelationshipRole>>();
+    for (const r of relationships.filter((rel) => isEffective(rel, now))) {
+      byFarm.set(r.farmId, (byFarm.get(r.farmId) ?? new Set()).add(r.relationshipRole));
+    }
+    return new Map([...byFarm].map(([farmId, roles]) => [farmId, [...roles].sort()]));
   }
 
   async hasAnyRole(userId: bigint, farmId: bigint, roles: readonly FarmRelationshipRole[]): Promise<boolean> {
@@ -51,4 +59,11 @@ export class FarmAccessService {
   async assertAccess(userId: bigint, farmId: bigint, rule: FarmAccessRule): Promise<void> {
     if (!(await this.canAccess(userId, farmId, rule))) throw forbidden();
   }
+}
+
+function isEffective(r: { startsAt: Date | null; endsAt: Date | null }, now: Date): boolean {
+  return (
+    (r.startsAt === null || r.startsAt.getTime() <= now.getTime()) &&
+    (r.endsAt === null || r.endsAt.getTime() > now.getTime())
+  );
 }

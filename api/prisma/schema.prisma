@@ -39,6 +39,12 @@ enum StaffRole {
   reviewer
 }
 
+/// Current staff slot on a request. Closed list: reviewer or case_agent. Not a communication case and not a review decision.
+enum RequestStaffAssignmentType {
+  reviewer
+  caseAgent @map("case_agent")
+}
+
 enum FarmType {
   vegetable @map("Vegetable")
   fruit     @map("Fruit")
@@ -201,6 +207,7 @@ enum SavedItemType {
   farm
   managementOpportunity  @map("management_opportunity")
   partnershipOpportunity @map("partnership_opportunity")
+  listing
 }
 
 enum SiteVisitStatus {
@@ -282,6 +289,8 @@ model User {
   facilitiesOwned             AgriculturalFacility[]
   facilityMediaUploaded       FacilityMedia[]
   notifications               Notification[]
+  staffAssignmentsReceived    RequestStaffAssignment[] @relation("AssignmentAssignee")
+  staffAssignmentsMade        RequestStaffAssignment[] @relation("AssignmentAssigner")
   auditLogs                   AuditLog[]
 
   @@map("users")
@@ -499,7 +508,9 @@ model Request {
   forwardings              RequestForwarding[]
   evaluations              FarmEvaluation[]
   communicationCases       CommunicationCase[]
-  savedAsOpportunity       SavedItem[]
+  staffAssignments         RequestStaffAssignment[]
+  savedAsOpportunity       SavedItem[]                @relation("SavedOpportunity")
+  savedAsListing           SavedItem[]                @relation("SavedListing")
   siteVisits               SiteVisit[]
   notifications            Notification[]
 
@@ -681,6 +692,26 @@ model RequestForwarding {
   @@unique([requestId, recipientUserId])
   @@index([recipientUserId, status])
   @@map("request_forwardings")
+}
+
+/// One current reviewer and one current case agent per request. Reassignment updates the same row.
+/// The row does not grant staff permissions and is not a communication case or a review decision.
+model RequestStaffAssignment {
+  id               BigInt                     @id @default(autoincrement())
+  requestId        BigInt                     @map("request_id")
+  assignmentType   RequestStaffAssignmentType @map("assignment_type")
+  assignedStaffId  BigInt                     @map("assigned_staff_id")
+  assignedByUserId BigInt                     @map("assigned_by_user_id")
+  assignedAt       DateTime                   @default(now()) @map("assigned_at") @db.DateTime(3)
+  updatedAt        DateTime                   @updatedAt @map("updated_at") @db.DateTime(3)
+
+  request    Request @relation(fields: [requestId], references: [id])
+  assignee   User    @relation("AssignmentAssignee", fields: [assignedStaffId], references: [id])
+  assignedBy User    @relation("AssignmentAssigner", fields: [assignedByUserId], references: [id])
+
+  @@unique([requestId, assignmentType])
+  @@index([assignedStaffId])
+  @@map("request_staff_assignments")
 }
 
 // =========================
@@ -1047,8 +1078,9 @@ model MessageRead {
 // SAVED ITEMS
 // =========================
 
-/// Exactly one target: farm_id for farm, opportunity_request_id for management/partnership (service-layer rule).
-/// target_key is a stable "kind:id" key so UNIQUE(user_id, target_key) works despite nullable foreign keys.
+/// Exactly one target: farm_id, opportunity_request_id, or listing_request_id.
+/// target_key is `kind:id` so UNIQUE(user_id, target_key) still covers every bookmark.
+/// MySQL cannot CHECK farm_id or opportunity_request_id while their foreign keys use ON DELETE SET NULL.
 model SavedItem {
   id                   BigInt        @id @default(autoincrement())
   userId               BigInt        @map("user_id")
@@ -1056,13 +1088,16 @@ model SavedItem {
   targetKey            String        @map("target_key") @db.VarChar(100)
   farmId               BigInt?       @map("farm_id")
   opportunityRequestId BigInt?       @map("opportunity_request_id")
+  listingRequestId     BigInt?       @map("listing_request_id")
   savedAt              DateTime?     @default(now()) @map("saved_at") @db.DateTime(3)
 
   user               User     @relation(fields: [userId], references: [id])
-  farm               Farm?    @relation(fields: [farmId], references: [id])
-  opportunityRequest Request? @relation(fields: [opportunityRequestId], references: [id])
+  farm               Farm?    @relation(fields: [farmId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  opportunityRequest Request? @relation("SavedOpportunity", fields: [opportunityRequestId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  listingRequest     Request? @relation("SavedListing", fields: [listingRequestId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@unique([userId, targetKey])
+  @@unique([userId, listingRequestId])
   @@index([userId, farmId])
   @@index([userId, opportunityRequestId])
   @@index([userId, itemType, savedAt])

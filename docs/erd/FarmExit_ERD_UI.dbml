@@ -324,6 +324,21 @@ Table request_forwardings {
   Note: 'Used when FarmExit forwards an approved/reviewed application or details request to the farm owner. Owner decision is stored here with actor/time.'
 }
 
+Table request_staff_assignments {
+  id bigint [pk, increment]
+  request_id bigint [not null]
+  assignment_type varchar(20) [not null, note: 'reviewer, case_agent']
+  assigned_staff_id bigint [not null]
+  assigned_by_user_id bigint [not null]
+  assigned_at datetime(3) [not null]
+  updated_at datetime(3) [not null]
+  indexes {
+    (request_id, assignment_type) [unique]
+    (assigned_staff_id)
+  }
+  Note: 'Current FarmExit staff slot for a request. One reviewer and one case agent, kept independent. Not a communication case, not a review decision, and not a permission grant.'
+}
+
 // =========================
 // SALE MODES & OWNER EXCHANGE PREFERENCES
 // =========================
@@ -605,18 +620,20 @@ Table message_reads {
 Table saved_items {
   id bigint [pk, increment]
   user_id bigint [not null]
-  item_type varchar(40) [not null, note: 'farm, management_opportunity, partnership_opportunity']
-  target_key varchar(100) [not null, note: 'Stable kind:id key, e.g. farm:12 or management_opportunity:45, to enforce uniqueness despite nullable foreign keys']
+  item_type varchar(40) [not null, note: 'farm, management_opportunity, partnership_opportunity, listing']
+  target_key varchar(100) [not null, note: 'Stable kind:id key, e.g. farm:12, management_opportunity:45, or listing:45, to enforce uniqueness despite nullable foreign keys']
   farm_id bigint
   opportunity_request_id bigint
+  listing_request_id bigint [note: 'Set only for item_type=listing. A published farm listing request, independent of a farm bookmark.']
   saved_at datetime(3)
   indexes {
     (user_id, target_key) [unique]
+    (user_id, listing_request_id) [unique]
     (user_id, farm_id)
     (user_id, opportunity_request_id)
     (user_id, item_type, saved_at)
   }
-  Note: 'Exactly one target: farm_id for farm, opportunity_request_id for management/partnership. Application enforces target type and target_key composition. UNIQUE(user_id,target_key) prevents duplicate saves with MySQL NULL semantics.'
+  Note: 'Exactly one target. farm: farm_id. management/partnership: opportunity_request_id. listing: listing_request_id. The other targets are null. UNIQUE(user_id, target_key) and UNIQUE(user_id, listing_request_id) prevent duplicate saves. MySQL allows many null listing_request_id values, so farm and opportunity bookmarks are unchanged.'
 }
 
 // =========================
@@ -757,6 +774,9 @@ Ref: request_forwardings.request_id > requests.id
 Ref: request_forwardings.recipient_user_id > users.id
 Ref: request_forwardings.forwarded_by > users.id
 Ref: request_forwardings.decided_by > users.id
+Ref: request_staff_assignments.request_id > requests.id
+Ref: request_staff_assignments.assigned_staff_id > users.id
+Ref: request_staff_assignments.assigned_by_user_id > users.id
 
 Ref: farm_sale_terms.listing_request_id - farm_listing_details.request_id
 Ref: farm_exchange_preferences.listing_request_id > farm_sale_terms.listing_request_id
@@ -797,6 +817,7 @@ Ref: message_reads.user_id > users.id
 Ref: saved_items.user_id > users.id
 Ref: saved_items.farm_id > farms.id
 Ref: saved_items.opportunity_request_id > requests.id
+Ref: saved_items.listing_request_id > requests.id
 
 Ref: site_visits.request_id > requests.id
 Ref: site_visits.farm_id > farms.id

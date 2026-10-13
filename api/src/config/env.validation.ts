@@ -24,6 +24,10 @@ export enum SmsProviderName {
   Development = 'development',
 }
 
+export enum StorageProviderName {
+  Local = 'local',
+}
+
 const toBoolean = ({ value }: { value: unknown }): unknown =>
   value === 'true' ? true : value === 'false' ? false : value;
 
@@ -103,6 +107,22 @@ export class EnvironmentVariables {
   /** SMS delivery adapter. `development` only logs the code outside production and is refused in production. */
   @IsEnum(SmsProviderName)
   SMS_PROVIDER: SmsProviderName = SmsProviderName.Development;
+
+  /** Private object storage for uploaded images. local (dev/test only) is refused in production. */
+  @IsEnum(StorageProviderName)
+  MEDIA_STORAGE_PROVIDER: StorageProviderName = StorageProviderName.Local;
+
+  /** Root directory of the local adapter (never served statically). */
+  @IsString()
+  @IsNotEmpty()
+  MEDIA_STORAGE_DIR = './storage/uploads';
+
+  /** Maximum size of one uploaded image in bytes (default 5 MB, hard cap 10 MB). */
+  @Type(() => Number)
+  @IsInt()
+  @Min(1024)
+  @Max(10_485_760)
+  MEDIA_MAX_IMAGE_BYTES = 5_242_880;
 
   @Transform(toList)
   @IsString({ each: true })

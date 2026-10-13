@@ -15,7 +15,14 @@ import { createFakePrisma } from './support/fake-prisma';
  * or else it must carry AccessTokenGuard AND CompletedProfileGuard (and StaffGuard when it declares staff roles or
  * permissions). A future business route that forgets its guards fails this test instead of shipping unprotected.
  */
-const PUBLIC = new Set(['GET health', 'POST auth/otp/request', 'POST auth/otp/verify', 'POST auth/refresh']);
+const PUBLIC = new Set([
+  'GET health',
+  'GET marketplace/farms',
+  'GET marketplace/farms/:slug',
+  'POST auth/otp/request',
+  'POST auth/otp/verify',
+  'POST auth/refresh',
+]);
 const SIGNED_IN_ONLY = new Set(['POST auth/logout', 'GET auth/me', 'POST auth/profile/complete', 'PATCH auth/profile']);
 
 type Route = { key: string; guards: unknown[]; staffMetadata: boolean };

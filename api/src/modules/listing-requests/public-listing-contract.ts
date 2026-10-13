@@ -1,0 +1,56 @@
+/**
+ * Phase 05C public listing contract. A public listing is not a farm record and not the admin publication DTO.
+ * Location is only the governorate and the general area name. Prices are the owner's stated whole pounds.
+ * No image is included: every current upload stays `pending_confirmation`, and no licence-approval workflow exists.
+ */
+export const PUBLIC_LISTING_FIELDS = [
+  'id',
+  'slug',
+  'farmName',
+  'governorate',
+  'areaName',
+  'areaFeddan',
+  'listingType',
+  'askingPrice',
+  'annualRentPerFeddan',
+  'statedSalePricePerFeddan',
+  'currency',
+  'availability',
+  'listingDescription',
+  'highlights',
+  'publishedAt',
+] as const;
+
+/** Never copy these onto a public listing response, even if a private or staff DTO has them. */
+export const PUBLIC_LISTING_FORBIDDEN = [
+  'farmId',
+  'requestNumber',
+  'createdBy',
+  'visibility',
+  'status',
+  'reviews',
+  'reviewerId',
+  'assignments',
+  'privatePinLatitude',
+  'privatePinLongitude',
+  'publicMapLatitude',
+  'publicMapLongitude',
+  'approximateArea',
+  'mobile',
+  'mobileE164',
+  'email',
+  'fullName',
+  'storageKey',
+  'licenceStatus',
+  'documents',
+  'extraDetails',
+  'accessDetails',
+  'description',
+  'waterSource',
+  'irrigationMethod',
+  'energySource',
+  'soilType',
+  'farmStatus',
+  'myRoles',
+  'audit',
+] as const;

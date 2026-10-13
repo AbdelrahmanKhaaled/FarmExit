@@ -1,6 +1,6 @@
 # FarmExit ERD
 
-`FarmExit_ERD_UI.dbml` is the approved, authoritative entity-relationship diagram (44 tables, 78 relationships).
+`FarmExit_ERD_UI.dbml` is the approved, authoritative entity-relationship diagram (45 tables, 82 relationships).
 `api/prisma/schema.prisma` implements it one model per table (`@@map` / `@map` keep the DBML names). Change the DBML
 first, then the Prisma schema, then add a reviewed migration.
 

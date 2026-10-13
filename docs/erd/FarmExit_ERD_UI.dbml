@@ -1,6 +1,6 @@
 Project FarmExit_Final_Implementation {
   database_type: 'MySQL'
-  Note: 'FarmExit updated logical ERD. FarmExit brokers introductions and mediates all buyer/renter-owner messaging. Sale/rent contracting, transfer and ALL payments happen OFF-PLATFORM. No payment, settlement, commission, online contract or in-platform offer modules. Optional admin-recorded off-platform outcomes are informational only. No global customer roles; farm roles are contextual. FarmExit Score is a STAFF evaluation, not a user rating. Evaluation methodology is not yet approved; publish only after documented evidence and review policy.'
+  Note: 'FarmExit updated logical ERD. FarmExit brokers introductions and mediates all buyer/renter-owner messaging. Sale/rent contracting, transfer and ALL payments happen OFF-PLATFORM. No payment, settlement, commission, online contract or in-platform offer modules. Optional admin-recorded off-platform outcomes are informational only. No global customer roles; farm roles are contextual. FarmExit Score is a STAFF evaluation, not a user rating. Evaluation methodology is not yet approved; publish only after documented evidence and review policy. Sale listings may be cash-only or quick-sale (open to installment and exchange proposals); buyer proposals and co-purchase grouping are mediated by FarmExit staff, with all consideration and legal completion off-platform.'
 }
 
 // =========================
@@ -156,7 +156,7 @@ Table farm_media {
 Table requests {
   id bigint [pk, increment]
   request_number varchar(40) [unique, not null]
-  request_type varchar(40) [not null, note: 'farm_listing, farm_management, partnership, professional_verification, professional_application, partnership_application, farm_details']
+  request_type varchar(40) [not null, note: 'farm_listing, farm_management, partnership, professional_verification, professional_application, partnership_application, farm_details, farm_purchase_proposal']
   created_by bigint [not null]
   farm_id bigint
   parent_request_id bigint
@@ -174,7 +174,7 @@ Table requests {
     (farm_id, request_type, status)
     (parent_request_id, request_type, status)
   }
-  Note: 'Root requests: farm_listing, farm_management, partnership, professional_verification. Child requests: professional_application -> management, partnership_application -> partnership, farm_details -> farm_listing.'
+  Note: 'Root requests: farm_listing, farm_management, partnership, professional_verification. Child requests: professional_application -> management, partnership_application -> partnership, farm_details -> farm_listing, farm_purchase_proposal -> farm_listing. Purchase proposals are user intents reviewed/relayed by FarmExit; they are NOT payments or binding on-platform contracts.'
 }
 
 Table farm_listing_details {
@@ -194,7 +194,7 @@ Table farm_listing_details {
     (listing_type, annual_rent_per_feddan)
     (availability)
   }
-  Note: 'Sale uses asking_price; rent uses annual_rent_per_feddan. Never apply the EGP 5m-100m sale price filter to rent. Prices are listing information, not online payments. Missing values display Not stated in listing.'
+  Note: 'Sale uses asking_price; rent uses annual_rent_per_feddan. Never apply the EGP 5m-100m sale price filter to rent. Prices are listing information, not online payments. For SALE, use farm_sale_terms to disclose eligible purchase proposals. Missing values display Not stated in listing.'
 }
 
 Table farm_management_details {
@@ -312,6 +312,110 @@ Table request_forwardings {
     (recipient_user_id, status)
   }
   Note: 'Used when FarmExit forwards an approved/reviewed application or details request to the farm owner. Owner decision is stored here with actor/time.'
+}
+
+// =========================
+// SALE MODES & OWNER EXCHANGE PREFERENCES
+// =========================
+Table farm_sale_terms {
+  listing_request_id bigint [pk, note: '1:1 with farm_listing_details; ONLY for listing_type=sale, never rent']
+  sale_mode varchar(24) [not null, default: 'standard_cash', note: 'standard_cash or quick_sale']
+  accepts_cash_proposals boolean [not null, default: true]
+  accepts_installment_proposals boolean [not null, default: false]
+  accepts_exchange_proposals boolean [not null, default: false]
+  exchange_preference_scope varchar(20) [not null, default: 'any', note: 'any, selected; selected requires at least one preference row']
+  co_purchase_policy varchar(30) [not null, default: 'requires_owner_approval', note: 'requires_owner_approval, approved, declined; administrative acceptance is distinct from quick-sale mode']
+  updated_at timestamp
+  indexes {
+    (sale_mode, accepts_installment_proposals, accepts_exchange_proposals)
+    (co_purchase_policy)
+  }
+  Note: 'Owner chooses standard_cash (cash offers only) or quick_sale (accepts receiving both installment and exchange proposals, as well as cash). These booleans represent eligibility to PROPOSE, NOT automatic acceptance of offer or guarantee of sale. Quick sale => accepts_installment_proposals=true AND accepts_exchange_proposals=true. Exchange scope=any means any supported asset type; selected means only owner-selected asset types in farm_exchange_preferences. Co-purchase needs separate owner approval. Negotiated actual installment terms and barter values are NOT payment records.'
+}
+
+Table farm_exchange_preferences {
+  id bigint [pk, increment]
+  listing_request_id bigint [not null]
+  asset_type varchar(24) [not null, note: 'factory, villa, apartment, car; owner multiselect']
+  created_at timestamp
+  indexes {
+    (listing_request_id, asset_type) [unique]
+    (asset_type, listing_request_id)
+  }
+  Note: 'Eligible only when accepts_exchange_proposals is true. Public exchange multiselect filter matches listings with scope=any OR any intersecting selected asset type when scope=selected. It represents the asset category, not ownership or asset verification.'
+}
+
+// =========================
+// BUYER PURCHASE PROPOSALS (NOT PAYMENTS)
+// =========================
+Table farm_purchase_proposal_details {
+  request_id bigint [pk, note: 'Child requests.request_type=farm_purchase_proposal; parent_request_id must be a SALE farm_listing request']
+  proposal_kind varchar(25) [not null, note: 'cash, installment, exchange, mixed, co_purchase']
+  proposed_total_value decimal(15,2) [note: 'Buyer-declared estimated total offer, not funds paid or guaranteed asset valuation']
+  currency char(3) [not null, default: 'EGP']
+  requested_share_percent decimal(5,2) [note: 'Only for co_purchase; strictly greater than 0 and at most 100']
+  proposal_notes text
+  submitted_at timestamp
+  Note: 'Buyer can propose cash, installment terms, exchange, cash+asset mixed consideration, or partial share ownership. FarmExit staff sees and mediates proposals via existing request_forwardings and private conversations. Owner must accept negotiated terms off-platform. No checkout, payment schedule execution or title transfer on the website.'
+}
+
+Table farm_purchase_proposal_components {
+  id bigint [pk, increment]
+  proposal_request_id bigint [not null]
+  component_type varchar(30) [not null, note: 'cash, installments, exchange_asset']
+  proposed_value decimal(15,2) [note: 'Buyer-estimated amount/value; never recorded as paid or receivable']
+  currency char(3) [not null, default: 'EGP']
+  asset_type varchar(24) [note: 'Required if exchange_asset: factory, villa, apartment, car']
+  asset_description text [note: 'Buyer describes the offered item; optional supporting docs live in request_documents']
+  installment_count int [note: 'Only if installments; proposed, subject to negotiation with FarmExit/admin and seller']
+  installment_interval varchar(50) [note: 'Optional proposed interval, subject to agreement, not an executable payment schedule']
+  component_notes text
+  created_at timestamp
+  indexes {
+    (proposal_request_id, component_type)
+    (component_type, asset_type)
+  }
+  Note: 'Supports examples such as EGP 5m proposed cash plus a car estimated at EGP 5m. Exchange assets may be multiple. Installment proposals are commercial terms only, never payment transactions. Match offered asset types to owner preferences before forwarding. Verify listing allows each proposed method.'
+}
+
+// =========================
+// CO-PURCHASE MATCHING, STAFF-COORDINATED
+// =========================
+Table co_purchase_groups {
+  id bigint [pk, increment]
+  listing_request_id bigint [not null, note: 'SALE listing only']
+  assigned_staff_id bigint [not null, note: 'FarmExit staff member who coordinates buyers and owner']
+  target_share_percent decimal(5,2) [not null, default: 100.00]
+  listing_asking_price_snapshot decimal(15,2) [note: 'Information-only asking price at group creation, not amount collected']
+  owner_approval_status varchar(25) [not null, default: 'pending', note: 'pending, approved, declined']
+  group_status varchar(35) [not null, default: 'matching', note: 'matching, pending_confirmations, ready_for_off_platform_deal, completed_off_platform, cancelled']
+  notes text
+  created_at timestamp
+  updated_at timestamp
+  closed_at timestamp
+  indexes {
+    (listing_request_id, group_status)
+    (assigned_staff_id, group_status)
+  }
+  Note: 'FarmExit introduces compatible buyers without direct buyer-to-buyer contact. Staff seeks owner approval before treating a co-purchase group as accepted. Reaching 100 percent is NOT itself a completed sale: confirmation and transfer/payment occur outside the website. Final amount may differ from the asking price by negotiated agreement.'
+}
+
+Table co_purchase_group_members {
+  id bigint [pk, increment]
+  group_id bigint [not null]
+  buyer_proposal_request_id bigint [not null, note: 'Must reference an approved-scope co_purchase farm_purchase_proposal under the same listing']
+  share_percent decimal(5,2) [not null, note: 'Admin-proposed share: >0 and <=100; sum of active/confirmed shares <=100 enforced transactionally']
+  proposed_contribution_value decimal(15,2) [note: 'Buyer proposed contribution or off-platform negotiated figure; NOT payment collected']
+  member_status varchar(30) [not null, default: 'proposed', note: 'proposed, contacted, confirmed, declined, withdrawn']
+  confirmed_at timestamp
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (group_id, buyer_proposal_request_id) [unique]
+    (group_id, member_status)
+    (buyer_proposal_request_id)
+  }
+  Note: 'Each member is a buyer proposal, not a payment account. Admin groups distinct interested buyers until total confirmed allocation reaches 100 percent (if owner approves). Enforce same listing and percentage cap in a MySQL transaction with row locking; no direct contact details are exposed.'
 }
 
 // =========================
@@ -540,7 +644,7 @@ Table request_outcomes {
     (outcome_type, recorded_at)
     (confirmation_status, recorded_at)
   }
-  Note: 'Admin-only record of an OFF-PLATFORM outcome after FarmExit mediation. No in-app contract, payment processing, invoice, commission accrual, balances, settlement, or guarantees. This record does not prove transfer of ownership or payment.'
+  Note: 'Admin-only record of an OFF-PLATFORM outcome after FarmExit mediation, including negotiated installment/exchange/co-purchase transactions. No in-app contract, payment processing, invoice, commission accrual, balances, settlement, or guarantees. This record does not prove transfer of ownership or payment.'
 }
 
 // =========================
@@ -646,6 +750,15 @@ Ref: request_forwardings.request_id > requests.id
 Ref: request_forwardings.recipient_user_id > users.id
 Ref: request_forwardings.forwarded_by > users.id
 Ref: request_forwardings.decided_by > users.id
+
+Ref: farm_sale_terms.listing_request_id - farm_listing_details.request_id
+Ref: farm_exchange_preferences.listing_request_id > farm_sale_terms.listing_request_id
+Ref: farm_purchase_proposal_details.request_id - requests.id
+Ref: farm_purchase_proposal_components.proposal_request_id > farm_purchase_proposal_details.request_id
+Ref: co_purchase_groups.listing_request_id > farm_sale_terms.listing_request_id
+Ref: co_purchase_groups.assigned_staff_id > users.id
+Ref: co_purchase_group_members.group_id > co_purchase_groups.id
+Ref: co_purchase_group_members.buyer_proposal_request_id > farm_purchase_proposal_details.request_id
 
 Ref: farm_evaluations.farm_id > farms.id
 Ref: farm_evaluations.listing_request_id > requests.id

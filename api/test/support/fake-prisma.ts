@@ -164,6 +164,12 @@ export class FakeTable {
     return Promise.resolve({ ...target });
   }
 
+  upsert({ where, create, update }: { where: Where; create: Row; update: Row }): Promise<Row> {
+    const target = this.rows.find((r) => matches(r, where));
+    if (!target) return this.create({ data: { ...create, ...where } });
+    return this.update({ where, data: update });
+  }
+
   private clash(data: Row, except: Row[]): string | null {
     for (const key of this.uniqueKeys) {
       if (data[key] != null && this.rows.some((r) => !except.includes(r) && r[key] === data[key])) return key;
@@ -281,6 +287,56 @@ export function createFakePrisma() {
     ipAddress: null,
     createdAt: new Date(),
   }));
+  const farmSaleTerms = new FakeTable(
+    () => ({
+      saleMode: 'standardCash',
+      acceptsCashProposals: true,
+      acceptsInstallmentProposals: false,
+      acceptsExchangeProposals: false,
+      exchangePreferenceScope: 'any',
+      updatedAt: new Date(),
+    }),
+    ['listingRequestId'],
+  );
+  const farmExchangePreference = new FakeTable(() => ({ createdAt: new Date() }), [], [['listingRequestId', 'assetType']]);
+  const farmPurchaseProposalDetail = new FakeTable(
+    () => ({
+      proposedTotalValue: null,
+      currency: 'EGP',
+      requestedSharePercent: null,
+      proposalNotes: null,
+      submittedAt: null,
+    }),
+    ['requestId'],
+  );
+  const farmPurchaseProposalComponent = new FakeTable(() => ({
+    proposedValue: null,
+    currency: 'EGP',
+    assetType: null,
+    assetDescription: null,
+    installmentCount: null,
+    installmentInterval: null,
+    componentNotes: null,
+    createdAt: new Date(),
+  }));
+  const coPurchaseGroup = new FakeTable(() => ({
+    listingAskingPriceSnapshot: null,
+    groupStatus: 'collectingInterest',
+    notes: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    closedAt: null,
+  }));
+  const coPurchaseGroupMember = new FakeTable(
+    () => ({
+      proposedContributionValue: null,
+      memberStatus: 'candidate',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+    [],
+    [['groupId', 'buyerProposalRequestId']],
+  );
   const savedItem = new FakeTable(
     () => ({
       farmId: null,
@@ -384,6 +440,12 @@ export function createFakePrisma() {
     requestStaffAssignment,
     auditLog,
     savedItem,
+    farmSaleTerms,
+    farmExchangePreference,
+    farmPurchaseProposalDetail,
+    farmPurchaseProposalComponent,
+    coPurchaseGroup,
+    coPurchaseGroupMember,
   };
   /** Interactive transaction: all-or-nothing over every table (the callback gets the same fake as 	x). */
   /** Row locks used by media uploads (`SELECT ... FOR UPDATE`). Enough for the in-memory API; it does not emulate InnoDB. */
@@ -536,6 +598,12 @@ export function createFakePrisma() {
     requestStaffAssignment,
     auditLog,
     savedItem,
+    farmSaleTerms,
+    farmExchangePreference,
+    farmPurchaseProposalDetail,
+    farmPurchaseProposalComponent,
+    coPurchaseGroup,
+    coPurchaseGroupMember,
     $transaction,
     $executeRaw,
     $queryRaw,

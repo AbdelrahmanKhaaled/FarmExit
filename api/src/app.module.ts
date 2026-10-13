@@ -6,6 +6,7 @@ import { AuthorizationModule } from './modules/authorization/authorization.modul
 import { FarmsModule } from './modules/farms/farms.module';
 import { ListingRequestsModule } from './modules/listing-requests/listing-requests.module';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
+import { OffersModule } from './modules/offers/offers.module';
 import { MediaModule } from './modules/media/media.module';
 import { HealthModule } from './modules/health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -21,6 +22,7 @@ import { PrismaModule } from './prisma/prisma.module';
     MediaModule,
     ListingRequestsModule,
     MarketplaceModule,
+    OffersModule,
   ],
 })
 export class AppModule {}

@@ -1,0 +1,50 @@
+import { StaffRole } from '../../generated/prisma/enums';
+
+/**
+ * FarmExit staff permissions. PROVISIONAL minimal matrix: it only names the staff actions the approved ERD already
+ * describes (request review, forwarding, FarmExit-relayed communication, staff evaluations) plus staff management.
+ * Business owners must confirm it before real endpoints rely on it. Never derive permissions from the client.
+ */
+export const StaffPermission = {
+  /** See requests in the FarmExit review queue. */
+  RequestsRead: 'requests.read',
+  /** Decide request reviews (request_reviews). */
+  RequestsReview: 'requests.review',
+  /** Forward reviewed requests to the owner (request_forwardings). */
+  RequestsForward: 'requests.forward',
+  /** Relay messages between a user and the other party through FarmExit (communication cases). */
+  CommunicationRelay: 'communication.relay',
+  /** Create and approve FarmExit evaluations (staff-only, never customer ratings). */
+  EvaluationsManage: 'evaluations.manage',
+  /** Administer staff memberships (no endpoint exists yet; there is no self-service promotion). */
+  StaffManage: 'staff.manage',
+} as const;
+
+export type StaffPermission = (typeof StaffPermission)[keyof typeof StaffPermission];
+
+const ALL_PERMISSIONS: readonly StaffPermission[] = Object.values(StaffPermission);
+
+/** Approved staff roles only (staff_memberships.staff_role): admin, case_agent, reviewer. */
+export const STAFF_ROLE_PERMISSIONS: Readonly<Record<StaffRole, readonly StaffPermission[]>> = {
+  [StaffRole.admin]: ALL_PERMISSIONS,
+  [StaffRole.caseAgent]: [
+    StaffPermission.RequestsRead,
+    StaffPermission.RequestsForward,
+    StaffPermission.CommunicationRelay,
+  ],
+  [StaffRole.reviewer]: [
+    StaffPermission.RequestsRead,
+    StaffPermission.RequestsReview,
+    StaffPermission.EvaluationsManage,
+  ],
+};
+
+/** Union of the permissions of the given roles (sorted, no duplicates). Unknown roles grant nothing. */
+export function permissionsForRoles(roles: readonly string[]): StaffPermission[] {
+  const granted = new Set<StaffPermission>();
+  for (const role of roles) {
+    const permissions = (STAFF_ROLE_PERMISSIONS as Record<string, readonly StaffPermission[] | undefined>)[role];
+    permissions?.forEach((p) => granted.add(p));
+  }
+  return [...granted].sort();
+}

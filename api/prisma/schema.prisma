@@ -1,5 +1,9 @@
 // FarmExit database schema (MySQL). Connection settings live in prisma.config.ts.
-// No business models yet: they are added from the approved ERD (docs/erd/) in a later phase.
+// Derived from the approved ERD: docs/erd/FarmExit_ERD_UI.dbml (authoritative; do not edit it from here).
+// Naming: models PascalCase singular with @@map to the DBML table; fields camelCase with @map to the DBML column.
+// Enums are used only where the DBML note gives a closed value list consistent with its default; open or
+// pending vocabularies (request status, taxonomies) stay String and are validated in the service layer.
+// Every date/time column is DATETIME(3) and stores UTC. The runtime pool sets timezone "Z" (see database-url.ts).
 
 generator client {
   provider            = "prisma-client"
@@ -11,4 +15,1191 @@ generator client {
 
 datasource db {
   provider = "mysql"
+}
+
+// =========================
+// ENUMS
+// =========================
+
+enum AccountStatus {
+  active
+  suspended
+  blocked
+}
+
+enum OtpPurpose {
+  signIn       @map("sign_in")
+  registration
+  verification
+}
+
+enum StaffRole {
+  admin
+  caseAgent @map("case_agent")
+  reviewer
+}
+
+enum FarmType {
+  vegetable @map("Vegetable")
+  fruit     @map("Fruit")
+  livestock @map("Livestock")
+  mixed     @map("Mixed")
+}
+
+enum FarmRelationshipRole {
+  owner
+  partner
+  manager
+  agriculturalEngineer @map("agricultural_engineer")
+  tenant
+}
+
+enum FarmRelationshipStatus {
+  active
+  pending
+  inactive
+}
+
+enum FarmMediaType {
+  photo
+  video
+  plan
+}
+
+enum RequestType {
+  farmListing              @map("farm_listing")
+  farmManagement           @map("farm_management")
+  partnership
+  professionalVerification @map("professional_verification")
+  professionalApplication  @map("professional_application")
+  partnershipApplication   @map("partnership_application")
+  farmDetails              @map("farm_details")
+  farmPurchaseProposal     @map("farm_purchase_proposal")
+}
+
+enum RequestVisibility {
+  private
+  public
+}
+
+enum ListingType {
+  sale
+  rent
+}
+
+enum ProfessionalNeed {
+  farmManager
+  agriculturalEngineer
+  both
+}
+
+enum ApplicantKind {
+  individual
+  company
+}
+
+enum ReviewDecision {
+  approved
+  changesRequested @map("changes_requested")
+  rejected
+}
+
+enum ForwardingStatus {
+  sent
+  viewed
+  decided
+  closed
+}
+
+enum OwnerDecision {
+  pending
+  accepted
+  declined
+}
+
+enum SaleMode {
+  standardCash @map("standard_cash")
+  quickSale    @map("quick_sale")
+}
+
+enum ExchangePreferenceScope {
+  any
+  selected
+}
+
+enum ExchangeAssetType {
+  factory
+  villa
+  apartment
+  car
+}
+
+enum ProposalKind {
+  cash
+  installment
+  exchange
+  mixed
+  coPurchase  @map("co_purchase")
+}
+
+enum ProposalComponentType {
+  cash
+  installments
+  exchangeAsset @map("exchange_asset")
+}
+
+enum CoPurchaseGroupStatus {
+  collectingInterest @map("collecting_interest")
+  underStaffFollowup @map("under_staff_followup")
+  closed
+}
+
+enum CoPurchaseMemberStatus {
+  candidate
+  shortlisted
+  withdrawn
+  archived
+}
+
+enum EvaluationStatus {
+  draft
+  inReview   @map("in_review")
+  approved
+  published
+  withdrawn
+  superseded
+}
+
+enum EvaluationCheckStatus {
+  notReviewed      @map("not_reviewed")
+  reviewed
+  needsInformation @map("needs_information")
+}
+
+enum ProfessionalType {
+  farmManager          @map("farm_manager")
+  agriculturalEngineer @map("agricultural_engineer")
+}
+
+enum VerificationStatus {
+  verificationRequired @map("verification_required")
+  draft
+  underReview          @map("under_review")
+  changesRequested     @map("changes_requested")
+  verified
+  notApproved          @map("not_approved")
+}
+
+enum CommunicationCaseStatus {
+  open
+  waitingCustomer @map("waiting_customer")
+  waitingOwner    @map("waiting_owner")
+  closed
+}
+
+enum SavedItemType {
+  farm
+  managementOpportunity  @map("management_opportunity")
+  partnershipOpportunity @map("partnership_opportunity")
+}
+
+enum SiteVisitStatus {
+  proposed
+  scheduled
+  completed
+  cancelled
+}
+
+enum OutcomeType {
+  saleCompletedOffPlatform @map("sale_completed_off_platform")
+  rentCompletedOffPlatform @map("rent_completed_off_platform")
+  noDeal                   @map("no_deal")
+  withdrawn
+  other
+}
+
+enum OutcomeConfirmationStatus {
+  reported
+  confirmed
+  disputed
+  corrected
+}
+
+enum FacilityStatus {
+  draft
+  underReview @map("under_review")
+  approved
+  published
+  rejected
+  archived
+}
+
+// =========================
+// IDENTITY & ACCESS
+// =========================
+
+/// Single account. No global owner/buyer/renter/manager/engineer role: context comes from farm relationships.
+model User {
+  id               BigInt        @id @default(autoincrement())
+  fullName         String?       @map("full_name") @db.VarChar(150)
+  mobileE164       String        @unique @map("mobile_e164") @db.VarChar(20)
+  mobileVerifiedAt DateTime?     @map("mobile_verified_at") @db.DateTime(3)
+  email            String?       @unique @db.VarChar(255)
+  avatarStorageKey String?       @map("avatar_storage_key") @db.VarChar(500)
+  accountStatus    AccountStatus @default(active) @map("account_status")
+  lastLoginAt      DateTime?     @map("last_login_at") @db.DateTime(3)
+  createdAt        DateTime?     @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt        DateTime?     @updatedAt @map("updated_at") @db.DateTime(3)
+
+  sessions                    UserSession[]
+  otpVerifications            OtpVerification[]
+  staffMemberships            StaffMembership[]
+  farmsCreated                Farm[]
+  farmRelationships           FarmRelationship[]
+  farmMediaUploaded           FarmMedia[]
+  requestsCreated             Request[]
+  requestDocumentsUploaded    RequestDocument[]      @relation("RequestDocumentUploader")
+  requestDocumentsReviewed    RequestDocument[]      @relation("RequestDocumentReviewer")
+  requestReviews              RequestReview[]
+  requestStatusChanges        RequestStatusHistory[]
+  forwardingsReceived         RequestForwarding[]    @relation("ForwardingRecipient")
+  forwardingsSent             RequestForwarding[]    @relation("ForwardingSender")
+  forwardingsDecided          RequestForwarding[]    @relation("ForwardingDecider")
+  coPurchaseGroupsAssigned    CoPurchaseGroup[]
+  evaluationsReviewed         FarmEvaluation[]       @relation("EvaluationReviewer")
+  evaluationsApproved         FarmEvaluation[]       @relation("EvaluationApprover")
+  professionalProfile         ProfessionalProfile?
+  communicationCasesAssigned  CommunicationCase[]
+  conversationsAsExternalUser Conversation[]
+  messagesSent                Message[]
+  messageRelaysDone           MessageRelay[]
+  messageReads                MessageRead[]
+  savedItems                  SavedItem[]
+  siteVisitsArranged          SiteVisit[]            @relation("SiteVisitArranger")
+  siteVisitsAsVisitor         SiteVisit[]            @relation("SiteVisitVisitor")
+  outcomesRecorded            RequestOutcome[]       @relation("OutcomeRecorder")
+  outcomesConfirmed           RequestOutcome[]       @relation("OutcomeConfirmer")
+  facilitiesOwned             AgriculturalFacility[]
+  facilityMediaUploaded       FacilityMedia[]
+  notifications               Notification[]
+  auditLogs                   AuditLog[]
+
+  @@map("users")
+}
+
+model UserSession {
+  id               BigInt    @id @default(autoincrement())
+  userId           BigInt    @map("user_id")
+  sessionTokenHash String    @unique @map("session_token_hash") @db.VarChar(128)
+  deviceName       String?   @map("device_name") @db.VarChar(120)
+  userAgent        String?   @map("user_agent") @db.Text
+  ipAddress        String?   @map("ip_address") @db.VarChar(45)
+  expiresAt        DateTime  @map("expires_at") @db.DateTime(3)
+  lastSeenAt       DateTime? @map("last_seen_at") @db.DateTime(3)
+  revokedAt        DateTime? @map("revoked_at") @db.DateTime(3)
+  createdAt        DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  user           User               @relation(fields: [userId], references: [id])
+  consumedTokens UserSessionToken[]
+
+  @@index([userId, revokedAt, expiresAt])
+  @@map("user_sessions")
+}
+
+/// SHA-256 hashes of refresh secrets that were already rotated. Presenting one again is proof of replay (theft).
+/// Never store the raw secret.
+model UserSessionToken {
+  id         BigInt   @id @default(autoincrement())
+  sessionId  BigInt   @map("session_id")
+  tokenHash  String   @map("token_hash") @db.VarChar(128)
+  consumedAt DateTime @default(now()) @map("consumed_at") @db.DateTime(3)
+
+  session UserSession @relation(fields: [sessionId], references: [id])
+
+  @@unique([sessionId, tokenHash])
+  @@map("user_session_tokens")
+}
+
+/// Never store the raw OTP.
+model OtpVerification {
+  id         BigInt     @id @default(autoincrement())
+  userId     BigInt?    @map("user_id")
+  mobileE164 String     @map("mobile_e164") @db.VarChar(20)
+  purpose    OtpPurpose
+  codeHash   String     @map("code_hash") @db.VarChar(128)
+  attempts   Int        @default(0)
+  expiresAt  DateTime   @map("expires_at") @db.DateTime(3)
+  consumedAt DateTime?  @map("consumed_at") @db.DateTime(3)
+  createdAt  DateTime?  @default(now()) @map("created_at") @db.DateTime(3)
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([mobileE164, purpose, createdAt])
+  @@index([userId, purpose, createdAt])
+  @@map("otp_verifications")
+}
+
+model StaffMembership {
+  id        BigInt    @id @default(autoincrement())
+  userId    BigInt    @map("user_id")
+  staffRole StaffRole @map("staff_role")
+  status    String    @default("active") @db.VarChar(20)
+  createdAt DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, staffRole])
+  @@map("staff_memberships")
+}
+
+// =========================
+// FARMS & FARM RELATIONSHIPS
+// =========================
+
+/// Exact farm coordinates (private_pin_*) are private to FarmExit; only public_map_* may be exposed where approved.
+model Farm {
+  id                  BigInt    @id @default(autoincrement())
+  name                String    @db.VarChar(200)
+  description         String?   @db.Text
+  farmType            FarmType  @map("farm_type")
+  mainActivity        String?   @map("main_activity") @db.VarChar(255)
+  areaFeddan          Decimal   @map("area_feddan") @db.Decimal(12, 2)
+  governorate         String    @db.VarChar(120)
+  areaName            String?   @map("area_name") @db.VarChar(120)
+  publicMapLatitude   Decimal?  @map("public_map_latitude") @db.Decimal(10, 8)
+  publicMapLongitude  Decimal?  @map("public_map_longitude") @db.Decimal(11, 8)
+  privatePinLatitude  Decimal?  @map("private_pin_latitude") @db.Decimal(10, 8)
+  privatePinLongitude Decimal?  @map("private_pin_longitude") @db.Decimal(11, 8)
+  approximateArea     String?   @map("approximate_area") @db.Text
+  waterSource         String?   @map("water_source") @db.VarChar(40)
+  irrigationMethod    String?   @map("irrigation_method") @db.VarChar(40)
+  energySource        String?   @map("energy_source") @db.VarChar(40)
+  soilType            String?   @map("soil_type") @db.VarChar(120)
+  productionDetails   Json?     @map("production_details")
+  accessDetails       Json?     @map("access_details")
+  facilities          Json?
+  farmStatus          String    @default("active") @map("farm_status") @db.VarChar(30)
+  createdBy           BigInt?   @map("created_by")
+  createdAt           DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt           DateTime? @updatedAt @map("updated_at") @db.DateTime(3)
+  deletedAt           DateTime? @map("deleted_at") @db.DateTime(3)
+
+  creator                User?                  @relation(fields: [createdBy], references: [id])
+  relationships          FarmRelationship[]
+  cropTypes              FarmCropType[]
+  media                  FarmMedia[]
+  requests               Request[]
+  evaluations            FarmEvaluation[]
+  savedItems             SavedItem[]
+  siteVisits             SiteVisit[]
+  agriculturalFacilities AgriculturalFacility[]
+
+  @@index([governorate, areaName])
+  @@index([farmType, areaFeddan])
+  @@index([waterSource, irrigationMethod, energySource])
+  @@index([farmStatus])
+  @@map("farms")
+}
+
+/// Source of contextual farm roles. Buyer/renter are not global roles.
+model FarmRelationship {
+  id                 BigInt                 @id @default(autoincrement())
+  userId             BigInt                 @map("user_id")
+  farmId             BigInt                 @map("farm_id")
+  relationshipRole   FarmRelationshipRole   @map("relationship_role")
+  relationshipStatus FarmRelationshipStatus @default(active) @map("relationship_status")
+  startsAt           DateTime?              @map("starts_at") @db.DateTime(3)
+  endsAt             DateTime?              @map("ends_at") @db.DateTime(3)
+  createdAt          DateTime?              @default(now()) @map("created_at") @db.DateTime(3)
+
+  user User @relation(fields: [userId], references: [id])
+  farm Farm @relation(fields: [farmId], references: [id])
+
+  @@unique([farmId, userId, relationshipRole])
+  @@index([userId, relationshipRole])
+  @@index([farmId, relationshipRole])
+  @@map("farm_relationships")
+}
+
+/// Only crop types actually stated by the owner or reviewed; no inferred tags. Values follow the marketplace taxonomy.
+model FarmCropType {
+  id        BigInt    @id @default(autoincrement())
+  farmId    BigInt    @map("farm_id")
+  cropType  String    @map("crop_type") @db.VarChar(80)
+  createdAt DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  farm Farm @relation(fields: [farmId], references: [id])
+
+  @@unique([farmId, cropType])
+  @@index([cropType, farmId])
+  @@map("farm_crop_types")
+}
+
+model FarmMedia {
+  id             BigInt        @id @default(autoincrement())
+  farmId         BigInt        @map("farm_id")
+  uploadedBy     BigInt        @map("uploaded_by")
+  mediaType      FarmMediaType @map("media_type")
+  storageKey     String        @map("storage_key") @db.VarChar(500)
+  altEn          String?       @map("alt_en") @db.VarChar(255)
+  altAr          String?       @map("alt_ar") @db.VarChar(255)
+  width          Int?
+  height         Int?
+  focalX         Decimal?      @map("focal_x") @db.Decimal(5, 4)
+  focalY         Decimal?      @map("focal_y") @db.Decimal(5, 4)
+  isIllustrative Boolean       @default(false) @map("is_illustrative")
+  licenceStatus  String        @default("pending_confirmation") @map("licence_status") @db.VarChar(30)
+  sortOrder      Int           @default(0) @map("sort_order")
+  createdAt      DateTime?     @default(now()) @map("created_at") @db.DateTime(3)
+
+  farm     Farm @relation(fields: [farmId], references: [id])
+  uploader User @relation(fields: [uploadedBy], references: [id])
+
+  @@map("farm_media")
+}
+
+// =========================
+// UNIFIED REQUEST WORKFLOW
+// =========================
+
+/// Root: farm_listing, farm_management, partnership, professional_verification. Children point to a parent request.
+/// Purchase proposals are user intents relayed by FarmExit; never payments or binding contracts.
+/// `status` stays String: DBML gives no closed list (statuses differ per request type; see web status vocabulary).
+model Request {
+  id              BigInt            @id @default(autoincrement())
+  requestNumber   String            @unique @map("request_number") @db.VarChar(40)
+  requestType     RequestType       @map("request_type")
+  createdBy       BigInt            @map("created_by")
+  farmId          BigInt?           @map("farm_id")
+  parentRequestId BigInt?           @map("parent_request_id")
+  status          String            @default("draft") @db.VarChar(50)
+  visibility      RequestVisibility @default(private)
+  currentStep     Int               @default(1) @map("current_step") @db.SmallInt
+  submittedAt     DateTime?         @map("submitted_at") @db.DateTime(3)
+  publishedAt     DateTime?         @map("published_at") @db.DateTime(3)
+  closedAt        DateTime?         @map("closed_at") @db.DateTime(3)
+  createdAt       DateTime?         @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt       DateTime?         @updatedAt @map("updated_at") @db.DateTime(3)
+
+  creator  User      @relation(fields: [createdBy], references: [id])
+  farm     Farm?     @relation(fields: [farmId], references: [id])
+  parent   Request?  @relation("RequestHierarchy", fields: [parentRequestId], references: [id])
+  children Request[] @relation("RequestHierarchy")
+
+  listingDetail            FarmListingDetail?
+  managementDetail         FarmManagementDetail?
+  partnershipDetail        PartnershipDetail?
+  applicationDetail        RequestApplicationDetail?
+  purchaseProposalDetail   FarmPurchaseProposalDetail?
+  professionalVerification ProfessionalVerificationDetail?
+  outcome                  RequestOutcome?
+  documents                RequestDocument[]
+  reviews                  RequestReview[]
+  statusHistory            RequestStatusHistory[]
+  forwardings              RequestForwarding[]
+  evaluations              FarmEvaluation[]
+  communicationCases       CommunicationCase[]
+  savedAsOpportunity       SavedItem[]
+  siteVisits               SiteVisit[]
+  notifications            Notification[]
+
+  @@index([requestType, status, publishedAt])
+  @@index([createdBy, createdAt])
+  @@index([farmId, requestType, status])
+  @@index([parentRequestId, requestType, status])
+  @@map("requests")
+}
+
+/// Sale uses asking_price; rent uses annual_rent_per_feddan. Prices are listing information, not payments.
+model FarmListingDetail {
+  requestId                BigInt      @id @map("request_id")
+  slug                     String      @unique @db.VarChar(220)
+  listingType              ListingType @map("listing_type")
+  askingPrice              Decimal?    @map("asking_price") @db.Decimal(15, 2)
+  annualRentPerFeddan      Decimal?    @map("annual_rent_per_feddan") @db.Decimal(15, 2)
+  statedSalePricePerFeddan Decimal?    @map("stated_sale_price_per_feddan") @db.Decimal(15, 2)
+  currency                 String      @default("EGP") @db.Char(3)
+  availability             String?     @db.VarChar(60)
+  listingDescription       String?     @map("listing_description") @db.Text
+  highlights               Json?
+  extraDetails             Json?       @map("extra_details")
+
+  request   Request        @relation(fields: [requestId], references: [id])
+  saleTerms FarmSaleTerms?
+
+  @@index([listingType, askingPrice])
+  @@index([listingType, annualRentPerFeddan])
+  @@index([availability])
+  @@map("farm_listing_details")
+}
+
+model FarmManagementDetail {
+  requestId              BigInt           @id @map("request_id")
+  professionalNeed       ProfessionalNeed @map("professional_need")
+  managementTypes        Json?            @map("management_types")
+  term                   String?          @db.VarChar(100)
+  currentTeam            Json?            @map("current_team")
+  currentSituation       String?          @map("current_situation") @db.Text
+  challenges             Json?
+  goals                  Json?
+  outcomes               String?          @db.Text
+  responsibilities       Json?
+  experienceLevel        String?          @map("experience_level") @db.VarChar(30)
+  cropExpertise          Json?            @map("crop_expertise")
+  onSitePresence         String?          @map("on_site_presence") @db.VarChar(100)
+  teamLeadership         String?          @map("team_leadership") @db.VarChar(100)
+  resourcesAndFacilities Json?            @map("resources_and_facilities")
+  additionalInformation  String?          @map("additional_information") @db.Text
+
+  request Request @relation(fields: [requestId], references: [id])
+
+  @@map("farm_management_details")
+}
+
+/// No ROI, financial-return percentages or guarantees are stored.
+model PartnershipDetail {
+  requestId              BigInt  @id @map("request_id")
+  objective              Json?
+  description            String? @db.Text
+  acceptedPartnerTypes   Json?   @map("accepted_partner_types")
+  partnerBackground      Json?   @map("partner_background")
+  lookingFor             Json?   @map("looking_for")
+  contributionSought     Json?   @map("contribution_sought")
+  contributionDetails    String? @map("contribution_details") @db.Text
+  currentTeam            Json?   @map("current_team")
+  operations             String? @db.Text
+  salesChannel           String? @map("sales_channel") @db.VarChar(255)
+  extraInformation       String? @map("extra_information") @db.Text
+  ownerDocumentsRequired Json?   @map("owner_documents_required")
+
+  request Request @relation(fields: [requestId], references: [id])
+
+  @@map("partnership_details")
+}
+
+/// Company identity is an application snapshot; there is no company account or role.
+model RequestApplicationDetail {
+  requestId                 BigInt         @id @map("request_id")
+  applicantKind             ApplicantKind? @map("applicant_kind")
+  professionalCapabilityId  BigInt?        @map("professional_capability_id")
+  applicationMessage        String?        @map("application_message") @db.Text
+  whyGoodFit                String?        @map("why_good_fit") @db.Text
+  relevantExperience        String?        @map("relevant_experience") @db.Text
+  approach                  String?        @db.Text
+  workingStyle              String?        @map("working_style") @db.Text
+  additionalInformation     String?        @map("additional_information") @db.Text
+  companyName               String?        @map("company_name") @db.VarChar(200)
+  companyRegistrationNumber String?        @map("company_registration_number") @db.VarChar(100)
+  companyContactName        String?        @map("company_contact_name") @db.VarChar(150)
+  companyContactRole        String?        @map("company_contact_role") @db.VarChar(100)
+  companySector             String?        @map("company_sector") @db.VarChar(150)
+  proposalDetails           Json?          @map("proposal_details")
+
+  request                Request                 @relation(fields: [requestId], references: [id])
+  professionalCapability ProfessionalCapability? @relation(fields: [professionalCapabilityId], references: [id])
+
+  @@map("request_application_details")
+}
+
+/// Private object-storage key; never expose the original applicant document directly to owners.
+/// `reviewStatus` stays String (extensible status vocabulary); default 'uploaded' is one of the documented values.
+model RequestDocument {
+  id            BigInt    @id @default(autoincrement())
+  requestId     BigInt    @map("request_id")
+  uploadedBy    BigInt    @map("uploaded_by")
+  slotKey       String    @map("slot_key") @db.VarChar(60)
+  documentType  String?   @map("document_type") @db.VarChar(120)
+  originalName  String?   @map("original_name") @db.VarChar(255)
+  storageKey    String    @map("storage_key") @db.VarChar(500)
+  mimeType      String?   @map("mime_type") @db.VarChar(120)
+  fileSizeBytes BigInt?   @map("file_size_bytes")
+  reviewStatus  String    @default("uploaded") @map("review_status") @db.VarChar(30)
+  reviewedBy    BigInt?   @map("reviewed_by")
+  reviewedAt    DateTime? @map("reviewed_at") @db.DateTime(3)
+  reviewNote    String?   @map("review_note") @db.Text
+  createdAt     DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  request  Request @relation(fields: [requestId], references: [id])
+  uploader User    @relation("RequestDocumentUploader", fields: [uploadedBy], references: [id])
+  reviewer User?   @relation("RequestDocumentReviewer", fields: [reviewedBy], references: [id])
+
+  evaluationChecks FarmEvaluationCheck[]
+
+  @@index([requestId, slotKey])
+  @@index([requestId, reviewStatus])
+  @@map("request_documents")
+}
+
+model RequestReview {
+  id         BigInt         @id @default(autoincrement())
+  requestId  BigInt         @map("request_id")
+  reviewerId BigInt         @map("reviewer_id")
+  decision   ReviewDecision
+  comment    String?        @db.Text
+  createdAt  DateTime?      @default(now()) @map("created_at") @db.DateTime(3)
+
+  request  Request @relation(fields: [requestId], references: [id])
+  reviewer User    @relation(fields: [reviewerId], references: [id])
+
+  @@map("request_reviews")
+}
+
+model RequestStatusHistory {
+  id         BigInt    @id @default(autoincrement())
+  requestId  BigInt    @map("request_id")
+  fromStatus String?   @map("from_status") @db.VarChar(50)
+  toStatus   String    @map("to_status") @db.VarChar(50)
+  changedBy  BigInt    @map("changed_by")
+  reason     String?   @db.Text
+  createdAt  DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  request Request @relation(fields: [requestId], references: [id])
+  changer User    @relation(fields: [changedBy], references: [id])
+
+  @@index([requestId, createdAt])
+  @@map("request_status_history")
+}
+
+/// FarmExit forwards an approved/reviewed application or details request to the farm owner; owner decision is stored here.
+model RequestForwarding {
+  id              BigInt           @id @default(autoincrement())
+  requestId       BigInt           @map("request_id")
+  recipientUserId BigInt           @map("recipient_user_id")
+  forwardedBy     BigInt           @map("forwarded_by")
+  status          ForwardingStatus @default(sent)
+  ownerDecision   OwnerDecision?   @map("owner_decision")
+  decisionReason  String?          @map("decision_reason") @db.Text
+  decidedBy       BigInt?          @map("decided_by")
+  createdAt       DateTime?        @default(now()) @map("created_at") @db.DateTime(3)
+  decidedAt       DateTime?        @map("decided_at") @db.DateTime(3)
+
+  request   Request @relation(fields: [requestId], references: [id])
+  recipient User    @relation("ForwardingRecipient", fields: [recipientUserId], references: [id])
+  sender    User    @relation("ForwardingSender", fields: [forwardedBy], references: [id])
+  decider   User?   @relation("ForwardingDecider", fields: [decidedBy], references: [id])
+
+  @@unique([requestId, recipientUserId])
+  @@index([recipientUserId, status])
+  @@map("request_forwardings")
+}
+
+// =========================
+// SALE MODES & OWNER EXCHANGE PREFERENCES
+// =========================
+
+/// Sale listings only (never rent). Booleans are eligibility to PROPOSE, not acceptance or a guarantee of sale.
+/// quick_sale => installment and exchange proposals both accepted (enforced in the service layer).
+model FarmSaleTerms {
+  listingRequestId            BigInt                  @id @map("listing_request_id")
+  saleMode                    SaleMode                @default(standardCash) @map("sale_mode")
+  acceptsCashProposals        Boolean                 @default(true) @map("accepts_cash_proposals")
+  acceptsInstallmentProposals Boolean                 @default(false) @map("accepts_installment_proposals")
+  acceptsExchangeProposals    Boolean                 @default(false) @map("accepts_exchange_proposals")
+  exchangePreferenceScope     ExchangePreferenceScope @default(any) @map("exchange_preference_scope")
+  updatedAt                   DateTime?               @updatedAt @map("updated_at") @db.DateTime(3)
+
+  listing             FarmListingDetail        @relation(fields: [listingRequestId], references: [requestId])
+  exchangePreferences FarmExchangePreference[]
+  coPurchaseGroups    CoPurchaseGroup[]
+
+  @@index([saleMode, acceptsInstallmentProposals, acceptsExchangeProposals])
+  @@map("farm_sale_terms")
+}
+
+/// Asset category only; not ownership or asset verification. Used when accepts_exchange_proposals is true.
+model FarmExchangePreference {
+  id               BigInt            @id @default(autoincrement())
+  listingRequestId BigInt            @map("listing_request_id")
+  assetType        ExchangeAssetType @map("asset_type")
+  createdAt        DateTime?         @default(now()) @map("created_at") @db.DateTime(3)
+
+  saleTerms FarmSaleTerms @relation(fields: [listingRequestId], references: [listingRequestId])
+
+  @@unique([listingRequestId, assetType])
+  @@index([assetType, listingRequestId])
+  @@map("farm_exchange_preferences")
+}
+
+// =========================
+// BUYER PURCHASE PROPOSALS (NOT PAYMENTS)
+// =========================
+
+/// Child request of a SALE listing. Buyer-declared intent only: no checkout, payment, escrow or title transfer.
+model FarmPurchaseProposalDetail {
+  requestId             BigInt       @id @map("request_id")
+  proposalKind          ProposalKind @map("proposal_kind")
+  proposedTotalValue    Decimal?     @map("proposed_total_value") @db.Decimal(15, 2)
+  currency              String       @default("EGP") @db.Char(3)
+  requestedSharePercent Decimal?     @map("requested_share_percent") @db.Decimal(5, 2)
+  proposalNotes         String?      @map("proposal_notes") @db.Text
+  submittedAt           DateTime?    @map("submitted_at") @db.DateTime(3)
+
+  request           Request                         @relation(fields: [requestId], references: [id])
+  components        FarmPurchaseProposalComponent[]
+  coPurchaseMembers CoPurchaseGroupMember[]
+
+  @@map("farm_purchase_proposal_details")
+}
+
+/// Commercial terms only, never payment transactions or receivables.
+model FarmPurchaseProposalComponent {
+  id                  BigInt                @id @default(autoincrement())
+  proposalRequestId   BigInt                @map("proposal_request_id")
+  componentType       ProposalComponentType @map("component_type")
+  proposedValue       Decimal?              @map("proposed_value") @db.Decimal(15, 2)
+  currency            String                @default("EGP") @db.Char(3)
+  assetType           ExchangeAssetType?    @map("asset_type")
+  assetDescription    String?               @map("asset_description") @db.Text
+  installmentCount    Int?                  @map("installment_count")
+  installmentInterval String?               @map("installment_interval") @db.VarChar(50)
+  componentNotes      String?               @map("component_notes") @db.Text
+  createdAt           DateTime?             @default(now()) @map("created_at") @db.DateTime(3)
+
+  proposal FarmPurchaseProposalDetail @relation(fields: [proposalRequestId], references: [requestId])
+
+  @@index([proposalRequestId, componentType])
+  @@index([componentType, assetType])
+  @@map("farm_purchase_proposal_components")
+}
+
+// =========================
+// CO-PURCHASE MATCHING, STAFF-COORDINATED
+// =========================
+
+/// Internal shortlist of buyers interested in partial shares of the SAME sale listing. Nonbinding; no legal ownership.
+model CoPurchaseGroup {
+  id                         BigInt                @id @default(autoincrement())
+  listingRequestId           BigInt                @map("listing_request_id")
+  assignedStaffId            BigInt                @map("assigned_staff_id")
+  targetSharePercent         Decimal               @default(100.00) @map("target_share_percent") @db.Decimal(5, 2)
+  listingAskingPriceSnapshot Decimal?              @map("listing_asking_price_snapshot") @db.Decimal(15, 2)
+  groupStatus                CoPurchaseGroupStatus @default(collectingInterest) @map("group_status")
+  notes                      String?               @db.Text
+  createdAt                  DateTime?             @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt                  DateTime?             @updatedAt @map("updated_at") @db.DateTime(3)
+  closedAt                   DateTime?             @map("closed_at") @db.DateTime(3)
+
+  saleTerms     FarmSaleTerms           @relation(fields: [listingRequestId], references: [listingRequestId])
+  assignedStaff User                    @relation(fields: [assignedStaffId], references: [id])
+  members       CoPurchaseGroupMember[]
+
+  @@index([listingRequestId, groupStatus])
+  @@index([assignedStaffId, groupStatus])
+  @@map("co_purchase_groups")
+}
+
+/// Nonbinding buyer interest linked to a co_purchase proposal. Percentages are NOT required to sum to <= 100.
+model CoPurchaseGroupMember {
+  id                        BigInt                 @id @default(autoincrement())
+  groupId                   BigInt                 @map("group_id")
+  buyerProposalRequestId    BigInt                 @map("buyer_proposal_request_id")
+  proposedSharePercent      Decimal                @map("proposed_share_percent") @db.Decimal(5, 2)
+  proposedContributionValue Decimal?               @map("proposed_contribution_value") @db.Decimal(15, 2)
+  memberStatus              CoPurchaseMemberStatus @default(candidate) @map("member_status")
+  createdAt                 DateTime?              @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt                 DateTime?              @updatedAt @map("updated_at") @db.DateTime(3)
+
+  group    CoPurchaseGroup            @relation(fields: [groupId], references: [id])
+  proposal FarmPurchaseProposalDetail @relation(fields: [buyerProposalRequestId], references: [requestId])
+
+  @@unique([groupId, buyerProposalRequestId])
+  @@index([groupId, memberStatus])
+  @@index([buyerProposalRequestId])
+  @@map("co_purchase_group_members")
+}
+
+// =========================
+// FARMEXIT EVALUATIONS / SCORES (NOT CUSTOMER RATINGS)
+// =========================
+
+/// FarmExit staff evaluation only. score_value stays null until a documented scoring policy exists. Never a user rating.
+model FarmEvaluation {
+  id                 BigInt           @id @default(autoincrement())
+  farmId             BigInt           @map("farm_id")
+  listingRequestId   BigInt?          @map("listing_request_id")
+  reviewedBy         BigInt           @map("reviewed_by")
+  approvedBy         BigInt?          @map("approved_by")
+  scoreValue         Decimal?         @map("score_value") @db.Decimal(7, 2)
+  scoreMax           Decimal?         @map("score_max") @db.Decimal(7, 2)
+  methodologyName    String?          @map("methodology_name") @db.VarChar(150)
+  methodologyVersion String?          @map("methodology_version") @db.VarChar(60)
+  reviewScopeEn      String?          @map("review_scope_en") @db.Text
+  reviewScopeAr      String?          @map("review_scope_ar") @db.Text
+  publicSummaryEn    String?          @map("public_summary_en") @db.Text
+  publicSummaryAr    String?          @map("public_summary_ar") @db.Text
+  internalNotes      String?          @map("internal_notes") @db.Text
+  status             EvaluationStatus @default(draft)
+  reviewedAt         DateTime?        @map("reviewed_at") @db.DateTime(3)
+  approvedAt         DateTime?        @map("approved_at") @db.DateTime(3)
+  publishedAt        DateTime?        @map("published_at") @db.DateTime(3)
+  createdAt          DateTime?        @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt          DateTime?        @updatedAt @map("updated_at") @db.DateTime(3)
+
+  farm           Farm                  @relation(fields: [farmId], references: [id])
+  listingRequest Request?              @relation(fields: [listingRequestId], references: [id])
+  reviewer       User                  @relation("EvaluationReviewer", fields: [reviewedBy], references: [id])
+  approver       User?                 @relation("EvaluationApprover", fields: [approvedBy], references: [id])
+  checks         FarmEvaluationCheck[]
+
+  @@index([farmId, status, publishedAt])
+  @@index([listingRequestId, status])
+  @@index([reviewedBy, createdAt])
+  @@map("farm_evaluations")
+}
+
+model FarmEvaluationCheck {
+  id                 BigInt                @id @default(autoincrement())
+  evaluationId       BigInt                @map("evaluation_id")
+  checkKey           String                @map("check_key") @db.VarChar(120)
+  checkStatus        EvaluationCheckStatus @default(notReviewed) @map("check_status")
+  evidenceDocumentId BigInt?               @map("evidence_document_id")
+  reviewerNotes      String?               @map("reviewer_notes") @db.Text
+  reviewedAt         DateTime?             @map("reviewed_at") @db.DateTime(3)
+
+  evaluation       FarmEvaluation   @relation(fields: [evaluationId], references: [id])
+  evidenceDocument RequestDocument? @relation(fields: [evidenceDocumentId], references: [id])
+
+  @@unique([evaluationId, checkKey])
+  @@map("farm_evaluation_checks")
+}
+
+// =========================
+// PROFESSIONAL EXPERIENCE
+// =========================
+
+model ProfessionalProfile {
+  id                 BigInt    @id @default(autoincrement())
+  userId             BigInt    @unique @map("user_id")
+  headline           String?   @db.VarChar(255)
+  bio                String?   @db.Text
+  baseGovernorate    String?   @map("base_governorate") @db.VarChar(120)
+  yearsExperience    Int?      @map("years_experience") @db.SmallInt
+  experienceSummary  String?   @map("experience_summary") @db.Text
+  workingPreferences Json?     @map("working_preferences")
+  createdAt          DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt          DateTime? @updatedAt @map("updated_at") @db.DateTime(3)
+
+  user         User                     @relation(fields: [userId], references: [id])
+  capabilities ProfessionalCapability[]
+
+  @@map("professional_profiles")
+}
+
+/// Farm Manager and Agricultural Engineer are verified independently. No Agricultural Specialist.
+model ProfessionalCapability {
+  id                    BigInt             @id @default(autoincrement())
+  professionalProfileId BigInt             @map("professional_profile_id")
+  professionalType      ProfessionalType   @map("professional_type")
+  verificationStatus    VerificationStatus @default(verificationRequired) @map("verification_status")
+  verifiedAt            DateTime?          @map("verified_at") @db.DateTime(3)
+  notApprovedReason     String?            @map("not_approved_reason") @db.Text
+
+  profile             ProfessionalProfile              @relation(fields: [professionalProfileId], references: [id])
+  expertise           ProfessionalExpertise[]
+  serviceAreas        ProfessionalServiceArea[]
+  verificationDetails ProfessionalVerificationDetail[]
+  applications        RequestApplicationDetail[]
+
+  @@unique([professionalProfileId, professionalType])
+  @@map("professional_capabilities")
+}
+
+model ProfessionalExpertise {
+  id                       BigInt    @id @default(autoincrement())
+  professionalCapabilityId BigInt    @map("professional_capability_id")
+  expertiseType            String    @map("expertise_type") @db.VarChar(80)
+  expertiseValue           String    @map("expertise_value") @db.VarChar(150)
+  createdAt                DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  capability ProfessionalCapability @relation(fields: [professionalCapabilityId], references: [id])
+
+  @@unique([professionalCapabilityId, expertiseType, expertiseValue])
+  @@map("professional_expertise")
+}
+
+model ProfessionalServiceArea {
+  id                       BigInt    @id @default(autoincrement())
+  professionalCapabilityId BigInt    @map("professional_capability_id")
+  governorate              String    @db.VarChar(120)
+  createdAt                DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  capability ProfessionalCapability @relation(fields: [professionalCapabilityId], references: [id])
+
+  @@unique([professionalCapabilityId, governorate])
+  @@map("professional_service_areas")
+}
+
+model ProfessionalVerificationDetail {
+  requestId                BigInt    @id @map("request_id")
+  professionalCapabilityId BigInt    @map("professional_capability_id")
+  profileSnapshot          Json      @map("profile_snapshot")
+  verificationSummary      String?   @map("verification_summary") @db.Text
+  createdAt                DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  request    Request                @relation(fields: [requestId], references: [id])
+  capability ProfessionalCapability @relation(fields: [professionalCapabilityId], references: [id])
+
+  @@map("professional_verification_details")
+}
+
+// =========================
+// COMMUNICATION - FARMEXIT RELAY ONLY
+// =========================
+
+model CommunicationCase {
+  id              BigInt                  @id @default(autoincrement())
+  requestId       BigInt                  @map("request_id")
+  assignedStaffId BigInt                  @map("assigned_staff_id")
+  status          CommunicationCaseStatus @default(open)
+  createdAt       DateTime?               @default(now()) @map("created_at") @db.DateTime(3)
+  closedAt        DateTime?               @map("closed_at") @db.DateTime(3)
+
+  request       Request        @relation(fields: [requestId], references: [id])
+  assignedStaff User           @relation(fields: [assignedStaffId], references: [id])
+  conversations Conversation[]
+
+  @@index([requestId, status])
+  @@index([assignedStaffId, status])
+  @@map("communication_cases")
+}
+
+/// One external user per channel. No direct buyer/renter <-> owner conversation exists.
+/// `status` stays String: DBML gives only a default ('open'), no value list.
+model Conversation {
+  id             BigInt    @id @default(autoincrement())
+  caseId         BigInt    @map("case_id")
+  externalUserId BigInt    @map("external_user_id")
+  status         String    @default("open") @db.VarChar(20)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+  closedAt       DateTime? @map("closed_at") @db.DateTime(3)
+
+  case         CommunicationCase @relation(fields: [caseId], references: [id])
+  externalUser User              @relation(fields: [externalUserId], references: [id])
+  messages     Message[]
+
+  @@unique([caseId, externalUserId])
+  @@map("conversations")
+}
+
+/// Sender must be the channel external user or authorized FarmExit staff (enforced in the service layer).
+model Message {
+  id             BigInt    @id @default(autoincrement())
+  conversationId BigInt    @map("conversation_id")
+  senderId       BigInt    @map("sender_id")
+  body           String?   @db.Text
+  sentAt         DateTime? @default(now()) @map("sent_at") @db.DateTime(3)
+  editedAt       DateTime? @map("edited_at") @db.DateTime(3)
+  deletedAt      DateTime? @map("deleted_at") @db.DateTime(3)
+
+  conversation Conversation        @relation(fields: [conversationId], references: [id])
+  sender       User                @relation(fields: [senderId], references: [id])
+  attachments  MessageAttachment[]
+  reads        MessageRead[]
+  relaysFrom   MessageRelay[]      @relation("RelaySourceMessage")
+  relayedAs    MessageRelay?       @relation("RelayedMessage")
+
+  @@index([conversationId, sentAt])
+  @@map("messages")
+}
+
+/// Audit trail: customer message -> FarmExit review -> new FarmExit-authored message to the other side.
+model MessageRelay {
+  id               BigInt    @id @default(autoincrement())
+  sourceMessageId  BigInt    @map("source_message_id")
+  relayedMessageId BigInt    @unique @map("relayed_message_id")
+  relayedBy        BigInt    @map("relayed_by")
+  relayNote        String?   @map("relay_note") @db.Text
+  relayedAt        DateTime? @default(now()) @map("relayed_at") @db.DateTime(3)
+
+  sourceMessage  Message @relation("RelaySourceMessage", fields: [sourceMessageId], references: [id])
+  relayedMessage Message @relation("RelayedMessage", fields: [relayedMessageId], references: [id])
+  relayer        User    @relation(fields: [relayedBy], references: [id])
+
+  @@map("message_relays")
+}
+
+model MessageAttachment {
+  id            BigInt    @id @default(autoincrement())
+  messageId     BigInt    @map("message_id")
+  storageKey    String    @map("storage_key") @db.VarChar(500)
+  mimeType      String?   @map("mime_type") @db.VarChar(120)
+  fileSizeBytes BigInt?   @map("file_size_bytes")
+  createdAt     DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  message Message @relation(fields: [messageId], references: [id])
+
+  @@map("message_attachments")
+}
+
+model MessageRead {
+  messageId BigInt   @map("message_id")
+  userId    BigInt   @map("user_id")
+  readAt    DateTime @map("read_at") @db.DateTime(3)
+
+  message Message @relation(fields: [messageId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([messageId, userId])
+  @@map("message_reads")
+}
+
+// =========================
+// SAVED ITEMS
+// =========================
+
+/// Exactly one target: farm_id for farm, opportunity_request_id for management/partnership (service-layer rule).
+/// target_key is a stable "kind:id" key so UNIQUE(user_id, target_key) works despite nullable foreign keys.
+model SavedItem {
+  id                   BigInt        @id @default(autoincrement())
+  userId               BigInt        @map("user_id")
+  itemType             SavedItemType @map("item_type")
+  targetKey            String        @map("target_key") @db.VarChar(100)
+  farmId               BigInt?       @map("farm_id")
+  opportunityRequestId BigInt?       @map("opportunity_request_id")
+  savedAt              DateTime?     @default(now()) @map("saved_at") @db.DateTime(3)
+
+  user               User     @relation(fields: [userId], references: [id])
+  farm               Farm?    @relation(fields: [farmId], references: [id])
+  opportunityRequest Request? @relation(fields: [opportunityRequestId], references: [id])
+
+  @@unique([userId, targetKey])
+  @@index([userId, farmId])
+  @@index([userId, opportunityRequestId])
+  @@index([userId, itemType, savedAt])
+  @@map("saved_items")
+}
+
+// =========================
+// SITE VISITS & OFF-PLATFORM OUTCOME TRACKING
+// =========================
+
+model SiteVisit {
+  id            BigInt          @id @default(autoincrement())
+  requestId     BigInt          @map("request_id")
+  farmId        BigInt          @map("farm_id")
+  arrangedBy    BigInt          @map("arranged_by")
+  visitorUserId BigInt          @map("visitor_user_id")
+  scheduledAt   DateTime?       @map("scheduled_at") @db.DateTime(3)
+  status        SiteVisitStatus @default(proposed)
+  notes         String?         @db.Text
+  createdAt     DateTime?       @default(now()) @map("created_at") @db.DateTime(3)
+
+  request  Request @relation(fields: [requestId], references: [id])
+  farm     Farm    @relation(fields: [farmId], references: [id])
+  arranger User    @relation("SiteVisitArranger", fields: [arrangedBy], references: [id])
+  visitor  User    @relation("SiteVisitVisitor", fields: [visitorUserId], references: [id])
+
+  @@map("site_visits")
+}
+
+/// OPTIONAL staff-entered historic summary of an external outcome. No deal approval, contract, payment, invoice,
+/// commission, balance or settlement; does not prove legal transfer or payment.
+model RequestOutcome {
+  id                 BigInt                    @id @default(autoincrement())
+  requestId          BigInt                    @unique @map("request_id")
+  recordedBy         BigInt                    @map("recorded_by")
+  outcomeType        OutcomeType               @map("outcome_type")
+  confirmationStatus OutcomeConfirmationStatus @default(reported) @map("confirmation_status")
+  occurredAt         DateTime?                 @map("occurred_at") @db.DateTime(3)
+  recordedAt         DateTime?                 @default(now()) @map("recorded_at") @db.DateTime(3)
+  confirmedBy        BigInt?                   @map("confirmed_by")
+  confirmedAt        DateTime?                 @map("confirmed_at") @db.DateTime(3)
+  internalNotes      String?                   @map("internal_notes") @db.Text
+  updatedAt          DateTime?                 @updatedAt @map("updated_at") @db.DateTime(3)
+
+  request   Request @relation(fields: [requestId], references: [id])
+  recorder  User    @relation("OutcomeRecorder", fields: [recordedBy], references: [id])
+  confirmer User?   @relation("OutcomeConfirmer", fields: [confirmedBy], references: [id])
+
+  @@index([outcomeType, recordedAt])
+  @@index([confirmationStatus, recordedAt])
+  @@map("request_outcomes")
+}
+
+// =========================
+// AGRICULTURAL FACILITIES & FACTORIES
+// =========================
+
+/// Future-ready; business rules pending validation, so `facilityType` stays a String (draft taxonomy).
+model AgriculturalFacility {
+  id              BigInt         @id @default(autoincrement())
+  ownerUserId     BigInt         @map("owner_user_id")
+  farmId          BigInt?        @map("farm_id")
+  facilityType    String         @map("facility_type") @db.VarChar(80)
+  name            String         @db.VarChar(200)
+  description     String?        @db.Text
+  governorate     String?        @db.VarChar(120)
+  areaName        String?        @map("area_name") @db.VarChar(120)
+  latitude        Decimal?       @db.Decimal(10, 8)
+  longitude       Decimal?       @db.Decimal(11, 8)
+  capacityDetails Json?          @map("capacity_details")
+  services        Json?
+  status          FacilityStatus @default(draft)
+  createdAt       DateTime?      @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt       DateTime?      @updatedAt @map("updated_at") @db.DateTime(3)
+  deletedAt       DateTime?      @map("deleted_at") @db.DateTime(3)
+
+  owner User            @relation(fields: [ownerUserId], references: [id])
+  farm  Farm?           @relation(fields: [farmId], references: [id])
+  media FacilityMedia[]
+
+  @@map("agricultural_facilities")
+}
+
+model FacilityMedia {
+  id            BigInt    @id @default(autoincrement())
+  facilityId    BigInt    @map("facility_id")
+  uploadedBy    BigInt    @map("uploaded_by")
+  storageKey    String    @map("storage_key") @db.VarChar(500)
+  mediaType     String    @default("photo") @map("media_type") @db.VarChar(30)
+  altEn         String?   @map("alt_en") @db.VarChar(255)
+  altAr         String?   @map("alt_ar") @db.VarChar(255)
+  sortOrder     Int       @default(0) @map("sort_order")
+  licenceStatus String    @default("pending_confirmation") @map("licence_status") @db.VarChar(30)
+  createdAt     DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  facility AgriculturalFacility @relation(fields: [facilityId], references: [id])
+  uploader User                 @relation(fields: [uploadedBy], references: [id])
+
+  @@map("facility_media")
+}
+
+// =========================
+// NOTIFICATIONS / AUDIT
+// =========================
+
+model Notification {
+  id               BigInt    @id @default(autoincrement())
+  userId           BigInt    @map("user_id")
+  requestId        BigInt?   @map("request_id")
+  notificationType String    @map("notification_type") @db.VarChar(60)
+  title            String    @db.VarChar(200)
+  body             String?   @db.Text
+  actionable       Boolean   @default(false)
+  readAt           DateTime? @map("read_at") @db.DateTime(3)
+  createdAt        DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  user    User     @relation(fields: [userId], references: [id])
+  request Request? @relation(fields: [requestId], references: [id])
+
+  @@index([userId, readAt, createdAt])
+  @@index([requestId])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id          BigInt    @id @default(autoincrement())
+  actorUserId BigInt?   @map("actor_user_id")
+  entityType  String    @map("entity_type") @db.VarChar(80)
+  entityId    BigInt    @map("entity_id")
+  action      String    @db.VarChar(60)
+  changes     Json?
+  ipAddress   String?   @map("ip_address") @db.VarChar(45)
+  createdAt   DateTime? @default(now()) @map("created_at") @db.DateTime(3)
+
+  actor User? @relation(fields: [actorUserId], references: [id])
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@map("audit_logs")
 }

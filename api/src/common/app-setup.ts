@@ -35,6 +35,7 @@ export function configureApp(app: INestApplication): void {
       .setTitle('FarmExit API')
       .setDescription('FarmExit REST API')
       .setVersion(DEFAULT_API_VERSION)
+      .addBearerAuth()
       .build();
     SwaggerModule.setup(SWAGGER_PATH, app, () => SwaggerModule.createDocument(app, document));
   }

@@ -8,6 +8,7 @@ describe('toMariaDbPoolConfig', () => {
       user: 'farmexit',
       password: 'p@ss:word',
       database: 'farmexit',
+      timezone: 'Z',
     });
   });
 

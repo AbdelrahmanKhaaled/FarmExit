@@ -21,6 +21,8 @@ services:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - farmexit-mysql-data:/var/lib/mysql
+      # Creates farmexit_shadow on first volume init (see docker/mysql/init/).
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test:
         [

@@ -4,6 +4,8 @@ export type MariaDbPoolConfig = {
   user: string;
   password: string;
   database: string;
+  /** Interpret JS dates as UTC. Columns are DATETIME(3) with no session offset. */
+  timezone: 'Z';
 };
 
 /**
@@ -21,5 +23,6 @@ export function toMariaDbPoolConfig(databaseUrl: string): MariaDbPoolConfig {
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
     database,
+    timezone: 'Z',
   };
 }

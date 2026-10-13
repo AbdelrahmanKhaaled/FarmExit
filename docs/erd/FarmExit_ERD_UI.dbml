@@ -1,6 +1,6 @@
 Project FarmExit_Final_Implementation {
   database_type: 'MySQL'
-  Note: 'FarmExit updated logical ERD. FarmExit brokers introductions and mediates all buyer/renter-owner messaging. Sale/rent contracting, transfer and ALL payments happen OFF-PLATFORM. No payment, settlement, commission, online contract or in-platform offer modules. Optional admin-recorded off-platform outcomes are informational only. No global customer roles; farm roles are contextual. FarmExit Score is a STAFF evaluation, not a user rating. Evaluation methodology is not yet approved; publish only after documented evidence and review policy. Sale listings may be cash-only or quick-sale (open to installment and exchange proposals); buyer proposals and co-purchase grouping are mediated by FarmExit staff, with all consideration and legal completion off-platform.'
+  Note: 'FarmExit updated logical ERD. FarmExit brokers introductions and mediates all buyer/renter-owner messaging. Sale/rent contracting, transfer and ALL payments happen OFF-PLATFORM. No payment, settlement, commission, online contract or binding online-offer execution modules. Optional admin-recorded off-platform outcomes are informational only. No global customer roles; farm roles are contextual. FarmExit Score is a STAFF evaluation, not a user rating. Evaluation methodology is not yet approved; publish only after documented evidence and review policy. Sale listings may be cash-only or quick-sale (open to installment and exchange proposals); co-purchase is buyer interest matching only. All negotiations, approvals, contracting, consideration and completion happen outside the website through FarmExit staff; there is no on-platform deal-closing workflow.'
 }
 
 // =========================
@@ -324,13 +324,11 @@ Table farm_sale_terms {
   accepts_installment_proposals boolean [not null, default: false]
   accepts_exchange_proposals boolean [not null, default: false]
   exchange_preference_scope varchar(20) [not null, default: 'any', note: 'any, selected; selected requires at least one preference row']
-  co_purchase_policy varchar(30) [not null, default: 'requires_owner_approval', note: 'requires_owner_approval, approved, declined; administrative acceptance is distinct from quick-sale mode']
   updated_at timestamp
   indexes {
     (sale_mode, accepts_installment_proposals, accepts_exchange_proposals)
-    (co_purchase_policy)
   }
-  Note: 'Owner chooses standard_cash (cash offers only) or quick_sale (accepts receiving both installment and exchange proposals, as well as cash). These booleans represent eligibility to PROPOSE, NOT automatic acceptance of offer or guarantee of sale. Quick sale => accepts_installment_proposals=true AND accepts_exchange_proposals=true. Exchange scope=any means any supported asset type; selected means only owner-selected asset types in farm_exchange_preferences. Co-purchase needs separate owner approval. Negotiated actual installment terms and barter values are NOT payment records.'
+  Note: 'Owner chooses standard_cash (cash offers only) or quick_sale (accepts receiving both installment and exchange proposals, as well as cash). These booleans represent eligibility to PROPOSE, NOT automatic acceptance of offer or guarantee of sale. Quick sale => accepts_installment_proposals=true AND accepts_exchange_proposals=true. Exchange scope=any means any supported asset type; selected means only owner-selected asset types in farm_exchange_preferences. A buyer may express interest in purchasing a partial share; this is not an owner-approved sale option or binding offer. Admins coordinate participants OUTSIDE the website. Negotiated installment terms and barter values are NOT payment records.'
 }
 
 Table farm_exchange_preferences {
@@ -356,7 +354,7 @@ Table farm_purchase_proposal_details {
   requested_share_percent decimal(5,2) [note: 'Only for co_purchase; strictly greater than 0 and at most 100']
   proposal_notes text
   submitted_at timestamp
-  Note: 'Buyer can propose cash, installment terms, exchange, cash+asset mixed consideration, or partial share ownership. FarmExit staff sees and mediates proposals via existing request_forwardings and private conversations. Owner must accept negotiated terms off-platform. No checkout, payment schedule execution or title transfer on the website.'
+  Note: 'Buyer can propose cash, installment terms, exchange, cash+asset mixed consideration, or partial share ownership. FarmExit staff sees and mediates proposals via existing request_forwardings and private conversations. FarmExit staff handle any discussions and approvals outside the website; no on-platform owner acceptance is required or tracked for purchase proposals. No checkout, payment schedule execution or title transfer on the website.'
 }
 
 Table farm_purchase_proposal_components {
@@ -385,10 +383,9 @@ Table co_purchase_groups {
   id bigint [pk, increment]
   listing_request_id bigint [not null, note: 'SALE listing only']
   assigned_staff_id bigint [not null, note: 'FarmExit staff member who coordinates buyers and owner']
-  target_share_percent decimal(5,2) [not null, default: 100.00]
+  target_share_percent decimal(5,2) [not null, default: 100.00, note: 'Nonbinding matching target only; 100% does not establish an agreed deal']
   listing_asking_price_snapshot decimal(15,2) [note: 'Information-only asking price at group creation, not amount collected']
-  owner_approval_status varchar(25) [not null, default: 'pending', note: 'pending, approved, declined']
-  group_status varchar(35) [not null, default: 'matching', note: 'matching, pending_confirmations, ready_for_off_platform_deal, completed_off_platform, cancelled']
+  group_status varchar(35) [not null, default: 'collecting_interest', note: 'collecting_interest, under_staff_followup, closed; internal lead coordination only']
   notes text
   created_at timestamp
   updated_at timestamp
@@ -397,17 +394,16 @@ Table co_purchase_groups {
     (listing_request_id, group_status)
     (assigned_staff_id, group_status)
   }
-  Note: 'FarmExit introduces compatible buyers without direct buyer-to-buyer contact. Staff seeks owner approval before treating a co-purchase group as accepted. Reaching 100 percent is NOT itself a completed sale: confirmation and transfer/payment occur outside the website. Final amount may differ from the asking price by negotiated agreement.'
+  Note: 'Internal shortlist of buyers interested in partial shares of the SAME sale listing. FarmExit staff can contact them outside the website. No group approval/acceptance or sale-closing workflow exists in the platform. Reaching 100% is only a nonbinding match indicator; legal negotiations, seller consent, pricing and completion are all handled externally.'
 }
 
 Table co_purchase_group_members {
   id bigint [pk, increment]
   group_id bigint [not null]
-  buyer_proposal_request_id bigint [not null, note: 'Must reference an approved-scope co_purchase farm_purchase_proposal under the same listing']
-  share_percent decimal(5,2) [not null, note: 'Admin-proposed share: >0 and <=100; sum of active/confirmed shares <=100 enforced transactionally']
+  buyer_proposal_request_id bigint [not null, note: 'Must reference a co_purchase farm_purchase_proposal under the same listing; not a buyer approved to transact']
+  proposed_share_percent decimal(5,2) [not null, note: 'Buyer requested share: >0 and <=100; interest only, not ownership allocation']
   proposed_contribution_value decimal(15,2) [note: 'Buyer proposed contribution or off-platform negotiated figure; NOT payment collected']
-  member_status varchar(30) [not null, default: 'proposed', note: 'proposed, contacted, confirmed, declined, withdrawn']
-  confirmed_at timestamp
+  member_status varchar(30) [not null, default: 'candidate', note: 'candidate, shortlisted, withdrawn, archived; internal matching only']
   created_at timestamp
   updated_at timestamp
   indexes {
@@ -415,7 +411,7 @@ Table co_purchase_group_members {
     (group_id, member_status)
     (buyer_proposal_request_id)
   }
-  Note: 'Each member is a buyer proposal, not a payment account. Admin groups distinct interested buyers until total confirmed allocation reaches 100 percent (if owner approves). Enforce same listing and percentage cap in a MySQL transaction with row locking; no direct contact details are exposed.'
+  Note: 'Each member is a nonbinding buyer interest linked to a purchase proposal, not an ownership share, buyer approval, or payment account. Multiple candidates may express overlapping interests, so do NOT require all candidate percentages to sum to <=100. Staff may shortlist a potential combination for external coordination. No buyer-to-buyer contact details are shared and there is no on-platform confirmation or completion.'
 }
 
 // =========================
@@ -644,7 +640,7 @@ Table request_outcomes {
     (outcome_type, recorded_at)
     (confirmation_status, recorded_at)
   }
-  Note: 'Admin-only record of an OFF-PLATFORM outcome after FarmExit mediation, including negotiated installment/exchange/co-purchase transactions. No in-app contract, payment processing, invoice, commission accrual, balances, settlement, or guarantees. This record does not prove transfer of ownership or payment.'
+  Note: 'OPTIONAL staff-entered historic summary when FarmExit learns an external sale/rent outcome. Not a required stage of proposal, co-purchase grouping or publication. No in-app deal approval, contract, payment, invoice, commission accrual, balances, settlement, or guarantees. This record does not prove legal ownership transfer or payment.'
 }
 
 // =========================

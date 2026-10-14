@@ -1,0 +1,11 @@
+---
+description: Token and quota saving - highest priority, always on
+alwaysApply: true
+---
+
+- Top priority: minimize tokens and account quota. Follow the `token-saver` personal skill.
+- Never open or use Chrome/browser extensions or browser automation (`agent-browser`) in any form.
+- Avoid subagents, multi-model reviews, web search, image generation, and repeated/exploratory scripts.
+- Grep before Read; read only needed ranges; never re-read unchanged files; batch independent calls.
+- Targeted tests while working; full gate once at the end (see `tujar-dashboard-gate` skill).
+- Short replies in the user's language. No extras beyond the request.

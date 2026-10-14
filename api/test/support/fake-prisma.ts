@@ -56,6 +56,9 @@ function wholePounds(value: unknown): boolean {
 function matches(row: Row, where: Where = {}): boolean {
   return Object.entries(where).every(([key, expected]) => {
     const actual = row[key];
+    if (actual === undefined && isOperator(expected)) {
+      return matches(row, expected);
+    }
     if (expected === null) return actual === null || actual === undefined;
     if (isOperator(expected)) {
       if ('contains' in expected) {
@@ -281,6 +284,18 @@ export function createFakePrisma() {
     [],
     [['requestId', 'assignmentType']],
   );
+  const requestForwarding = new FakeTable(
+    () => ({
+      status: 'sent',
+      ownerDecision: null,
+      decisionReason: null,
+      decidedBy: null,
+      createdAt: new Date(),
+      decidedAt: null,
+    }),
+    [],
+    [['requestId', 'recipientUserId']],
+  );
   const auditLog = new FakeTable(() => ({
     actorUserId: null,
     changes: null,
@@ -350,6 +365,83 @@ export function createFakePrisma() {
       ['userId', 'listingRequestId'],
     ],
   );
+  const requestDocument = new FakeTable(() => ({
+    requestId: null,
+    storageKey: 'fake-doc',
+    originalFilename: 'doc.pdf',
+    mimeType: 'application/pdf',
+    fileSizeBytes: 1024,
+    status: 'uploaded',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }));
+  const farmEvaluationCheck = new FakeTable(
+    () => ({
+      evidenceDocumentId: null,
+      reviewerNotes: null,
+      reviewedAt: null,
+    }),
+    [],
+    [['evaluationId', 'checkKey']],
+  );
+  const farmEvaluationTable = new FakeTable(() => ({
+    listingRequestId: null,
+    approvedBy: null,
+    scoreValue: null,
+    scoreMax: null,
+    methodologyName: null,
+    methodologyVersion: null,
+    reviewScopeEn: null,
+    reviewScopeAr: null,
+    publicSummaryEn: null,
+    publicSummaryAr: null,
+    internalNotes: null,
+    status: 'draft',
+    reviewedAt: null,
+    approvedAt: null,
+    publishedAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }));
+  const attachEvaluationRelations = async (ev: Row, include?: Record<string, boolean>): Promise<Row> => {
+    if (!include) return ev;
+    const out = { ...ev };
+    if (include.reviewer) {
+      out.reviewer = await user.findFirst({ where: { id: ev.reviewedBy } });
+    }
+    if (include.approver) {
+      out.approver = ev.approvedBy ? await user.findFirst({ where: { id: ev.approvedBy } }) : null;
+    }
+    if (include.checks) {
+      out.checks = await farmEvaluationCheck.findMany({ where: { evaluationId: ev.id } });
+    }
+    return out;
+  };
+  const farmEvaluation = Object.assign(farmEvaluationTable, {
+    create: async ({ data, include }: { data: Row; include?: Record<string, boolean> }): Promise<Row> => {
+      const { checks, ...fields } = data;
+      const created = await FakeTable.prototype.create.call(farmEvaluationTable, { data: fields });
+      if (checks && typeof checks === 'object' && 'create' in checks && Array.isArray((checks as Record<string, unknown>).create)) {
+        for (const c of (checks as { create: Row[] }).create) {
+          await farmEvaluationCheck.create({ data: { ...c, evaluationId: created.id } });
+        }
+      }
+      return attachEvaluationRelations(created, include);
+    },
+    findFirst: async (args: Args & { include?: Record<string, boolean> }): Promise<Row | null> => {
+      const row = await FakeTable.prototype.findFirst.call(farmEvaluationTable, args);
+      return row ? attachEvaluationRelations(row, args?.include) : null;
+    },
+    findMany: async (args: Args & { include?: Record<string, boolean> }): Promise<Row[]> => {
+      const rows = await FakeTable.prototype.findMany.call(farmEvaluationTable, args);
+      if (!args?.include) return rows;
+      return Promise.all(rows.map((r) => attachEvaluationRelations(r, args.include)));
+    },
+    update: async (args: { where: Where; data: Row; include?: Record<string, boolean> }): Promise<Row> => {
+      const updated = await FakeTable.prototype.update.call(farmEvaluationTable, args);
+      return attachEvaluationRelations(updated, args.include);
+    },
+  });
   const agriculturalFacility = new FakeTable(() => ({
     description: null,
     governorate: null,
@@ -438,6 +530,7 @@ export function createFakePrisma() {
     requestStatusHistory,
     requestReview,
     requestStaffAssignment,
+    requestForwarding,
     auditLog,
     savedItem,
     farmSaleTerms,
@@ -446,6 +539,9 @@ export function createFakePrisma() {
     farmPurchaseProposalComponent,
     coPurchaseGroup,
     coPurchaseGroupMember,
+    requestDocument,
+    farmEvaluation,
+    farmEvaluationCheck,
   };
   /** Interactive transaction: all-or-nothing over every table (the callback gets the same fake as 	x). */
   /** Row locks used by media uploads (`SELECT ... FOR UPDATE`). Enough for the in-memory API; it does not emulate InnoDB. */
@@ -596,6 +692,7 @@ export function createFakePrisma() {
     requestStatusHistory,
     requestReview,
     requestStaffAssignment,
+    requestForwarding,
     auditLog,
     savedItem,
     farmSaleTerms,
@@ -604,6 +701,9 @@ export function createFakePrisma() {
     farmPurchaseProposalComponent,
     coPurchaseGroup,
     coPurchaseGroupMember,
+    requestDocument,
+    farmEvaluation,
+    farmEvaluationCheck,
     $transaction,
     $executeRaw,
     $queryRaw,

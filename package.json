@@ -25,10 +25,8 @@
     "test:api": "npm --prefix api run test",
     "test:api:e2e": "npm --prefix api run test:e2e",
     "test:api:integration": "npm --prefix api run test:integration",
-    "db:up": "docker compose up -d mysql",
-    "db:down": "docker compose down",
-    "db:logs": "docker compose logs -f mysql",
-    "prisma:generate": "npm --prefix api run prisma:generate"
+    "prisma:generate": "npm --prefix api run prisma:generate",
+    "prisma:seed": "npm --prefix api run prisma:seed"
   },
   "devDependencies": {
     "concurrently": "^10.0.6"

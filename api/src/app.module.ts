@@ -10,6 +10,11 @@ import { OffersModule } from './modules/offers/offers.module';
 import { MediaModule } from './modules/media/media.module';
 import { HealthModule } from './modules/health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { EvaluationsModule } from './modules/evaluations/evaluations.module';
+import { RequestsModule } from './modules/requests/requests.module';
+import { ProfessionalProfilesModule } from './modules/professional-profiles/professional-profiles.module';
+import { ProfessionalVerificationRequestsModule } from './modules/professional-verification-requests/professional-verification-requests.module';
+import { FarmManagementRequestsModule } from './modules/farm-management-requests/farm-management-requests.module';
 
 @Module({
   imports: [
@@ -23,6 +28,11 @@ import { PrismaModule } from './prisma/prisma.module';
     ListingRequestsModule,
     MarketplaceModule,
     OffersModule,
+    EvaluationsModule,
+    RequestsModule,
+    ProfessionalProfilesModule,
+    ProfessionalVerificationRequestsModule,
+    FarmManagementRequestsModule,
   ],
 })
 export class AppModule {}

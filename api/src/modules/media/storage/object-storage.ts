@@ -6,6 +6,10 @@ export const OBJECT_STORAGE = Symbol('OBJECT_STORAGE');
 export const STORAGE_KEY_PATTERN =
   /^(farms|facilities)\/[1-9]\d{0,18}\/media\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$/;
 
+/** Private request supporting documents: `requests/<id>/documents/<uuid>.<pdf|jpg|png|webp>`. */
+export const REQUEST_DOCUMENT_KEY_PATTERN =
+  /^requests\/[1-9]\d{0,18}\/documents\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(pdf|jpg|png|webp)$/;
+
 export class InvalidStorageKeyError extends Error {}
 export class StorageObjectNotFoundError extends Error {}
 
@@ -23,5 +27,7 @@ export interface ObjectStorage {
 }
 
 export function assertValidStorageKey(key: string): void {
-  if (!STORAGE_KEY_PATTERN.test(key)) throw new InvalidStorageKeyError('Invalid storage key');
+  if (!STORAGE_KEY_PATTERN.test(key) && !REQUEST_DOCUMENT_KEY_PATTERN.test(key)) {
+    throw new InvalidStorageKeyError('Invalid storage key');
+  }
 }

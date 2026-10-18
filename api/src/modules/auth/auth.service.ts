@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
 import { timingSafeEqual } from 'node:crypto';
 import type { User } from '../../generated/prisma/client';
-import { AccountStatus } from '../../generated/prisma/enums';
+import { AccountStatus, AuthSessionAudience } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { invalidCode, isProfileCompleted, profileIncomplete, unauthorized } from './auth.errors';
 import type { ClientContext } from './auth.types';
@@ -59,7 +59,7 @@ export class AuthService {
         })
       : await this.createUser(mobile, now);
 
-    const pair = await this.startSession(user.id, client, dto.deviceName, now);
+    const pair = await this.startSession(user.id, client, dto.deviceName, now, AuthSessionAudience.website);
     return { ...pair, user: toAuthUser(user), isNewUser: !existing };
   }
 
@@ -111,6 +111,16 @@ export class AuthService {
   /** Revokes one session (idempotent). */
   async logout(sessionId: bigint): Promise<void> {
     await this.revoke(sessionId);
+  }
+
+  /** Starts a session for an already-authenticated user (e.g. dashboard email/password login). */
+  createSessionForUser(
+    userId: bigint,
+    client: ClientContext,
+    deviceName?: string,
+    authAudience: AuthSessionAudience = AuthSessionAudience.website,
+  ): Promise<TokenPairResponseDto> {
+    return this.startSession(userId, client, deviceName, new Date(), authAudience);
   }
 
   /** First-time profile completion (phone -> OTP -> profile). Can only happen once. */
@@ -184,12 +194,14 @@ export class AuthService {
     client: ClientContext,
     deviceName: string | undefined,
     now: Date,
+    authAudience: AuthSessionAudience,
   ): Promise<TokenPairResponseDto> {
     const refresh = this.tokens.generateRefreshSecret();
     const expiresAt = new Date(now.getTime() + this.tokens.refreshTtlMs);
     const session = await this.prisma.userSession.create({
       data: {
         userId,
+        authAudience,
         sessionTokenHash: refresh.hash,
         deviceName: deviceName ?? null,
         userAgent: client.userAgent?.slice(0, MAX_USER_AGENT_LENGTH) ?? null,

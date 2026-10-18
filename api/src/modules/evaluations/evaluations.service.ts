@@ -15,7 +15,7 @@ import {
 } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StaffAuthorizationService } from '../authorization/staff-authorization.service';
-import { StaffPermission } from '../authorization/staff-permissions';
+import { staffHasAdminScope, StaffPermission } from '../authorization/staff-permissions';
 import type { StaffContext } from '../authorization/staff.types';
 import { DEFAULT_PAGE_SIZE } from '../farms/dto/list-farms-query.dto';
 import type { CreateEvaluationDto } from './dto/create-evaluation.dto';
@@ -432,7 +432,7 @@ export class EvaluationsService {
     farmId: bigint,
     listingRequestId: bigint | null,
   ): Promise<void> {
-    if (staff.roles.includes(StaffRole.admin)) {
+    if (staffHasAdminScope(staff.roles)) {
       return;
     }
 
@@ -473,7 +473,7 @@ export class EvaluationsService {
     staff: StaffContext,
     evaluation: { reviewedBy: bigint; listingRequestId: bigint | null },
   ): Promise<void> {
-    if (staff.roles.includes(StaffRole.admin)) {
+    if (staffHasAdminScope(staff.roles)) {
       return;
     }
 
@@ -502,7 +502,7 @@ export class EvaluationsService {
     farmId: bigint,
     evaluation?: { listingRequestId: bigint | null; reviewedBy: bigint },
   ): Promise<void> {
-    if (staff.roles.includes(StaffRole.admin)) {
+    if (staffHasAdminScope(staff.roles)) {
       return;
     }
 
@@ -594,7 +594,7 @@ export class EvaluationsService {
     farmId: bigint,
   ): Promise<void> {
     if (targetStatus === EvaluationStatus.approved || targetStatus === EvaluationStatus.published) {
-      if (!staff.roles.includes(StaffRole.admin)) {
+      if (!staffHasAdminScope(staff.roles)) {
         throw new ForbiddenException('Only administrators can approve or publish farm evaluations');
       }
     }

@@ -11,7 +11,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { forbidden } from '../authorization/authorization.errors';
 import { StaffAuthorizationService, STAFF_STATUS_ACTIVE } from '../authorization/staff-authorization.service';
-import { StaffPermission } from '../authorization/staff-permissions';
+import { staffHasAdminScope, StaffPermission } from '../authorization/staff-permissions';
 import { DEFAULT_PAGE_SIZE, type ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
 import type {
   AssignListingStaffDto,
@@ -113,7 +113,7 @@ export class StaffListingReviewsService {
       select: { id: true, status: true },
     });
     if (!request || request.status === LISTING_DRAFT) throw notFound();
-    const admin = staff.roles.includes(StaffRole.admin);
+    const admin = staffHasAdminScope(staff.roles);
     if (!admin) {
       if (!staff.roles.includes(StaffRole.reviewer)) throw forbidden();
       const slot = await this.prisma.requestStaffAssignment.findFirst({
@@ -304,7 +304,7 @@ export class StaffListingReviewsService {
   private async access(userId: bigint): Promise<Access> {
     const staff = await this.staffAuth.loadContext(userId);
     if (!staff?.permissions.includes(StaffPermission.RequestsRead)) throw forbidden();
-    if (staff.roles.includes(StaffRole.admin)) return { kind: 'admin' };
+    if (staffHasAdminScope(staff.roles)) return { kind: 'admin' };
     const types: RequestStaffAssignmentType[] = [];
     if (staff.roles.includes(StaffRole.reviewer)) types.push(RequestStaffAssignmentType.reviewer);
     if (staff.roles.includes(StaffRole.caseAgent)) types.push(RequestStaffAssignmentType.caseAgent);

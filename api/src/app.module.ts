@@ -15,6 +15,12 @@ import { RequestsModule } from './modules/requests/requests.module';
 import { ProfessionalProfilesModule } from './modules/professional-profiles/professional-profiles.module';
 import { ProfessionalVerificationRequestsModule } from './modules/professional-verification-requests/professional-verification-requests.module';
 import { FarmManagementRequestsModule } from './modules/farm-management-requests/farm-management-requests.module';
+import { PartnershipRequestsModule } from './modules/partnership-requests/partnership-requests.module';
+import { PartnershipApplicationsModule } from './modules/partnership-applications/partnership-applications.module';
+import { CommunicationModule } from './modules/communication/communication.module';
+import { FarmDetailsRequestsModule } from './modules/farm-details-requests/farm-details-requests.module';
+import { AdminAuthModule } from './modules/admin-auth/admin-auth.module';
+import { AdminOperationsModule } from './modules/admin-operations/admin-operations.module';
 
 @Module({
   imports: [
@@ -22,6 +28,7 @@ import { FarmManagementRequestsModule } from './modules/farm-management-requests
     PrismaModule,
     HealthModule,
     AuthModule,
+    AdminAuthModule,
     AuthorizationModule,
     FarmsModule,
     MediaModule,
@@ -33,6 +40,11 @@ import { FarmManagementRequestsModule } from './modules/farm-management-requests
     ProfessionalProfilesModule,
     ProfessionalVerificationRequestsModule,
     FarmManagementRequestsModule,
+    PartnershipRequestsModule,
+    PartnershipApplicationsModule,
+    CommunicationModule,
+    FarmDetailsRequestsModule,
+    AdminOperationsModule,
   ],
 })
 export class AppModule {}

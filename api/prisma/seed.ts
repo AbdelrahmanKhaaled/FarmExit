@@ -255,6 +255,7 @@ async function main() {
   console.log(`   - Farms: 2 (Olive Grove, Vegetable Plot)`);
   console.log(`   - Requests: 2 (${req1.requestNumber} [draft], ${req2.requestNumber} [underFarmExitReview])`);
   console.log('   - No fake scores, no fake licenses, no payments, no auto-published listings.');
+  console.log('   - No admin user: from repo root run npm run admin:bootstrap -- --mobile <number> --name "<name>"');
 }
 
 main()

@@ -33,10 +33,17 @@ enum OtpPurpose {
   verification
 }
 
+/// Distinguishes website OTP sessions from dashboard email/password sessions.
+enum AuthSessionAudience {
+  website   @map("website")
+  dashboard @map("dashboard")
+}
+
 enum StaffRole {
   admin
   caseAgent @map("case_agent")
   reviewer
+  superAdmin @map("super_admin")
 }
 
 /// Current staff slot on a request. Closed list: reviewer or case_agent. Not a communication case and not a review decision.
@@ -292,14 +299,36 @@ model User {
   staffAssignmentsReceived    RequestStaffAssignment[] @relation("AssignmentAssignee")
   staffAssignmentsMade        RequestStaffAssignment[] @relation("AssignmentAssigner")
   auditLogs                   AuditLog[]
+  adminCredential             AdminCredential?
 
   @@map("users")
 }
 
+/// Dashboard email + password credentials for staff with admin or super_admin membership.
+model AdminCredential {
+  id                  BigInt    @id @default(autoincrement())
+  userId              BigInt    @unique @map("user_id")
+  email               String    @unique @db.VarChar(255)
+  passwordHash        String    @map("password_hash") @db.VarChar(255)
+  isActive            Boolean   @default(true) @map("is_active")
+  mustChangePassword  Boolean   @default(true) @map("must_change_password")
+  passwordChangedAt   DateTime? @map("password_changed_at") @db.DateTime(3)
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until") @db.DateTime(3)
+  lastLoginAt         DateTime? @map("last_login_at") @db.DateTime(3)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.DateTime(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("admin_credentials")
+}
+
 model UserSession {
-  id               BigInt    @id @default(autoincrement())
-  userId           BigInt    @map("user_id")
-  sessionTokenHash String    @unique @map("session_token_hash") @db.VarChar(128)
+  id               BigInt              @id @default(autoincrement())
+  userId           BigInt              @map("user_id")
+  authAudience     AuthSessionAudience @default(website) @map("auth_audience")
+  sessionTokenHash String              @unique @map("session_token_hash") @db.VarChar(128)
   deviceName       String?   @map("device_name") @db.VarChar(120)
   userAgent        String?   @map("user_agent") @db.Text
   ipAddress        String?   @map("ip_address") @db.VarChar(45)

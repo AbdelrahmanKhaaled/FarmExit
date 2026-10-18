@@ -13,6 +13,19 @@ const describeDb = process.env.RUN_DB_INTEGRATION === '1' ? describe : describe.
 type Json = Record<string, unknown>;
 const json = (res: { body: unknown }): Json => res.body as Json;
 
+async function deleteRequestTree(prisma: PrismaService, rid: bigint): Promise<void> {
+  const children = await prisma.request.findMany({ where: { parentRequestId: rid }, select: { id: true } });
+  for (const child of children) await deleteRequestTree(prisma, child.id);
+  await prisma.communicationCase.deleteMany({ where: { requestId: rid } });
+  await prisma.requestForwarding.deleteMany({ where: { requestId: rid } });
+  await prisma.requestReview.deleteMany({ where: { requestId: rid } });
+  await prisma.requestStaffAssignment.deleteMany({ where: { requestId: rid } });
+  await prisma.requestStatusHistory.deleteMany({ where: { requestId: rid } });
+  await prisma.farmListingDetail.deleteMany({ where: { requestId: rid } });
+  await prisma.auditLog.deleteMany({ where: { entityType: 'request', entityId: rid } });
+  await prisma.request.deleteMany({ where: { id: rid } });
+}
+
 describeDb('Unified Requests on real MySQL', () => {
   const mobiles = [0, 1, 2, 3].map(
     () => `+2016${String(randomInt(0, 100_000_000)).padStart(8, '0')}`,
@@ -21,7 +34,9 @@ describeDb('Unified Requests on real MySQL', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let admin: { id: bigint; token: string };
-  let reviewer: { id: bigint; token: string };
+  let caseAgent: { id: bigint; token: string };
+  let listingRequestId: bigint;
+  let listingSlug: string;
   let requester: { id: bigint; token: string };
   let owner: { id: bigint; token: string };
   let farmId: bigint;
@@ -71,7 +86,7 @@ describeDb('Unified Requests on real MySQL', () => {
     prisma = app.get(PrismaService);
 
     admin = await makeUser(mobiles[0], 'Integration Admin', 'admin');
-    reviewer = await makeUser(mobiles[1], 'Integration Reviewer', 'reviewer');
+    caseAgent = await makeUser(mobiles[1], 'Integration Agent', 'caseAgent');
     requester = await makeUser(mobiles[2], 'Integration Requester');
     owner = await makeUser(mobiles[3], 'Integration Farm Owner');
 
@@ -93,19 +108,35 @@ describeDb('Unified Requests on real MySQL', () => {
         relationshipStatus: 'active',
       },
     });
+
+    listingSlug = `mysql-fd-${randomBytes(4).toString('hex')}`;
+    const listing = await prisma.request.create({
+      data: {
+        requestNumber: `LST-${randomBytes(6).toString('hex')}`,
+        requestType: 'farmListing',
+        status: 'published',
+        visibility: 'public',
+        createdBy: owner.id,
+        farmId,
+      },
+    });
+    listingRequestId = listing.id;
+    await prisma.farmListingDetail.create({
+      data: { requestId: listing.id, slug: listingSlug, listingType: 'sale', askingPrice: 1000 },
+    });
   });
 
   afterAll(async () => {
     if (prisma) {
       if (requestId) {
-        await prisma.requestForwarding.deleteMany({ where: { requestId } });
-        await prisma.requestReview.deleteMany({ where: { requestId } });
-        await prisma.requestStaffAssignment.deleteMany({ where: { requestId } });
-        await prisma.requestStatusHistory.deleteMany({ where: { requestId } });
-        await prisma.auditLog.deleteMany({ where: { entityType: 'request', entityId: requestId } });
-        await prisma.request.deleteMany({ where: { id: requestId } });
+        await deleteRequestTree(prisma, requestId);
       }
       if (farmId) {
+        const farmRequests = await prisma.request.findMany({ where: { farmId }, select: { id: true } });
+        for (const row of farmRequests) {
+          await deleteRequestTree(prisma, row.id);
+        }
+        await prisma.farmRelationship.deleteMany({ where: { farmId } });
         await prisma.farm.deleteMany({ where: { id: farmId } });
       }
       for (const uid of createdUserIds) {
@@ -121,61 +152,46 @@ describeDb('Unified Requests on real MySQL', () => {
     await as(requester).get('/api/v1/staff/requests').expect(403);
   });
 
-  it('creates draft request and submits it through user endpoint on real MySQL', async () => {
-    // Create draft request in database
-    const req = await prisma.request.create({
-      data: {
-        requestNumber: `REQ-MYSQL-${String(randomInt(1000, 9999))}`,
-        requestType: 'partnership',
-        status: 'draft',
-        createdBy: requester.id,
-        farmId,
-        visibility: 'private',
-      },
-    });
-    requestId = req.id;
+  it('creates farm details request and submits through dedicated API on real MySQL', async () => {
+    const created = json(
+      await as(requester).post('/api/v1/farm-details-requests', { listingSlug }).expect(201),
+    );
+    requestId = BigInt(created.id as string);
+    expect(created.listing).toMatchObject({ listingSlug, listingType: 'sale' });
 
-    // Caller submits draft request
-    const submitted = json(await as(requester).post(`/api/v1/requests/${String(requestId)}/submit`).expect(200));
-    expect(submitted.status).toBe('submitted');
+    const submitted = json(await as(requester).post(`/api/v1/farm-details-requests/${String(requestId)}/submit`).expect(200));
+    expect(submitted.status).toBe('underFarmExitReview');
 
-    // Confirm DB status and history record
     const inDb = await prisma.request.findUnique({ where: { id: requestId } });
-    expect(inDb?.status).toBe('submitted');
-
-    const history = await prisma.requestStatusHistory.findFirst({ where: { requestId } });
-    expect(history?.toStatus).toBe('submitted');
+    expect(inDb?.parentRequestId).toBe(listingRequestId);
   });
 
-  it('admin assigns reviewer, reviewer approves, and owner accepts forwarding on real MySQL', async () => {
-    // 1. Admin assigns reviewer
+  it('admin assigns case agent, agent approves, and owner accepts forwarding on real MySQL', async () => {
     const assigned = json(
       await as(admin)
         .put(`/api/v1/staff/requests/${String(requestId)}/assignments`, {
-          assignmentType: 'reviewer',
-          assignedStaffId: String(reviewer.id),
+          assignmentType: 'caseAgent',
+          assignedStaffId: String(caseAgent.id),
         })
         .expect(200),
     );
     expect(Array.isArray(assigned.assignments)).toBe(true);
 
-    // 2. Reviewer approves request
     const reviewed = json(
-      await as(reviewer)
-        .post(`/api/v1/staff/requests/${String(requestId)}/reviews`, {
+      await as(caseAgent)
+        .post(`/api/v1/staff/farm-details-requests/${String(requestId)}/reviews`, {
           decision: 'approved',
-          comment: 'Legal and technical criteria verified on real MySQL',
+          comment: 'Information request cleared for owner coordination',
         })
         .expect(200),
     );
     expect(reviewed.status).toBe('approved');
 
-    // 3. Admin forwards to owner
     const forwarded = json(
-      await as(admin)
+      await as(caseAgent)
         .post(`/api/v1/staff/requests/${String(requestId)}/forwardings`, {
           recipientUserId: String(owner.id),
-          internalNotes: 'Forwarded approved listing to farm owner on real MySQL',
+          internalNotes: 'Forwarded approved details inquiry to farm owner on real MySQL',
         })
         .expect(200),
     );

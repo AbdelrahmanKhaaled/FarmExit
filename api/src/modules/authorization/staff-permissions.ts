@@ -24,8 +24,23 @@ export type StaffPermission = (typeof StaffPermission)[keyof typeof StaffPermiss
 
 const ALL_PERMISSIONS: readonly StaffPermission[] = Object.values(StaffPermission);
 
-/** Approved staff roles only (staff_memberships.staff_role): admin, case_agent, reviewer. */
+/** Admin dashboard and full operational authority (admin or super_admin membership). */
+export function staffHasAdminScope(roles: readonly string[]): boolean {
+  return roles.includes(StaffRole.admin) || roles.includes(StaffRole.superAdmin);
+}
+
+/** Roles allowed to sign in to the admin dashboard (email + password). */
+export function staffHasDashboardAccess(roles: readonly string[]): boolean {
+  return staffHasAdminScope(roles);
+}
+
+export function staffIsSuperAdmin(roles: readonly string[]): boolean {
+  return roles.includes(StaffRole.superAdmin);
+}
+
+/** Approved staff roles only (staff_memberships.staff_role). */
 export const STAFF_ROLE_PERMISSIONS: Readonly<Record<StaffRole, readonly StaffPermission[]>> = {
+  [StaffRole.superAdmin]: ALL_PERMISSIONS,
   [StaffRole.admin]: ALL_PERMISSIONS,
   [StaffRole.caseAgent]: [
     StaffPermission.RequestsRead,

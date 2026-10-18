@@ -8,7 +8,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { forbidden } from '../authorization/authorization.errors';
 import { StaffAuthorizationService } from '../authorization/staff-authorization.service';
-import { StaffPermission } from '../authorization/staff-permissions';
+import { staffHasAdminScope, StaffPermission } from '../authorization/staff-permissions';
 import { DEFAULT_PAGE_SIZE, type ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
 import { REQUEST_STATUS_UNDER_REVIEW } from '../requests/request-workflow.policy';
 import type { DecideListingReviewDto } from '../listing-requests/dto/staff-listing-review.dto';
@@ -71,7 +71,7 @@ export class StaffFarmManagementReviewsService {
       requestType: RequestType.farmManagement,
       status: REQUEST_STATUS_UNDER_REVIEW,
     };
-    if (staff.roles.includes(StaffRole.admin)) return where;
+    if (staffHasAdminScope(staff.roles)) return where;
     if (!staff.roles.includes(StaffRole.reviewer)) return null;
     const mine = await this.prisma.requestStaffAssignment.findMany({
       where: { assignedStaffId: userId, assignmentType: RequestStaffAssignmentType.reviewer },
@@ -92,7 +92,7 @@ export class StaffFarmManagementReviewsService {
   private async assertMayView(userId: bigint, requestId: bigint): Promise<void> {
     const staff = await this.staffAuth.loadContext(userId);
     if (!staff?.permissions.includes(StaffPermission.RequestsRead)) throw forbidden();
-    if (staff.roles.includes(StaffRole.admin)) return;
+    if (staffHasAdminScope(staff.roles)) return;
     const slot = await this.prisma.requestStaffAssignment.findFirst({
       where: { requestId, assignedStaffId: userId, assignmentType: RequestStaffAssignmentType.reviewer },
     });
@@ -102,8 +102,8 @@ export class StaffFarmManagementReviewsService {
   private async assertMayDecide(userId: bigint, requestId: bigint): Promise<void> {
     const staff = await this.staffAuth.loadContext(userId);
     if (!staff?.permissions.includes(StaffPermission.RequestsReview)) throw forbidden();
-    if (!staff.roles.includes(StaffRole.admin) && !staff.roles.includes(StaffRole.reviewer)) throw forbidden();
-    if (!staff.roles.includes(StaffRole.admin)) {
+    if (!staffHasAdminScope(staff.roles) && !staff.roles.includes(StaffRole.reviewer)) throw forbidden();
+    if (!staffHasAdminScope(staff.roles)) {
       const slot = await this.prisma.requestStaffAssignment.findFirst({
         where: { requestId, assignedStaffId: userId, assignmentType: RequestStaffAssignmentType.reviewer },
       });

@@ -143,7 +143,7 @@ describe('Unified Requests, Review & Forwarding E2E', () => {
     const r1 = await fakePrisma.request.create({
       data: {
         requestNumber: 'REQ-2026-DRAFT',
-        requestType: 'partnership',
+        requestType: 'farmPurchaseProposal',
         status: 'draft',
         createdBy: requesterUser.id,
         farmId,
@@ -156,7 +156,7 @@ describe('Unified Requests, Review & Forwarding E2E', () => {
     const r2 = await fakePrisma.request.create({
       data: {
         requestNumber: 'REQ-2026-REVIEW',
-        requestType: 'partnership',
+        requestType: 'farmPurchaseProposal',
         status: 'underFarmExitReview',
         createdBy: requesterUser.id,
         farmId,
@@ -165,6 +165,18 @@ describe('Unified Requests, Review & Forwarding E2E', () => {
       },
     });
     underReviewRequestId = r2.id as bigint;
+
+    await fakePrisma.request.create({
+      data: {
+        requestNumber: 'REQ-2026-FD-INBOX',
+        requestType: 'farmDetails',
+        status: 'underFarmExitReview',
+        createdBy: requesterUser.id,
+        farmId,
+        visibility: 'private',
+        submittedAt: new Date(),
+      },
+    });
 
     // Create document on underReviewRequestId
     const doc = await fakePrisma.requestDocument.create({
@@ -329,7 +341,7 @@ describe('Unified Requests, Review & Forwarding E2E', () => {
       const res = json(
         await as(adminUser)
           .get('/api/v1/staff/requests')
-          .query({ requestType: 'partnership', status: 'underFarmExitReview' })
+          .query({ requestType: 'farmDetails', status: 'underFarmExitReview' })
           .expect(200),
       );
       expect((res.items as Json[]).length).toBeGreaterThanOrEqual(1);
@@ -353,7 +365,7 @@ describe('Unified Requests, Review & Forwarding E2E', () => {
       const draft = await fakePrisma.request.create({
         data: {
           requestNumber: 'REQ-TEST-DRAFT-2',
-          requestType: 'partnership',
+          requestType: 'farmPurchaseProposal',
           status: 'draft',
           createdBy: requesterUser.id,
         },

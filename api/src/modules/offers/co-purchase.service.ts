@@ -8,6 +8,7 @@ import {
   RequestVisibility,
   StaffRole,
 } from '../../generated/prisma/enums';
+import { staffHasAdminScope } from '../authorization/staff-permissions';
 import { PrismaService } from '../../prisma/prisma.service';
 import { forbidden } from '../authorization/authorization.errors';
 import { STAFF_STATUS_ACTIVE, StaffAuthorizationService } from '../authorization/staff-authorization.service';
@@ -233,7 +234,7 @@ export class CoPurchaseService {
   private async kind(userId: bigint): Promise<'admin' | 'staff'> {
     const staff = await this.staffAuth.loadContext(userId);
     if (!staff) throw forbidden();
-    if (staff.roles.includes(StaffRole.admin)) return 'admin';
+    if (staffHasAdminScope(staff.roles)) return 'admin';
     if (staff.roles.includes(StaffRole.caseAgent)) return 'staff';
     throw forbidden();
   }

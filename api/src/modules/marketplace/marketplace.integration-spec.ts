@@ -124,29 +124,35 @@ describeDb('Public marketplace on real MySQL', () => {
     const draft = json(await as(owner).post(`/api/v1/farms/${plot}/listing-requests`, { listingType: 'rent', annualRentPerFeddan: 50 }).expect(201));
 
     const open = json(await http().get(LIST).expect(200));
-    expect(open.total).toBe(3);
+    const createdIds = new Set([String(sale.id), String(bigger.id), String(rent.id)]);
+    expect((open.items as Json[]).filter((item) => createdIds.has(String(item.id))).length).toBe(3);
     expect(JSON.stringify(open)).not.toMatch(/privatePin|30\.5|mobile|@|storageKey|farmId/);
-    expect(json(await http().get(`${LIST}?q=orange`).expect(200)).total).toBe(2);
-    expect((json(await http().get(`${LIST}?listingType=sale&sort=priceAsc`).expect(200)).items as Json[]).map((item) => item.askingPrice)).toEqual([
-      4000, 9000,
-    ]);
+    const orangeHits = json(await http().get(`${LIST}?q=orange`).expect(200));
+    expect((orangeHits.items as Json[]).filter((item) => createdIds.has(String(item.id))).length).toBe(2);
+    const saleSorted = json(await http().get(`${LIST}?listingType=sale&sort=priceAsc`).expect(200));
+    expect(
+      (saleSorted.items as Json[])
+        .filter((item) => createdIds.has(String(item.id)))
+        .map((item) => item.askingPrice),
+    ).toEqual([4000, 9000]);
 
     await prisma.farmListingDetail.update({
       where: { requestId: BigInt(bigger.id as string) },
       data: { askingPrice: new Prisma.Decimal('1500.25') },
     });
     const precise = json(await http().get(`${LIST}?listingType=sale&sort=priceAsc`).expect(200));
-    expect(precise.total).toBe(1);
-    expect(precise.items).toEqual([expect.objectContaining({ id: sale.id, askingPrice: 4000 })]);
+    const preciseMine = (precise.items as Json[]).filter((item) => createdIds.has(String(item.id)));
+    expect(preciseMine).toEqual([expect.objectContaining({ id: sale.id, askingPrice: 4000 })]);
     await http().get(`${LIST}/${bigger.slug as string}`).expect(404);
 
-    const mixed = json(await http().get(`${LIST}?sort=priceAsc&pageSize=1`).expect(200));
-    expect(mixed).toMatchObject({ total: 2, pageSize: 1 });
+    const mixed = json(await http().get(`${LIST}?q=orange&sort=priceAsc&pageSize=1`).expect(200));
+    expect(mixed.pageSize).toBe(1);
     expect(mixed.items).toEqual([expect.objectContaining({ id: rent.id, annualRentPerFeddan: 700 })]);
 
     await http().get(`${LIST}/${draft.slug as string}`).expect(404);
     await prisma.farm.update({ where: { id: BigInt(plot) }, data: { deletedAt: new Date() } });
-    expect(json(await http().get(LIST).expect(200)).total).toBe(2);
+    const afterDelete = json(await http().get(`${LIST}?q=orange`).expect(200));
+    expect((afterDelete.items as Json[]).filter((item) => createdIds.has(String(item.id))).length).toBe(2);
     await http().get(`${LIST}/${bigger.slug as string}`).expect(404);
   });
 

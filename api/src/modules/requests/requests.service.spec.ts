@@ -208,8 +208,18 @@ describe('RequestsService', () => {
       await expect(service.submitDraft(10n, 100n)).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    it('submits a generic draft request for review', async () => {
+    it('rejects generic submit for specialized partnership requests', async () => {
       prisma.request.findFirst.mockResolvedValue({ ...baseRequest, requestType: RequestType.partnership });
+      await expect(service.submitDraft(10n, 100n)).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects generic submit for specialized farm details requests', async () => {
+      prisma.request.findFirst.mockResolvedValue({ ...baseRequest, requestType: RequestType.farmDetails });
+      await expect(service.submitDraft(10n, 100n)).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('submits a generic draft request for review', async () => {
+      prisma.request.findFirst.mockResolvedValue({ ...baseRequest, requestType: RequestType.farmPurchaseProposal });
       const res = await service.submitDraft(10n, 100n);
       expect(res.status).toBe('submitted');
       expect(prisma.requestStatusHistory.create).toHaveBeenCalledTimes(1);
@@ -335,7 +345,7 @@ describe('RequestsService', () => {
   });
 
   describe('Review Decisions', () => {
-    const genericRequest = { ...baseRequest, requestType: RequestType.partnership };
+    const genericRequest = { ...baseRequest, requestType: RequestType.farmPurchaseProposal };
 
     it('records review approval and transitions request to approved', async () => {
       staffAuth.loadContext.mockResolvedValue(reviewerStaff);

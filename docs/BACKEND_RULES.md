@@ -65,7 +65,9 @@ api/test/farm-listings.e2e-spec.ts    HTTP tests
 - All input is validated by the global `ValidationPipe` (`whitelist`, `forbidNonWhitelisted`, `transform`); every
   request body, query and param has a DTO.
 - CORS allows only `CORS_ORIGINS`. Swagger is disabled in production unless `SWAGGER_ENABLED=true`.
-- Authentication (later phase): mobile number + OTP only, no email/password. Authorisation is checked in the
+- Authentication: website users sign in with mobile + OTP (`auth_audience = website`). Dashboard staff sign in with
+  email + password via `admin_credentials` (`auth_audience = dashboard`). One `users` row per person; farm capabilities
+  come from `farm_relationships`, platform staff from `staff_memberships` (not a global `users.role`). Authorisation is checked in the
   service layer for every resource (owner, applicant, FarmExit staff), not only by route guards.
 - Refresh tokens rotate on every use; rotated secrets are kept only as SHA-256 hashes (`user_session_tokens`). Replaying a consumed secret revokes its session. **Narrow, deliberate exception:** a duplicate of the _most recently_ consumed secret arriving within 3 seconds (`REFRESH_DUPLICATE_GRACE_MS`) is a benign client race (retry or parallel refresh): it gets 401 with no tokens and the session is NOT revoked, so the winning request keeps working. The tradeoff: a thief replaying a just-rotated secret within that window is also only rejected, never given tokens, and the next real replay (older token, or after 3 s) still revokes. Unknown secrets never revoke (session ids are guessable).
 - Responses expose only the fields a caller may see (explicit response DTOs). Never leak stack traces, SQL or

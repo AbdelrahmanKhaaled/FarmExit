@@ -22,8 +22,11 @@ const PUBLIC = new Set([
   'POST auth/otp/request',
   'POST auth/otp/verify',
   'POST auth/refresh',
+  'POST admin-auth/login',
+  'POST admin-auth/refresh',
 ]);
 const SIGNED_IN_ONLY = new Set(['POST auth/logout', 'GET auth/me', 'POST auth/profile/complete', 'PATCH auth/profile']);
+const DASHBOARD_AUTH = new Set(['POST admin-auth/logout', 'GET admin-auth/me']);
 
 type Route = { key: string; guards: unknown[]; staffMetadata: boolean };
 
@@ -84,7 +87,7 @@ describe('Route protection inventory', () => {
 
   it('requires a completed profile on every route that is not sign-in/onboarding', () => {
     const unprotected = routes
-      .filter((r) => !PUBLIC.has(r.key) && !SIGNED_IN_ONLY.has(r.key))
+      .filter((r) => !PUBLIC.has(r.key) && !SIGNED_IN_ONLY.has(r.key) && !DASHBOARD_AUTH.has(r.key))
       .filter((r) => !r.guards.includes(CompletedProfileGuard))
       .map((r) => r.key);
     expect(unprotected).toEqual([]);

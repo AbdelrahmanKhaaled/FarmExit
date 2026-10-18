@@ -16,7 +16,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { FarmAccessService } from '../authorization/farm-access.service';
 import { StaffAuthorizationService } from '../authorization/staff-authorization.service';
-import { StaffPermission } from '../authorization/staff-permissions';
+import { staffHasAdminScope, StaffPermission } from '../authorization/staff-permissions';
 import type { StaffContext } from '../authorization/staff.types';
 import {
   FORWARDING_RECIPIENT_ROLES,
@@ -263,7 +263,7 @@ export class RequestsService {
     }
 
     // Role scoping
-    const isAdmin = staff.roles.includes(StaffRole.admin);
+    const isAdmin = staffHasAdminScope(staff.roles);
     if (!isAdmin) {
       if (query.assignedStaffId && query.assignedStaffId !== staffUserId.toString()) {
         throw new ForbiddenException('Non-admin staff may only filter requests assigned to themselves');
@@ -424,7 +424,7 @@ export class RequestsService {
     }
 
     // Role check: Admin or assigned reviewer
-    if (!staff.roles.includes(StaffRole.admin)) {
+    if (!staffHasAdminScope(staff.roles)) {
       if (!staff.roles.includes(StaffRole.reviewer)) {
         throw new ForbiddenException('Reviewers only');
       }
@@ -517,7 +517,7 @@ export class RequestsService {
     }
 
     // Role check: Admin or assigned case agent
-    if (!staff.roles.includes(StaffRole.admin)) {
+    if (!staffHasAdminScope(staff.roles)) {
       if (!staff.roles.includes(StaffRole.caseAgent)) {
         throw new ForbiddenException('Case agents only');
       }
@@ -731,7 +731,7 @@ export class RequestsService {
     }
 
     // Validate valid transitions
-    if (FINAL_STATUSES.has(request.status) && !staff.roles.includes(StaffRole.admin)) {
+    if (FINAL_STATUSES.has(request.status) && !staffHasAdminScope(staff.roles)) {
       throw new ConflictException(`Cannot transition request from final status '${request.status}'`);
     }
 
@@ -839,7 +839,7 @@ export class RequestsService {
   }
 
   private async assertStaffCanAccessRequest(staff: StaffContext, requestId: bigint): Promise<void> {
-    if (staff.roles.includes(StaffRole.admin)) return;
+    if (staffHasAdminScope(staff.roles)) return;
 
     const assignment = await this.prisma.requestStaffAssignment.findFirst({
       where: {

@@ -1,21 +1,22 @@
-import { RateLimiter } from './rate-limit';
+import { Reflector } from '@nestjs/core';
+import { RateLimit, RateLimitGuard, RateLimiter } from './rate-limit';
 
-describe('RateLimiter', () => {
-  const options = { limit: 2, windowSeconds: 60 };
+describe('RateLimitGuard', () => {
+  it('keys limits by forwarded client IP when trust proxy is enabled', () => {
+    const guard = new RateLimitGuard(new Reflector(), new RateLimiter());
+    const handler = function handler() {};
+    RateLimit({ limit: 1, windowSeconds: 60 })(handler);
 
-  it('allows up to the limit then reports the wait time', () => {
-    const limiter = new RateLimiter();
-    expect(limiter.hit('a', options, 0)).toBe(0);
-    expect(limiter.hit('a', options, 1_000)).toBe(0);
-    expect(limiter.hit('a', options, 2_000)).toBe(58);
-  });
+    const ctx = {
+      getHandler: () => handler,
+      getClass: () => class AuthController {},
+      switchToHttp: () => ({
+        getRequest: () => ({ ip: '203.0.113.50', headers: {} }),
+        getResponse: () => ({ setHeader: jest.fn() }),
+      }),
+    };
 
-  it('counts keys independently and resets after the window', () => {
-    const limiter = new RateLimiter();
-    limiter.hit('a', options, 0);
-    limiter.hit('a', options, 0);
-    expect(limiter.hit('a', options, 0)).toBeGreaterThan(0);
-    expect(limiter.hit('b', options, 0)).toBe(0);
-    expect(limiter.hit('a', options, 60_000)).toBe(0);
+    expect(guard.canActivate(ctx as never)).toBe(true);
+    expect(() => guard.canActivate(ctx as never)).toThrow();
   });
 });

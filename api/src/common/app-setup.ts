@@ -14,6 +14,10 @@ export const SWAGGER_PATH = `${API_PREFIX}/docs`;
 export function configureApp(app: INestApplication): void {
   const config = app.get<ConfigService<Env, true>>(ConfigService);
 
+  const express = app.getHttpAdapter().getInstance() as { set?: (key: string, value: unknown) => void };
+  express.set?.('trust proxy', 1);
+
+  app.enableShutdownHooks();
   app.setGlobalPrefix(API_PREFIX);
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: DEFAULT_API_VERSION });
 

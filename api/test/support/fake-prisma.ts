@@ -133,6 +133,15 @@ export class FakeTable {
     return this.findFirst(args);
   }
 
+  findUniqueOrThrow(args: Args & { include?: Record<string, boolean> }): Promise<Row> {
+    return this.findUnique(args).then((row) => {
+      if (!row) {
+        return Promise.reject(Object.assign(new Error('No record found for query'), { code: 'P2025' }));
+      }
+      return row;
+    });
+  }
+
   findMany(args: Args = {}): Promise<Row[]> {
     const sorted = this.sorted(
       this.rows.filter((r) => matches(r, args.where)),
@@ -144,6 +153,34 @@ export class FakeTable {
   }
   count(args: Args = {}): Promise<number> {
     return Promise.resolve(this.rows.filter((r) => matches(r, args.where)).length);
+  }
+
+  groupBy({
+    by,
+    where,
+  }: {
+    by: string[];
+    where?: Where;
+    _count?: { _all?: boolean };
+  }): Promise<Row[]> {
+    const filtered = this.rows.filter((r) => matches(r, where));
+    const map = new Map<string, { row: Row; count: number }>();
+    for (const r of filtered) {
+      const key = by.map((b) => String(r[b])).join('\0');
+      const existing = map.get(key);
+      if (existing) existing.count += 1;
+      else {
+        const groupRow: Row = { _count: { _all: 0 } };
+        for (const b of by) groupRow[b] = r[b];
+        map.set(key, { row: groupRow, count: 1 });
+      }
+    }
+    return Promise.resolve(
+      [...map.values()].map(({ row, count }) => {
+        row._count = { _all: count };
+        return { ...row };
+      }),
+    );
   }
 
   updateMany({ where, data }: { where?: Where; data: Row }): Promise<{ count: number }> {
@@ -277,6 +314,102 @@ export function createFakePrisma() {
     }),
     ['requestId', 'slug'],
   );
+  const partnershipDetail = new FakeTable(() => ({
+    objective: null,
+    description: null,
+    acceptedPartnerTypes: null,
+    partnerBackground: null,
+    lookingFor: null,
+    contributionSought: null,
+    contributionDetails: null,
+    currentTeam: null,
+    operations: null,
+    salesChannel: null,
+    extraInformation: null,
+    ownerDocumentsRequired: null,
+  }));
+  const communicationCase = new FakeTable(() => ({
+    status: 'open',
+    createdAt: new Date(),
+    closedAt: null,
+  }));
+  const conversation = new FakeTable(
+    () => ({
+      status: 'open',
+      createdAt: new Date(),
+      closedAt: null,
+    }),
+    [],
+    [['caseId', 'externalUserId']],
+  );
+  const message = new FakeTable(() => ({
+    body: null,
+    sentAt: new Date(),
+    editedAt: null,
+    deletedAt: null,
+  }));
+  const messageRelay = new FakeTable(() => ({
+    relayNote: null,
+    relayedAt: new Date(),
+  }));
+  const farmManagementDetail = new FakeTable(() => ({
+    professionalNeed: 'farmManager',
+    managementTypes: null,
+    term: null,
+    currentTeam: null,
+    currentSituation: null,
+    challenges: null,
+    goals: null,
+    outcomes: null,
+    responsibilities: null,
+    experienceLevel: null,
+    cropExpertise: null,
+    onSitePresence: null,
+    teamLeadership: null,
+    resourcesAndFacilities: null,
+    additionalInformation: null,
+  }));
+  const professionalVerificationDetail = new FakeTable(() => ({
+    professionalCapabilityId: 1n,
+    profileSnapshot: {},
+    verificationSummary: null,
+    createdAt: new Date(),
+  }));
+  const professionalProfile = new FakeTable(
+    () => ({
+      headline: null,
+      bio: null,
+      baseGovernorate: null,
+      yearsExperience: null,
+      experienceSummary: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+    ['userId'],
+  );
+  const professionalCapability = new FakeTable(() => ({
+    professionalProfileId: 1n,
+    professionalType: 'farmManager',
+    verificationStatus: 'verificationRequired',
+    verifiedAt: null,
+    notApprovedReason: null,
+  }));
+  const requestApplicationDetail = new FakeTable(() => ({
+    applicantKind: null,
+    professionalCapabilityId: null,
+    applicationMessage: null,
+    whyGoodFit: null,
+    relevantExperience: null,
+    approach: null,
+    workingStyle: null,
+    additionalInformation: null,
+    companyName: null,
+    companyRegistrationNumber: null,
+    companyContactName: null,
+    companyContactRole: null,
+    companySector: null,
+    proposalDetails: null,
+  }));
   const requestStatusHistory = new FakeTable(() => ({ fromStatus: null, reason: null, createdAt: new Date() }));
   const requestReview = new FakeTable(() => ({ comment: null, createdAt: new Date() }));
   const requestStaffAssignment = new FakeTable(
@@ -457,6 +590,19 @@ export function createFakePrisma() {
   }));
   const userSessionToken = new FakeTable(() => ({ consumedAt: new Date() }));
   const staffMembership = new FakeTable(() => ({ status: 'active', createdAt: new Date() }));
+  const adminCredential = new FakeTable(
+    () => ({
+      isActive: true,
+      mustChangePassword: true,
+      passwordChangedAt: null,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      lastLoginAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+    ['userId', 'email'],
+  );
   const farmRelationship = new FakeTable(() => ({
     relationshipStatus: 'active',
     startsAt: null,
@@ -464,7 +610,13 @@ export function createFakePrisma() {
     createdAt: new Date(),
   }));
   const otpVerification = new FakeTable(() => ({ userId: null, attempts: 0, consumedAt: null }));
-  const sessionTable = new FakeTable(() => ({ deviceName: null, userAgent: null, ipAddress: null, revokedAt: null }));
+  const sessionTable = new FakeTable(() => ({
+    authAudience: 'website',
+    deviceName: null,
+    userAgent: null,
+    ipAddress: null,
+    revokedAt: null,
+  }));
 
   const userSession = Object.assign(sessionTable, {
     // `include: { user: true }` joins the owning user.
@@ -513,11 +665,26 @@ export function createFakePrisma() {
     return Promise.resolve(1);
   };
 
+  const credentialFindUnique = adminCredential.findUnique.bind(adminCredential);
+  adminCredential.findUnique = async (args: Args & { include?: Record<string, boolean> }) => {
+    const row = await credentialFindUnique(args);
+    if (!row || !args.include?.user) return row;
+    const owner = await user.findFirst({ where: { id: row.userId } });
+    if (!owner) return { ...row, user: null };
+    const includeUser = args.include.user as { include?: { staffMemberships?: boolean } };
+    if (includeUser.include?.staffMemberships) {
+      const memberships = staffMembership.rows.filter((m) => m.userId === owner.id);
+      return { ...row, user: { ...owner, staffMemberships: memberships } };
+    }
+    return { ...row, user: owner };
+  };
+
   const tables = {
     user,
     otpVerification,
     userSession,
     staffMembership,
+    adminCredential,
     farmRelationship,
     userSessionToken,
     farm,
@@ -527,6 +694,16 @@ export function createFakePrisma() {
     facilityMedia,
     request,
     farmListingDetail,
+    partnershipDetail,
+    farmManagementDetail,
+    professionalProfile,
+    professionalCapability,
+    professionalVerificationDetail,
+    requestApplicationDetail,
+    communicationCase,
+    conversation,
+    message,
+    messageRelay,
     requestStatusHistory,
     requestReview,
     requestStaffAssignment,
@@ -568,6 +745,10 @@ export function createFakePrisma() {
       );
     }
     return Promise.reject(new Error('Unsupported raw SQL in fake'));
+  };
+
+  const $queryRawUnsafe = (_sql: string, ..._values: unknown[]): Promise<unknown[]> => {
+    return Promise.resolve([]);
   };
 
   const $transaction = async <T>(fn: (tx: unknown) => Promise<T>): Promise<T> => {
@@ -675,11 +856,100 @@ export function createFakePrisma() {
   request.count = (args) =>
     relational(args) ? Promise.resolve(request.rows.filter((row) => matchRequest(row, args?.where)).length) : count(args);
 
+  const attachMessageRow = (row: Row | null, include?: Record<string, boolean>): Row | null => {
+    if (!row) return null;
+    const out = { ...row };
+    if (include?.conversation) {
+      out.conversation = conversation.rows.find((item) => item.id === row.conversationId) ?? null;
+    }
+    if (include?.relayedAs) {
+      out.relayedAs = messageRelay.rows.find((item) => item.relayedMessageId === row.id) ?? null;
+    }
+    return out;
+  };
+
+  type IncludeArgs = Args & { include?: Record<string, boolean> };
+
+  const messageFindUnique = message.findUnique.bind(message);
+  const messageFindFirst = message.findFirst.bind(message);
+  const messageFindMany = message.findMany.bind(message);
+  message.findUnique = (args: IncludeArgs) =>
+    messageFindUnique(args).then((row) => attachMessageRow(row, args.include));
+  message.findFirst = (args: IncludeArgs) =>
+    messageFindFirst(args).then((row) => attachMessageRow(row, args.include));
+  message.findMany = (args: IncludeArgs) =>
+    messageFindMany(args).then((rows) => rows.map((row) => attachMessageRow(row, args.include) as Row));
+
+  const attachProfessionalProfile = (row: Row | null, include?: Record<string, boolean>): Row | null => {
+    if (!row) return null;
+    const out = { ...row };
+    if (include?.capabilities) {
+      const caps = professionalCapability.rows
+        .filter((item) => item.professionalProfileId === row.id)
+        .map((item) => ({ ...item, expertise: [], serviceAreas: [] }))
+        .sort((a, b) => String((a as Row).professionalType).localeCompare(String((b as Row).professionalType)));
+      out.capabilities = caps;
+    }
+    return out;
+  };
+
+  const profileFindUnique = professionalProfile.findUnique.bind(professionalProfile);
+  const profileFindUniqueOrThrow = professionalProfile.findUniqueOrThrow.bind(professionalProfile);
+  professionalProfile.findUnique = (args: IncludeArgs) =>
+    profileFindUnique(args).then((row) => attachProfessionalProfile(row, args.include));
+  professionalProfile.findUniqueOrThrow = (args: IncludeArgs) =>
+    profileFindUniqueOrThrow(args).then((row) => attachProfessionalProfile(row, args.include) as Row);
+
+  const attachCapabilityRow = (row: Row | null, include?: Record<string, boolean>): Row | null => {
+    if (!row) return null;
+    const out = { ...row };
+    if (include?.profile) {
+      out.profile = professionalProfile.rows.find((item) => item.id === row.professionalProfileId) ?? null;
+    }
+    if (include?.expertise) out.expertise = [];
+    if (include?.serviceAreas) out.serviceAreas = [];
+    return out;
+  };
+
+  const capabilityMatchesWhere = (row: Row, where: Where = {}): boolean => {
+    const profileFilter = where.profile;
+    const rest = { ...where };
+    delete rest.profile;
+    if (!matches(row, rest)) return false;
+    if (profileFilter !== undefined) {
+      const profileRow = professionalProfile.rows.find((item) => item.id === row.professionalProfileId);
+      if (!profileRow || !matches(profileRow, profileFilter as Where)) return false;
+    }
+    return true;
+  };
+
+  const capabilityFindUnique = professionalCapability.findUnique.bind(professionalCapability);
+  professionalCapability.findFirst = (args: IncludeArgs = {}) => {
+    const found =
+      professionalCapability.rows.filter((row) => capabilityMatchesWhere(row, args.where))[0] ?? null;
+    return Promise.resolve(attachCapabilityRow(found ? { ...found } : null, args.include));
+  };
+  professionalCapability.findUnique = (args: IncludeArgs) =>
+    capabilityFindUnique(args).then((row) => attachCapabilityRow(row, args.include));
+
+  const verificationDetailFindUnique = professionalVerificationDetail.findUnique.bind(professionalVerificationDetail);
+  professionalVerificationDetail.findUnique = (args: IncludeArgs) =>
+    verificationDetailFindUnique(args).then((row) => {
+      if (!row) return null;
+      const out = { ...row };
+      if (args.include?.capability) {
+        out.capability =
+          professionalCapability.rows.find((item) => item.id === row.professionalCapabilityId) ?? null;
+      }
+      return out;
+    });
+
   const api = {
     user,
     otpVerification,
     userSession,
     staffMembership,
+    adminCredential,
     farmRelationship,
     userSessionToken,
     farm,
@@ -689,6 +959,16 @@ export function createFakePrisma() {
     facilityMedia,
     request,
     farmListingDetail,
+    partnershipDetail,
+    farmManagementDetail,
+    professionalProfile,
+    professionalCapability,
+    professionalVerificationDetail,
+    requestApplicationDetail,
+    communicationCase,
+    conversation,
+    message,
+    messageRelay,
     requestStatusHistory,
     requestReview,
     requestStaffAssignment,
@@ -707,6 +987,7 @@ export function createFakePrisma() {
     $transaction,
     $executeRaw,
     $queryRaw,
+    $queryRawUnsafe,
     $disconnect: () => Promise.resolve(),
   };
   return api;

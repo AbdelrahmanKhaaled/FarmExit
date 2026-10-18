@@ -5,6 +5,7 @@ import { AccessTokenGuard } from '../auth/access-token.guard';
 import { CompletedProfileGuard } from '../auth/completed-profile.guard';
 import type { StaffPermission } from './staff-permissions';
 import { PERMISSIONS_KEY, ROLES_KEY } from './staff.metadata';
+import { DashboardAudienceGuard } from '../admin-auth/dashboard-audience.guard';
 import { StaffGuard, type StaffRequest } from './staff.guard';
 import type { StaffContext } from './staff.types';
 
@@ -15,6 +16,15 @@ import type { StaffContext } from './staff.types';
 export const StaffOnly = (): ClassDecorator & MethodDecorator =>
   applyDecorators(
     UseGuards(AccessTokenGuard, CompletedProfileGuard, StaffGuard),
+    ApiBearerAuth(),
+    ApiUnauthorizedResponse(),
+    ApiForbiddenResponse({ description: 'Not active FarmExit staff, or missing the required role/permission' }),
+  );
+
+/** Active staff via a dashboard-authenticated session (email/password audience). */
+export const StaffDashboardOnly = (): ClassDecorator & MethodDecorator =>
+  applyDecorators(
+    UseGuards(AccessTokenGuard, CompletedProfileGuard, DashboardAudienceGuard, StaffGuard),
     ApiBearerAuth(),
     ApiUnauthorizedResponse(),
     ApiForbiddenResponse({ description: 'Not active FarmExit staff, or missing the required role/permission' }),

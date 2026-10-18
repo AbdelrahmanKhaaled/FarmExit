@@ -1,0 +1,12 @@
+{
+  "brandName": "FarmExit",
+  "language": {
+    "switchTo": "العربية",
+    "switchLabel": "Switch to Arabic"
+  },
+  "actions": {
+    "close": "Close",
+    "back": "Back",
+    "removeFilter": "Remove filter: {label}"
+  }
+}

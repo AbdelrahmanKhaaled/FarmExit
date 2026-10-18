@@ -1,6 +1,8 @@
 # FarmExit Web
 
-The FarmExit website: Next.js App Router, TypeScript (strict), Tailwind CSS v4 and next-intl.
+The **public** FarmExit website (marketplace, marketing, user-facing flows). The **admin dashboard** is a separate app in [`../dashboard/`](../dashboard/README.md).
+
+Next.js App Router, TypeScript (strict), Tailwind CSS v4 and next-intl.
 Phase 0.1 is the foundation; Phase 1 adds the shared design-system components; Phase 2 builds the Homepage
 (`/en`, `/ar`); Phase 3 the Farm Marketplace (`/[locale]/farms`); Phase 4 Farm Details (`/[locale]/farms/[slug]`)
 with the FarmExit Score. The other feature pages come later.

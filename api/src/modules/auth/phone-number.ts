@@ -33,3 +33,8 @@ export function normalizeMobile(input: string): string | null {
   if (e164.startsWith('+20')) return EGYPT_MOBILE.test(e164) ? e164 : null;
   return E164.test(e164) ? e164 : null;
 }
+
+/** True when a stored users.mobile_e164 value is a valid Egyptian mobile in E.164 form. */
+export function isValidStoredEgyptianMobile(mobileE164: string): boolean {
+  return EGYPT_MOBILE.test(mobileE164);
+}

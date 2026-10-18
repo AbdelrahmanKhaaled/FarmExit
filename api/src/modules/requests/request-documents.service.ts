@@ -3,10 +3,11 @@ import { StreamableFile } from '@nestjs/common';
 import type { RequestDocument } from '../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StaffAuthorizationService } from '../authorization/staff-authorization.service';
-import { StaffPermission } from '../authorization/staff-permissions';
+import { staffHasAdminScope, StaffPermission } from '../authorization/staff-permissions';
+import type { StaffContext } from '../authorization/staff.types';
 import { isRequestDocumentStorageKey, RequestDocumentFilesService } from '../media/request-document-files.service';
 import type { UploadedRequestDocumentFile } from '../media/request-document-upload.validator';
-import { OWNER_EDITABLE_STATUSES } from './request-workflow.policy';
+import { OWNER_EDITABLE_STATUSES, staffInboxRequestTypes } from './request-workflow.policy';
 
 const notFound = (): NotFoundException => new NotFoundException('Request not found');
 const docNotFound = (): NotFoundException => new NotFoundException('Document not found');
@@ -110,7 +111,37 @@ export class RequestDocumentsService {
 
     if (request.createdBy === userId) return doc;
     const staff = await this.staffAuth.loadContext(userId);
-    if (staff?.permissions.includes(StaffPermission.RequestsRead)) return doc;
+    if (staff?.permissions.includes(StaffPermission.RequestsRead)) {
+      await this.assertStaffRequestAccess(staff, requestId);
+      return doc;
+    }
+    throw notFound();
+  }
+
+  private async assertStaffRequestAccess(staff: StaffContext, requestId: bigint): Promise<void> {
+    if (staffHasAdminScope(staff.roles)) return;
+
+    const assignment = await this.prisma.requestStaffAssignment.findFirst({
+      where: { requestId, assignedStaffId: staff.userId },
+    });
+    if (assignment) return;
+
+    const allAssignments = await this.prisma.requestStaffAssignment.findMany({
+      where: { requestId },
+      select: { id: true },
+    });
+    if (allAssignments.length === 0) {
+      const request = await this.prisma.request.findUnique({
+        where: { id: requestId },
+        select: { requestType: true },
+      });
+      if (!request) throw notFound();
+      const allowedTypes = staffInboxRequestTypes(staff);
+      if (allowedTypes !== null && !allowedTypes.includes(request.requestType)) {
+        throw notFound();
+      }
+      return;
+    }
     throw notFound();
   }
 }

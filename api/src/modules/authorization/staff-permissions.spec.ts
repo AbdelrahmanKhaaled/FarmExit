@@ -2,13 +2,14 @@ import { StaffRole } from '../../generated/prisma/enums';
 import { permissionsForRoles, STAFF_ROLE_PERMISSIONS, StaffPermission } from './staff-permissions';
 
 describe('staff permission matrix', () => {
-  it('covers exactly the approved staff roles (admin, caseAgent, reviewer)', () => {
+  it('covers exactly the approved staff roles (superAdmin, admin, caseAgent, reviewer)', () => {
     expect(Object.keys(STAFF_ROLE_PERMISSIONS).sort()).toEqual(Object.values(StaffRole).sort());
-    expect(Object.values(StaffRole).sort()).toEqual(['admin', 'caseAgent', 'reviewer']);
+    expect(Object.values(StaffRole).sort()).toEqual(['admin', 'caseAgent', 'reviewer', 'superAdmin']);
   });
 
-  it('gives admin every permission', () => {
+  it('gives admin and superAdmin every permission', () => {
     expect(permissionsForRoles(['admin'])).toEqual(Object.values(StaffPermission).sort());
+    expect(permissionsForRoles(['superAdmin'])).toEqual(Object.values(StaffPermission).sort());
   });
 
   it('keeps case agents and reviewers on their own duties', () => {

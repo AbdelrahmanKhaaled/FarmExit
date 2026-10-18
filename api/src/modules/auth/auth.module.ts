@@ -29,6 +29,6 @@ import { TokenService } from './token.service';
     },
   ],
   // Other feature modules protect their routes with AccessTokenGuard (it only needs TokenService and PrismaService).
-  exports: [AccessTokenGuard, CompletedProfileGuard, TokenService],
+  exports: [AccessTokenGuard, CompletedProfileGuard, TokenService, AuthService, RateLimitGuard, RateLimiter],
 })
 export class AuthModule {}

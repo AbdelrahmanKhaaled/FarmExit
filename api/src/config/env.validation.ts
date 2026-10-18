@@ -13,6 +13,7 @@ import {
   MinLength,
   validateSync,
 } from 'class-validator';
+import { assertDevFixedOtpEnvironment } from '../modules/auth/dev-fixed-otp';
 
 export enum NodeEnv {
   Development = 'development',
@@ -127,7 +128,20 @@ export class EnvironmentVariables {
   @Transform(toList)
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
-  CORS_ORIGINS: string[] = ['http://localhost:3000'];
+  CORS_ORIGINS: string[] = ['http://localhost:3000', 'http://localhost:3002'];
+
+  /** Development-only fixed OTP for allowlisted mobiles (never in production). */
+  @Transform(toBoolean)
+  @IsBoolean()
+  DEV_FIXED_OTP_ENABLED = false;
+
+  @IsOptional()
+  @IsString()
+  DEV_FIXED_OTP_CODE = '';
+
+  @Transform(toList)
+  @IsString({ each: true })
+  DEV_FIXED_OTP_ALLOWED_MOBILES: string[] = [];
 
   /** Swagger UI. Unset: enabled outside production, disabled in production. */
   @IsOptional()
@@ -150,5 +164,6 @@ export function validateEnv(config: Record<string, unknown>): Env {
       'Invalid environment configuration:\n  - OTP_HASH_SECRET: must be different from JWT_ACCESS_SECRET',
     );
   }
+  assertDevFixedOtpEnvironment(env);
   return { ...env, SWAGGER_ENABLED: env.SWAGGER_ENABLED ?? env.NODE_ENV !== NodeEnv.Production };
 }

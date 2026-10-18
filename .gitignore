@@ -53,3 +53,10 @@ Thumbs.db
 
 # Local uploaded media (private)
 api/storage/
+
+# Dev DB backups (fix-mobiles)
+api/backups/
+
+# Dashboard demo seed artifacts
+api/prisma/backups/
+api/prisma/.dashboard-demo-manifest.json

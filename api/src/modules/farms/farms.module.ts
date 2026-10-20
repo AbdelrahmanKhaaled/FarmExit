@@ -6,11 +6,19 @@ import { FarmMemberAccessService } from './farm-member-access.service';
 import { FarmSpecificationsService } from './farm-specifications.service';
 import { FarmsController } from './farms.controller';
 import { FarmsService } from './farms.service';
+import { PrivateLocationController } from './private-location.controller';
+import { PrivateLocationService } from './private-location.service';
 
 @Module({
   imports: [AuthorizationModule],
-  controllers: [FarmsController, FarmDetailsController],
-  providers: [FarmsService, FarmMemberAccessService, FarmSpecificationsService, FarmFacilitiesService],
+  controllers: [FarmsController, FarmDetailsController, PrivateLocationController],
+  providers: [
+    FarmsService,
+    FarmMemberAccessService,
+    FarmSpecificationsService,
+    FarmFacilitiesService,
+    PrivateLocationService,
+  ],
   exports: [FarmsService, FarmMemberAccessService],
 })
 export class FarmsModule {}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button, buttonClasses } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/Field';
@@ -38,6 +38,7 @@ export function FarmMediaPanel({
   const [progress, setProgress] = useState<string | null>(null);
   const [selected, setSelected] = useState(false);
   const [selectedName, setSelectedName] = useState('');
+  const fileInput = useRef<HTMLInputElement>(null);
   const [formTouched, setFormTouched] = useState(false);
   useEffect(() => {
     onPendingChange?.(selected);
@@ -149,7 +150,7 @@ export function FarmMediaPanel({
         {!loading && !error && items.length === 0 && (
           <p className="mt-12 type-body-caption text-text-secondary">{t('empty')}</p>
         )}
-        <ul className="mt-16 grid grid-cols-2 gap-12 sm:grid-cols-3">
+        <ul className="mt-16 grid grid-cols-2 gap-12 tablet:grid-cols-3">
           {items.map((m) => (
             <li key={m.id} className="flex flex-col gap-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -170,7 +171,23 @@ export function FarmMediaPanel({
             className="mt-24 flex flex-col gap-12 border-t border-border-subtle pt-24"
           >
             <h4 className="type-heading-h5">{t('uploadTitle')}</h4>
-            <label className="flex cursor-pointer flex-col items-center gap-16 rounded-card border border-dashed border-border-strong bg-bg-muted p-24 text-center">
+            <label
+              className="flex cursor-pointer flex-col items-center gap-16 rounded-card border border-dashed border-border-strong bg-bg-muted p-24 text-center"
+              onDragOver={(event) => {
+                if (canUpload && !uploading) event.preventDefault();
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
+                if (!canUpload || uploading || !fileInput.current || !event.dataTransfer.files[0]) return;
+                const selection = new DataTransfer();
+                selection.items.add(event.dataTransfer.files[0]);
+                fileInput.current.files = selection.files;
+                setSelected(true);
+                setSelectedName(event.dataTransfer.files[0].name);
+                setFormTouched(true);
+                setError(null);
+              }}
+            >
               <Icon name="gallery" size={32} className="text-text-brand" />
               <span className="type-label-large">{w('drop')}</span>
               <span className="type-body-caption text-text-muted">{w('hint')}</span>
@@ -183,6 +200,7 @@ export function FarmMediaPanel({
               )}
               <input
                 name="file"
+                ref={fileInput}
                 type="file"
                 onChange={(event) => {
                   setSelected(Boolean(event.target.files?.length));

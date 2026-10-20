@@ -13,8 +13,9 @@ test('management saves a single private draft, retains values, and submits only 
   await expect(page.locator('[data-phase7-task]').getByRole('alert')).toContainText('Choose a farm and professional');
   expect(calls).toHaveLength(0);
   await page.getByRole('radio', { name: 'Both', exact: true }).check();
-  await page.getByRole('checkbox', { name: 'Production supervision', exact: true }).check();
-  await page.locator('[name=term]').fill('One season');
+  await page.getByRole('radio', { name: 'Production supervision', exact: true }).check();
+  await page.locator('select[name=term]').selectOption('custom');
+  await page.locator('[name=customTerm]').fill('One season');
   await next(page);
   await page.locator('[name=currentSituation]').fill('Owner-stated irrigation needs');
   await page.locator('[name=goals]').fill('Organise irrigation\nImprove harvest planning');
@@ -42,15 +43,23 @@ test('professional profile, capability expertise, private upload and verificatio
   await next(page);
   await page.locator('[name=headline]').fill('Agricultural engineer');
   await page.locator('[name=yearsExperience]').fill('7');
-  await page.locator('[name=baseGovernorate]').fill('Beheira');
+  await page.locator('select[name=baseGovernorate]').selectOption('Beheira');
   await page.locator('[name=bio]').fill('User-stated introduction');
   await next(page);
   await page.getByRole('checkbox', { name: 'Fruits', exact: true }).check();
   await page.getByRole('checkbox', { name: 'Drip irrigation', exact: true }).check();
-  await page.locator('[name=serviceAreas]').fill('Beheira, Matrouh');
+  await page
+    .locator('details')
+    .filter({ has: page.locator('input[name=otherServiceArea]') })
+    .locator('summary')
+    .click();
+  await page.getByRole('checkbox', { name: 'Beheira', exact: true }).check();
+  await page.locator('[name=otherServiceArea]').fill('Matrouh');
+  await page.getByRole('button', { name: 'Add governorate', exact: true }).click();
   await next(page);
   await expect(page.getByTestId('request-documents-panel')).toBeVisible();
   const docs = page.getByTestId('request-documents-panel');
+  await docs.locator('summary').click();
   await docs
     .getByTestId('document-file')
     .setInputFiles({ name: 'private.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.7\nfixture') });
@@ -64,7 +73,7 @@ test('professional profile, capability expertise, private upload and verificatio
   expect(calls.filter((c) => c.url === '/api/professional-profile/capabilities' && c.method === 'POST')).toHaveLength(
     1,
   );
-  expect(calls.find((c) => c.url === '/api/professional-profile' && c.method === 'PUT')?.body).toMatchObject({
+  expect(calls.find((c) => c.url === '/api/professional-profile' && c.method === 'PUT' && (c.body as { yearsExperience?: number })?.yearsExperience === 7)?.body).toMatchObject({
     yearsExperience: 7,
     baseGovernorate: 'Beheira',
   });

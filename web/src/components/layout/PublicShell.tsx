@@ -1,17 +1,12 @@
 import type { ReactNode } from 'react';
 import { Footer } from './Footer';
 import { Navbar, type NavbarUser } from './Navbar';
+import { PublicNavbar } from './PublicNavbar';
 
-export function PublicShell({
-  children,
-  user,
-}: {
-  children: ReactNode;
-  user?: NavbarUser;
-}) {
+export function PublicShell({ children, user }: { children: ReactNode; user?: NavbarUser }) {
   return (
     <>
-      <Navbar user={user} />
+      {user ? <Navbar user={user} /> : <PublicNavbar />}
       {children}
       <Footer />
     </>

@@ -30,7 +30,8 @@ export function Logo({ variant = 'horizontal', tone = 'light', height, className
   const t = useTranslations('common');
   const size = VARIANTS[variant];
   const h = height ?? size.height;
-  const w = Math.round((size.width / size.height) * h * 100) / 100;
+  // HTMLImageElement.width is integer-valued; fractional width attributes trigger Next's sizing warning.
+  const w = Math.round((size.width / size.height) * h);
 
   return (
     <Image

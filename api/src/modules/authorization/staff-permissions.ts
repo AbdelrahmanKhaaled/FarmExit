@@ -6,6 +6,8 @@ import { StaffRole } from '../../generated/prisma/enums';
  * Business owners must confirm it before real endpoints rely on it. Never derive permissions from the client.
  */
 export const StaffPermission = {
+  /** Exact farm pins: explicit permission, granted only by existing admin full-authority scope. */
+  PrivateLocationRead: 'farms.private-location.read',
   /** See requests in the FarmExit review queue. */
   RequestsRead: 'requests.read',
   /** Decide request reviews (request_reviews). */

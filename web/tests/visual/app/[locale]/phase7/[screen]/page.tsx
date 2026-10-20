@@ -9,6 +9,7 @@ import {
   type VerificationRequest,
 } from '@/features/my-professional/VerificationRequestDetail';
 import { RequestList } from '@/features/phase7/RequestList';
+import { PublicNavbar } from '@/components/layout/PublicNavbar';
 export default async function Fixture({
   params,
   searchParams,
@@ -21,6 +22,7 @@ export default async function Fixture({
     query = await searchParams;
   if (locale !== 'en' && locale !== 'ar') notFound();
   setRequestLocale(locale);
+  if (screen === 'public-navbar') return <PublicNavbar />;
   const user = {
     id: 'phase7-visual-only',
     fullName: locale === 'ar' ? 'حساب اختبار' : 'Visual test',
@@ -86,7 +88,7 @@ export default async function Fixture({
   };
   const history = [
     { toStatus: 'draft', reason: null, createdAt: '2026-01-01T12:00:00Z' },
-    { toStatus: 'underReview', reason: null, createdAt: '2026-01-02T12:00:00Z' },
+    { toStatus: 'underFarmExitReview', reason: null, createdAt: '2026-01-02T12:00:00Z' },
   ];
   let content;
   if (screen === 'management-wizard')
@@ -141,7 +143,10 @@ export default async function Fixture({
   else if (['management-underReview', 'management-approved', 'management-rejected'].includes(screen))
     content = (
       <ManagementRequestDetail
-        initial={{ ...management, status: screen.slice('management-'.length) }}
+        initial={{
+          ...management,
+          status: screen.endsWith('underReview') ? 'underFarmExitReview' : screen.slice('management-'.length),
+        }}
         history={history}
       />
     );
@@ -151,7 +156,7 @@ export default async function Fixture({
         items={
           screen.endsWith('empty')
             ? []
-            : ['draft', 'underReview', 'changesRequested', 'approved', 'rejected'].map((status, i) => ({
+            : ['draft', 'underFarmExitReview', 'changesRequested', 'approved', 'rejected'].map((status, i) => ({
                 ...management,
                 id: String(7001 + i),
                 status,
@@ -198,7 +203,10 @@ export default async function Fixture({
   else if (['verification-underReview', 'verification-approved', 'verification-rejected'].includes(screen))
     content = (
       <VerificationRequestDetail
-        initial={{ ...verification, status: screen.slice('verification-'.length) }}
+        initial={{
+          ...verification,
+          status: screen.endsWith('underReview') ? 'underFarmExitReview' : screen.slice('verification-'.length),
+        }}
         history={history}
       />
     );
@@ -209,7 +217,7 @@ export default async function Fixture({
         items={
           screen.endsWith('empty')
             ? []
-            : ['draft', 'underReview', 'changesRequested', 'approved', 'rejected'].map((status, i) => ({
+            : ['draft', 'underFarmExitReview', 'changesRequested', 'approved', 'rejected'].map((status, i) => ({
                 ...verification,
                 id: String(7301 + i),
                 status,

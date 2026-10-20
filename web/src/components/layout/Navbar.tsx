@@ -1,3 +1,5 @@
+'use client';
+
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
@@ -9,6 +11,7 @@ import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { Container } from './Container';
 import { MobileMenu } from './MobileMenu';
 import { accountLinks, primaryNav } from './site-links';
+import { useNavbarSession } from './use-navbar-session';
 
 /*
  * Figma: Components → Group / Navigation & Layout → Navbar (Breakpoint × Session).
@@ -25,8 +28,15 @@ export type NavbarUser = {
   hasUnread?: boolean;
 };
 
-export function Navbar({ user, className }: { user?: NavbarUser; className?: string }) {
+export function Navbar({
+  user: initialUser,
+  className,
+}: {
+  user?: NavbarUser;
+  className?: string;
+}) {
   const t = useTranslations('nav');
+  const { user, pending: sessionPending } = useNavbarSession(initialUser);
 
   return (
     <header className={cn('sticky top-0 z-40 border-b border-border-nav bg-overlay-nav effect-nav-glass', className)}>
@@ -46,6 +56,7 @@ export function Navbar({ user, className }: { user?: NavbarUser; className?: str
               <li key={item.key}>
                 <Link
                   href={item.href}
+                  prefetch={item.key === 'farms' ? false : undefined}
                   className="whitespace-nowrap type-label-nav text-text-primary transition-colors duration-150 hover:text-text-brand"
                 >
                   {t(`links.${item.key}`)}
@@ -86,6 +97,8 @@ export function Navbar({ user, className }: { user?: NavbarUser; className?: str
                 <Icon name="chevron-down" size={16} className="hidden text-text-primary desktop:block" />
               </Link>
             </>
+          ) : sessionPending ? (
+            <span aria-busy="true" className="hidden h-42 w-96 desktop:block" />
           ) : (
             <div className="hidden desktop:flex">
               <ButtonLink href={accountLinks.signIn} variant="ghost" size="sm">
@@ -100,7 +113,11 @@ export function Navbar({ user, className }: { user?: NavbarUser; className?: str
             </ButtonLink>
           </div>
 
-          <MobileMenu signedIn={Boolean(user)} className="order-last flex desktop:hidden" />
+          <MobileMenu
+            signedIn={Boolean(user)}
+            sessionPending={sessionPending}
+            className="order-last flex desktop:hidden"
+          />
         </div>
       </Container>
     </header>

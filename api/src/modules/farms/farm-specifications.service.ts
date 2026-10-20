@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import {
   type FarmSpecificationResponseDto,
   PRODUCTION_DETAIL_KEYS,
+  FARM_AMENITIES,
   type ProductionDetailsPatchDto,
   type UpdateFarmSpecificationDto,
 } from './dto/farm-specification.dto';
@@ -36,7 +37,12 @@ export class FarmSpecificationsService {
       if (dto[key] !== undefined) columns[key] = dto[key];
     }
     const production = definedProductionKeys(dto.productionDetails);
-    if (Object.keys(columns).length === 0 && dto.cropTypes === undefined && Object.keys(production).length === 0) {
+    if (
+      Object.keys(columns).length === 0 &&
+      dto.cropTypes === undefined &&
+      dto.amenities === undefined &&
+      Object.keys(production).length === 0
+    ) {
       throw new BadRequestException('Nothing to update');
     }
 
@@ -45,6 +51,7 @@ export class FarmSpecificationsService {
       if (!current) throw new NotFoundException('Farm not found');
 
       const data: Prisma.FarmUncheckedUpdateManyInput = { ...columns };
+      if (dto.amenities !== undefined) data.facilities = mergeAmenities(current.facilities, dto.amenities);
       if (Object.keys(production).length > 0)
         data.productionDetails = mergeProduction(current.productionDetails, production);
       // Compare-and-swap on updated_at: a concurrent writer makes this fail (409) instead of silently overwriting.
@@ -82,6 +89,12 @@ export class FarmSpecificationsService {
       energySource: farm.energySource ?? null,
       soilType: farm.soilType ?? null,
       cropTypes: crops.map((c) => c.cropType).sort(),
+      amenities: Array.isArray(asObject(farm.facilities).amenities)
+        ? (asObject(farm.facilities).amenities as unknown[]).filter(
+            (value): value is string =>
+              typeof value === 'string' && (FARM_AMENITIES as readonly string[]).includes(value),
+          )
+        : [],
       // Only allow-listed keys are ever returned, even if other keys exist in the stored JSON.
       productionDetails: {
         currentProduction: text('currentProduction'),
@@ -96,6 +109,12 @@ export class FarmSpecificationsService {
 
 function asObject(value: unknown): Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+export function mergeAmenities(stored: unknown, amenities: string[]): Prisma.InputJsonObject {
+  if (stored !== null && (typeof stored !== 'object' || Array.isArray(stored)))
+    throw new ConflictException('Existing facility details require review before changing amenities');
+  return { ...asObject(stored), amenities };
 }
 
 function definedProductionKeys(

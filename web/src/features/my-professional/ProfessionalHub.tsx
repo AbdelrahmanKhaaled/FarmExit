@@ -12,6 +12,7 @@ import { WizardCard } from '@/features/my-farms/WizardCard';
 import { WizardDisclosure } from '@/features/my-farms/WizardDisclosure';
 import { jsonRequest } from '@/features/my-farms/types';
 import { farmTypes, managementTypes } from '@/lib/domain/enums';
+import { GovernorateField, ServiceAreasField } from '@/features/phase7/GovernorateFields';
 import { VerificationRequestDetail, type VerificationRequest } from './VerificationRequestDetail';
 export type Expertise = { expertiseType: string; expertiseValue: string };
 export type Capability = {
@@ -135,6 +136,16 @@ export function ProfessionalHub({
     setError(null);
     try {
       let current = profile;
+      // Capabilities require a persisted professional profile. The PUT is also
+      // the existing profile creation contract for a first-time professional.
+      if (!current || step >= 2 || exit) {
+        current = await jsonRequest<ProfessionalProfile>('/api/professional-profile', 'PUT', {
+          ...data,
+          yearsExperience: data.yearsExperience === '' ? undefined : Number(data.yearsExperience),
+        });
+        if (!current?.id || !Array.isArray(current.capabilities)) throw new Error('confirmation');
+        setProfile(current);
+      }
       let c = current?.capabilities.find((c) => c.professionalType === selected);
       if (!c) {
         current = await jsonRequest<ProfessionalProfile>('/api/professional-profile/capabilities', 'POST', {
@@ -143,13 +154,6 @@ export function ProfessionalHub({
         setProfile(current);
         c = current.capabilities.find((c) => c.professionalType === selected);
         if (!c) throw new Error('confirmation');
-      }
-      if (step >= 2 || exit) {
-        current = await jsonRequest<ProfessionalProfile>('/api/professional-profile', 'PUT', {
-          ...data,
-          yearsExperience: data.yearsExperience === '' ? undefined : Number(data.yearsExperience),
-        });
-        setProfile(current);
       }
       if ((step >= 3 || exit) && c.verificationStatus !== 'verified') {
         const serviceAreas = areas
@@ -182,7 +186,9 @@ export function ProfessionalHub({
         '/api/professional-verification-requests?page=1&pageSize=50',
       );
       const active = rows.items.find(
-        (r) => r.professionalCapabilityId === c.id && ['draft', 'changesRequested', 'underReview'].includes(r.status),
+        (r) =>
+          r.professionalCapabilityId === c.id &&
+          ['draft', 'changesRequested', 'underFarmExitReview'].includes(r.status),
       );
       const verification =
         active ??
@@ -356,13 +362,10 @@ export function ProfessionalHub({
                 onChange={(e) => update('headline', e.target.value)}
                 fieldStyle="form"
               />
-              <TextInput
+              <GovernorateField
                 label={t('baseGovernorate')}
-                name="baseGovernorate"
-                maxLength={120}
                 value={data.baseGovernorate}
-                onChange={(e) => update('baseGovernorate', e.target.value)}
-                fieldStyle="form"
+                onChange={(value) => update('baseGovernorate', value)}
               />
               <TextArea
                 label={t('bio')}
@@ -478,15 +481,16 @@ export function ProfessionalHub({
               </fieldset>
             </WizardCard>
             <WizardCard icon="location-pin" title={w('serviceAreas')}>
-              <TextInput
+              <ServiceAreasField
                 label={w('governorates')}
-                name="serviceAreas"
-                value={areas}
-                onChange={(e) => {
-                  setAreas(e.target.value);
+                values={areas
+                  .split(/[,،]/)
+                  .map((value) => value.trim())
+                  .filter(Boolean)}
+                onChange={(values) => {
+                  setAreas(values.join(', '));
                   setSaved(false);
                 }}
-                fieldStyle="form"
                 disabled={capability?.verificationStatus === 'verified'}
               />
               <p className="type-body-caption text-text-muted">{w('areasHint')}</p>

@@ -1,3 +1,10 @@
+export type PrivateFarmLocation = {
+  farmId: string;
+  privatePinLatitude: number | null;
+  privatePinLongitude: number | null;
+  nearestMainRoad: string | null;
+  roadDistanceKm: number | null;
+};
 export type Farm = {
   id: string;
   name: string;
@@ -34,6 +41,7 @@ export type ListingDraft = {
   reviews: { decision: string; comment: string | null; createdAt: string | null }[];
 };
 export type FarmSpecification = {
+  amenities?: string[];
   cropTypes: string[];
   productionDetails: { currentProduction: string | null; harvestSeasons: string | null; notes: string | null };
   canEdit: boolean;

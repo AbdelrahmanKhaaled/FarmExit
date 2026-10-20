@@ -36,7 +36,7 @@ export class RequestDocumentsService {
     userId: bigint,
     requestId: bigint,
     slotKey: string,
-    file: UploadedRequestDocumentFile,
+    file: UploadedRequestDocumentFile | undefined,
     documentType?: string | null,
   ): Promise<RequestDocumentMetadataDto> {
     const request = await this.prisma.request.findFirst({
@@ -93,7 +93,7 @@ export class RequestDocumentsService {
     if (!request) throw notFound();
     const rows = await this.prisma.requestDocument.findMany({
       where: { requestId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
     return rows.map(toMetadata);
   }

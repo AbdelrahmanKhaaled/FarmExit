@@ -8,6 +8,19 @@ export async function isolatePhase6(
 ) {
   const mutations: { url: string; method: string; body: unknown }[] = [];
   const facilities: Facility[] = [];
+  let specification = {
+    amenities: [] as string[],
+    cropTypes: ['citrus'],
+    productionDetails: { currentProduction: null, harvestSeasons: null, notes: null },
+    canEdit: true,
+  };
+  let location = {
+    farmId: '1001',
+    privatePinLatitude: null,
+    privatePinLongitude: null,
+    nearestMainRoad: null,
+    roadDistanceKm: null,
+  };
   let docs = [
     {
       id: '3001',
@@ -73,6 +86,12 @@ export async function isolatePhase6(
         ),
       });
     if (path === '/api/auth/me') return route.fulfill({ status: 401, json: { message: 'Isolated fixture' } });
+    if (path.endsWith('/private-location')) {
+      if (options.saveError && method !== 'GET')
+        return route.fulfill({ status: 503, json: { message: 'Unavailable' } });
+      if (method === 'PATCH') location = { ...location, ...request.postDataJSON() };
+      return route.fulfill({ json: location });
+    }
     if (path.endsWith('/submit')) {
       if (options.submitDelay) await new Promise((resolve) => setTimeout(resolve, options.submitDelay));
       if (options.submitError) return route.fulfill({ status: 409, json: { message: 'Not confirmed' } });
@@ -83,7 +102,14 @@ export async function isolatePhase6(
       if (method === 'GET') return route.fulfill({ json: docs });
       if (options.uploadError) return route.fulfill({ status: 413, json: { message: 'Upload rejected' } });
       docs = [
-        { ...docs[0]!, id: '3002', reviewStatus: 'uploaded', reviewNote: '', originalName: 'new-copy.pdf' },
+        {
+          ...docs[0]!,
+          id: String(3001 + docs.length),
+          slotKey: /name="slotKey"\r\n\r\n([^\r\n]+)/.exec(request.postDataBuffer()?.toString() ?? '')?.[1] ?? '',
+          reviewStatus: 'uploaded',
+          reviewNote: '',
+          originalName: /filename="([^"]+)"/.exec(request.postDataBuffer()?.toString() ?? '')?.[1] ?? 'new-copy.pdf',
+        },
         ...docs,
       ];
       return route.fulfill({ json: docs[0] });
@@ -116,14 +142,10 @@ export async function isolatePhase6(
       facilities.push(facility);
       return route.fulfill({ json: facility });
     }
-    if (path.endsWith('/specifications'))
-      return route.fulfill({
-        json: {
-          cropTypes: ['citrus'],
-          productionDetails: { currentProduction: null, harvestSeasons: null, notes: null },
-          canEdit: true,
-        },
-      });
+    if (path.endsWith('/specifications')) {
+      if (method === 'PATCH') specification = { ...specification, ...request.postDataJSON() };
+      return route.fulfill({ json: specification });
+    }
     if (path.includes('/listing-requests')) {
       if (options.saveError && method !== 'GET')
         return route.fulfill({ status: 503, json: { message: 'Unavailable' } });

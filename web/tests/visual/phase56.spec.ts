@@ -55,11 +55,11 @@ for (const locale of ['en', 'ar'])
             await page.evaluate(() => window.scrollTo(0, 0));
           }
           if (screen === 'wizard?step=2') {
-            await expect(page.locator('[name=nearestMainRoad]')).toBeDisabled();
-            await expect(page.locator('[name=roadDistanceKm]')).toBeDisabled();
+            await expect(page.locator('[name=nearestMainRoad]')).toBeEnabled();
+            await expect(page.locator('[name=roadDistanceKm]')).toBeEnabled();
             await expect(
               page.getByRole('button', { name: locale === 'ar' ? 'تحديد الموقع' : 'Place pin', exact: true }),
-            ).toBeDisabled();
+            ).toBeVisible();
           }
           if (screen === 'wizard?step=3') await expect(page.locator('select[name=energySource]')).toHaveCount(0);
           if (screen === 'portal' && locale === 'ar') {
@@ -75,7 +75,7 @@ for (const locale of ['en', 'ar'])
     });
   }
 
-test('supported optional fields persist; unavailable location fields never enter a save payload', async ({ page }) => {
+test('supported optional fields persist; unchanged private location never enters a save payload', async ({ page }) => {
   const requests = await isolatePhase6(page);
   await page.goto('/en/phase6/wizard?step=2');
   const land = page.locator('details').filter({ hasText: 'Soil type and anything buyers' });
@@ -94,6 +94,7 @@ test('supported optional fields persist; unavailable location fields never enter
   await highlights.locator('summary').click();
   await page.locator('[name=highlight1]').fill('Owner-stated highlight');
   const panel = page.getByTestId('farm-facilities-panel');
+  await panel.locator('summary').filter({ hasText: 'Add another facility' }).click();
   await panel.getByRole('radio').nth(1).check();
   await panel.locator('[name=name]').fill('Owner-stated storage');
   await panel.getByRole('button', { name: 'Add facility', exact: true }).click();
@@ -112,5 +113,7 @@ test('supported optional fields persist; unavailable location fields never enter
   expect(requests.find((r) => r.url === '/api/listing-requests/2001' && r.method === 'PATCH')?.body).toMatchObject({
     highlights: ['Owner-stated highlight'],
   });
-  expect(JSON.stringify(requests)).not.toMatch(/nearestMainRoad|roadDistanceKm|latitude|longitude/);
+  expect(JSON.stringify(requests.filter((r) => r.method !== 'GET'))).not.toMatch(
+    /nearestMainRoad|roadDistanceKm|latitude|longitude/,
+  );
 });

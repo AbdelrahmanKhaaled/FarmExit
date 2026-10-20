@@ -2,6 +2,7 @@
 import { useTranslations } from 'next-intl';
 import { ManagementWizard, type ManagementFarmOption } from './ManagementWizard';
 import { RequestTracking } from '@/features/phase7/RequestTracking';
+import { managementGoals, managementChallenges, formatManagementChoices } from '@/features/phase7/reference-options';
 export type ManagementRequest = {
   id: string;
   requestNumber: string;
@@ -13,6 +14,9 @@ export type ManagementRequest = {
   term: string | null;
   currentSituation: string | null;
   goals: string[] | null;
+  challenges?: string[] | null;
+  outcomes?: string | null;
+  additionalInformation?: string | null;
   reviews: { decision: string; comment: string | null; createdAt: string | null }[];
   createdAt: string | null;
   updatedAt: string | null;
@@ -48,7 +52,10 @@ export function ManagementRequestDetail({
         [t('need'), (t as (key: string) => string)(`needs.${initial.professionalNeed}`)],
         [t('term'), initial.term],
         [t('currentSituation'), initial.currentSituation],
-        [t('goals'), initial.goals?.join('\n') ?? null],
+        [t('goals'), formatManagementChoices(initial.goals, managementGoals, [t('goalOptions.g0'), t('goalOptions.g1'), t('goalOptions.g2')])],
+        [t('challenges'), formatManagementChoices(initial.challenges, managementChallenges, [t('challengeOptions.c0'), t('challengeOptions.c1'), t('challengeOptions.c2'), t('challengeOptions.c3')])],
+        [t('outcomes'), initial.outcomes ?? null],
+        [t('additionalInformation'), initial.additionalInformation ?? null],
       ]}
     />
   );

@@ -4,10 +4,9 @@ import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { accountLinks } from '@/components/layout/site-links';
 import { Container } from '@/components/layout/Container';
 import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
+import { PublicNavbar } from '@/components/layout/PublicNavbar';
 import { ButtonLink } from '@/components/ui/Button';
 import { Surface } from '@/components/ui/Surface';
 
@@ -27,7 +26,7 @@ export default async function ManagementMarketplacePage({ params }: PageProps<'/
 
   return (
     <>
-      <Navbar />
+      <PublicNavbar />
       <main id="main" data-testid="management-marketplace">
         <section aria-labelledby="management-marketplace-title" className="fx-band-depth">
           <Container
@@ -60,8 +59,12 @@ export default async function ManagementMarketplacePage({ params }: PageProps<'/
             <p className="type-body-default text-text-secondary">{t('notLiveBody')}</p>
             <p className="type-body-caption text-text-muted">{th('subtitle')}</p>
             <div className="flex flex-wrap gap-12 pt-8">
-              <ButtonLink href={accountLinks.signIn} variant="primary" size="md">{t('submitRequest')}</ButtonLink>
-              <ButtonLink href="/my/requests" variant="outline" size="md">{t('trackRequests')}</ButtonLink>
+              <ButtonLink href="/my/management/new" variant="primary" size="md">
+                {t('submitRequest')}
+              </ButtonLink>
+              <ButtonLink href="/my/management" variant="outline" size="md">
+                {t('trackRequests')}
+              </ButtonLink>
             </div>
           </Surface>
         </Container>

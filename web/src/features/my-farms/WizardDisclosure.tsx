@@ -8,15 +8,17 @@ export function WizardDisclosure({
   description,
   icon,
   children,
+  open,
 }: {
   title: string;
   description: string;
   icon: IconName;
   children: ReactNode;
+  open?: boolean;
 }) {
   const t = useTranslations('workspace.wizard');
   return (
-    <details className="group rounded-card border border-border-hairline bg-bg-surface p-20 tablet:p-24">
+    <details open={open} className="group rounded-card border border-border-hairline bg-bg-surface p-20 tablet:p-24">
       <summary className="flex cursor-pointer list-none items-center gap-16 [&::-webkit-details-marker]:hidden">
         <span className="flex size-44 shrink-0 items-center justify-center rounded-full bg-bg-muted text-text-brand">
           <Icon name={icon} size={24} />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/Field';
@@ -29,11 +29,13 @@ export function FarmFacilitiesPanel({
   canEdit,
   onPendingChange,
   onLoaded,
+  amenities,
 }: {
   farmId: string;
   canEdit: boolean;
   onPendingChange?: (pending: boolean) => void;
   onLoaded?: (items: Facility[] | null) => void;
+  amenities?: ReactNode;
 }) {
   const t = useTranslations('workspace.facilities');
   const w = useTranslations('workspace.wizard');
@@ -146,8 +148,13 @@ export function FarmFacilitiesPanel({
   }
 
   return (
-    <WizardCard title={t('title')} icon="building" description={w('unsupportedFacilities')}>
+    <WizardCard
+      title={t('title')}
+      icon="building"
+      description={amenities ? w('amenitiesNote') : w('unsupportedFacilities')}
+    >
       <div data-testid="farm-facilities-panel">
+        {amenities}
         {loading && <p className="mt-12 type-body-caption text-text-muted">{t('loading')}</p>}
         {error && <p className="mt-12 type-body-caption text-status-error">{error}</p>}
         {!canEdit && !loading && !error && items.length === 0 && (
@@ -225,60 +232,65 @@ export function FarmFacilitiesPanel({
           ))}
         </ul>
         {(canEdit || formDirty) && (
-          <form
-            hidden={!canEdit}
-            onChange={() => setFormDirty(true)}
-            onSubmit={createFacility}
-            className="flex flex-col gap-12"
-          >
-            <fieldset disabled={savingFacility} className="contents">
-              <fieldset>
-                <legend className="mb-12 type-label-form">{t('type')}</legend>
-                <div className="grid grid-cols-2 gap-12">
-                  {FACILITY_TYPES.map((type) => (
-                    <label
-                      key={type}
-                      className={`flex min-h-56 cursor-pointer items-center gap-8 rounded-lg border p-12 type-label-small-strong ${selectedType === type ? 'border-brand-primary bg-bg-selected text-text-brand' : 'border-border-hairline'}`}
+          <details open={amenities ? undefined : true} className="mt-16">
+            <summary className="mb-16 cursor-pointer type-label-small-strong text-text-brand">
+              {w('additionalFacility')}
+            </summary>
+            <form
+              hidden={!canEdit}
+              onChange={() => setFormDirty(true)}
+              onSubmit={createFacility}
+              className="flex flex-col gap-12"
+            >
+              <fieldset disabled={savingFacility} className="contents">
+                <fieldset>
+                  <legend className="mb-12 type-label-form">{t('type')}</legend>
+                  <div className="grid grid-cols-2 gap-12">
+                    {FACILITY_TYPES.map((type) => (
+                      <label
+                        key={type}
+                        className={`flex min-h-56 cursor-pointer items-center gap-8 rounded-lg border p-12 type-label-small-strong ${selectedType === type ? 'border-brand-primary bg-bg-selected text-text-brand' : 'border-border-hairline'}`}
+                      >
+                        <Icon name="building" size={18} className="hidden shrink-0 tablet:block" />
+                        <span className="min-w-0 flex-1">{t(`types.${type}`)}</span>
+                        <input
+                          type="radio"
+                          name="facilityType"
+                          value={type}
+                          required
+                          checked={selectedType === type}
+                          onChange={() => setSelectedType(type)}
+                          className="size-18 shrink-0 accent-brand-primary"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <div hidden={!selectedType} className="flex flex-col gap-16">
+                  <TextInput label={t('name')} name="name" required fieldStyle="form" />
+                  <TextInput label={t('description')} name="description" fieldStyle="form" />
+                  <TextInput label={t('governorate')} name="governorate" fieldStyle="form" />
+                  <TextInput label={t('areaName')} name="areaName" fieldStyle="form" />
+                  <Button type="submit" variant="primary" size="sm">
+                    {t('add')}
+                  </Button>
+                  {formDirty && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={(event) => {
+                        event.currentTarget.form?.reset();
+                        setSelectedType('');
+                        setFormDirty(false);
+                      }}
                     >
-                      <Icon name="building" size={18} className="hidden shrink-0 tablet:block" />
-                      <span className="min-w-0 flex-1">{t(`types.${type}`)}</span>
-                      <input
-                        type="radio"
-                        name="facilityType"
-                        value={type}
-                        required
-                        checked={selectedType === type}
-                        onChange={() => setSelectedType(type)}
-                        className="size-18 shrink-0 accent-brand-primary"
-                      />
-                    </label>
-                  ))}
+                      {w('clearFacility')}
+                    </Button>
+                  )}
                 </div>
               </fieldset>
-              <div hidden={!selectedType} className="flex flex-col gap-16">
-                <TextInput label={t('name')} name="name" required fieldStyle="form" />
-                <TextInput label={t('description')} name="description" fieldStyle="form" />
-                <TextInput label={t('governorate')} name="governorate" fieldStyle="form" />
-                <TextInput label={t('areaName')} name="areaName" fieldStyle="form" />
-                <Button type="submit" variant="primary" size="sm">
-                  {t('add')}
-                </Button>
-                {formDirty && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={(event) => {
-                      event.currentTarget.form?.reset();
-                      setSelectedType('');
-                      setFormDirty(false);
-                    }}
-                  >
-                    {w('clearFacility')}
-                  </Button>
-                )}
-              </div>
-            </fieldset>
-          </form>
+            </form>
+          </details>
         )}
       </div>
     </WizardCard>

@@ -28,7 +28,11 @@ export class FarmManagementRequestsService {
     private readonly farmAccess: FarmAccessService,
   ) {}
 
-  async create(userId: bigint, farmId: bigint, dto: CreateFarmManagementRequestDto): Promise<FarmManagementRequestResponseDto> {
+  async create(
+    userId: bigint,
+    farmId: bigint,
+    dto: CreateFarmManagementRequestDto,
+  ): Promise<FarmManagementRequestResponseDto> {
     const farm = await this.ownedFarm(userId, farmId);
     const created = await this.insert(userId, farm, dto);
     return toResponse(created.request, created.detail, farm, []);
@@ -49,8 +53,12 @@ export class FarmManagementRequestsService {
       this.prisma.request.count({ where }),
       this.prisma.request.findMany({ where, orderBy: { id: 'desc' }, skip: (page - 1) * pageSize, take: pageSize }),
     ]);
-    const details = await this.prisma.farmManagementDetail.findMany({ where: { requestId: { in: rows.map((r) => r.id) } } });
-    const farms = await this.prisma.farm.findMany({ where: { id: { in: rows.map((r) => r.farmId!).filter(Boolean) }, deletedAt: null } });
+    const details = await this.prisma.farmManagementDetail.findMany({
+      where: { requestId: { in: rows.map((r) => r.id) } },
+    });
+    const farms = await this.prisma.farm.findMany({
+      where: { id: { in: rows.map((r) => r.farmId!).filter(Boolean) }, deletedAt: null },
+    });
     const detailBy = new Map(details.map((d) => [d.requestId, d]));
     const farmBy = new Map(farms.map((f) => [f.id, f]));
     const reviews = await this.ownerReviews(rows.map((r) => r.id));
@@ -81,7 +89,11 @@ export class FarmManagementRequestsService {
     return toResponse(request, detail, farm, reviews.get(requestId) ?? []);
   }
 
-  async update(userId: bigint, requestId: bigint, dto: UpdateFarmManagementRequestDto): Promise<FarmManagementRequestResponseDto> {
+  async update(
+    userId: bigint,
+    requestId: bigint,
+    dto: UpdateFarmManagementRequestDto,
+  ): Promise<FarmManagementRequestResponseDto> {
     const { request, farm } = await this.owned(userId, requestId);
     if (!OWNER_EDITABLE_STATUSES.has(request.status)) {
       throw new ConflictException('Only a draft or a request with requested changes can be updated');
@@ -96,7 +108,9 @@ export class FarmManagementRequestsService {
         ...(dto.challenges !== undefined ? { challenges: dto.challenges } : {}),
         ...(dto.goals !== undefined ? { goals: dto.goals } : {}),
         ...(dto.outcomes !== undefined ? { outcomes: dto.outcomes ?? null } : {}),
-        ...(dto.additionalInformation !== undefined ? { additionalInformation: dto.additionalInformation ?? null } : {}),
+        ...(dto.additionalInformation !== undefined
+          ? { additionalInformation: dto.additionalInformation ?? null }
+          : {}),
       },
     });
     const refreshed = await this.prisma.request.findUniqueOrThrow({ where: { id: request.id } });
@@ -156,7 +170,10 @@ export class FarmManagementRequestsService {
       .filter(([, roles]) => roles.includes(FarmRelationshipRole.owner))
       .map(([id]) => id);
     if (owned.length === 0) return [];
-    const farms = await this.prisma.farm.findMany({ where: { id: { in: owned }, deletedAt: null }, select: { id: true } });
+    const farms = await this.prisma.farm.findMany({
+      where: { id: { in: owned }, deletedAt: null },
+      select: { id: true },
+    });
     return farms.map((f) => f.id);
   }
 
@@ -203,6 +220,9 @@ export class FarmManagementRequestsService {
               term: dto.term ?? null,
               currentSituation: dto.currentSituation ?? null,
               goals: dto.goals ?? undefined,
+              challenges: dto.challenges ?? undefined,
+              outcomes: dto.outcomes ?? null,
+              additionalInformation: dto.additionalInformation ?? null,
             },
           });
           await tx.requestStatusHistory.create({
@@ -262,6 +282,9 @@ function toResponse(
     term: detail.term,
     currentSituation: detail.currentSituation,
     goals: jsonStrings(detail.goals),
+    challenges: jsonStrings(detail.challenges),
+    outcomes: detail.outcomes,
+    additionalInformation: detail.additionalInformation,
     reviews,
     createdAt: request.createdAt?.toISOString() ?? null,
     updatedAt: request.updatedAt?.toISOString() ?? null,

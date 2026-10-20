@@ -47,6 +47,8 @@ export const PUBLIC_LISTING_FORBIDDEN = [
   'documents',
   'extraDetails',
   'accessDetails',
+  'nearestMainRoad',
+  'roadDistanceKm',
   'description',
   'waterSource',
   'irrigationMethod',

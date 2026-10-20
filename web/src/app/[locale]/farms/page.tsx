@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { Container } from '@/components/layout/Container';
 import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
+import { PublicNavbar } from '@/components/layout/PublicNavbar';
 import { MarketplaceResults, MarketplaceResultsStatic } from '@/features/marketplace/MarketplaceResults';
 import { MarketplaceSearch, MarketplaceSearchStatic } from '@/features/marketplace/MarketplaceSearch';
 
@@ -33,7 +33,7 @@ export default async function FarmsPage({ params }: PageProps<'/[locale]/farms'>
   const t = await getTranslations('marketplace');
   return (
     <>
-      <Navbar />
+      <PublicNavbar />
       <main id="main" data-testid="marketplace">
         <section aria-labelledby="marketplace-title" className="fx-band-depth">
           <Container

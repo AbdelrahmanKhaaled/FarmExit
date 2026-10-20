@@ -4,6 +4,7 @@ test('a staged facility entry survives navigation and cannot be silently dropped
   const requests = await isolatePhase6(page);
   await page.goto('/en/phase6/wizard?step=3');
   const panel = page.getByTestId('farm-facilities-panel');
+  await panel.locator('summary').filter({ hasText: 'Add another facility' }).click();
   await panel.getByRole('radio').first().check();
   await panel.locator('input[name=name]').fill('Owner-stated storage');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();

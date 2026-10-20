@@ -161,7 +161,29 @@
       "changesRequested": "Changes requested",
       "approved": "Approved",
       "rejected": "Rejected",
-      "withdrawn": "Withdrawn"
+      "withdrawn": "Withdrawn",
+      "underFarmExitReview": "Under review"
+    },
+    "challenges": "Main challenge",
+    "outcomes": "Expected outcomes",
+    "additionalInformation": "Additional information",
+    "customGoals": "Add your own goal (one per line)",
+    "selectTerm": "Select a term",
+    "oneYear": "1 year",
+    "customTerm": "Other term",
+    "sessionError": "Your session could not be confirmed. Your edits are retained. Sign in again in another tab, then retry.",
+    "conflictError": "This request is no longer editable. Your edits are retained; reload only after copying any unsaved changes.",
+    "validationError": "Some details were rejected. Your edits are retained; check the field limits and try again.",
+    "goalOptions": {
+      "g0": "Raise yield per feddan",
+      "g1": "Reduce water use per season",
+      "g2": "Prepare the farm for export certification"
+    },
+    "challengeOptions": {
+      "c0": "Results have dropped or stayed flat",
+      "c1": "Irrigation needs attention",
+      "c2": "Not enough time to oversee the farm",
+      "c3": "Need technical advice"
     }
   },
   "professional": {
@@ -232,7 +254,8 @@
       "changesRequested": "Changes requested",
       "approved": "Approved",
       "rejected": "Rejected",
-      "withdrawn": "Withdrawn"
+      "withdrawn": "Withdrawn",
+      "underFarmExitReview": "Under review"
     }
   },
   "requestDetail": {
@@ -635,6 +658,8 @@
     "availability": "Availability",
     "description": "Describe your farm",
     "fields": {
+      "nearestMainRoad": "Nearest main road",
+      "roadDistanceKm": "Distance to road (km)",
       "name": "Farm name",
       "farmType": "Farm type",
       "mainActivity": "Main crops or activity",
@@ -663,6 +688,17 @@
       "title": "Request documents",
       "empty": "No documents uploaded to this request.",
       "file": "PDF or clear photo",
+      "refreshError": "Upload confirmed. The document list could not refresh; reload to view it. Do not upload the same file again.",
+      "sessionError": "Your session could not be confirmed. Sign in again before retrying; your selected file is retained.",
+      "accessError": "You do not have access to upload documents to this request.",
+      "sizeError": "This file exceeds the server upload limit. Choose a smaller file.",
+      "lockedError": "This request is no longer editable. Check its current status before retrying.",
+      "supportingDocument": "Supporting document",
+      "history": "Earlier copies",
+      "replacement": "Uploading a new copy of the selected document",
+      "newDocument": "Add as a separate document",
+      "additional": "Additional documents",
+      "additionalNote": "Optional supporting files, such as licences or recent reports.",
       "slot": "Document reference",
       "type": "Document type (optional)",
       "choose": "Choose document",
@@ -703,6 +739,34 @@
     "clearFacility": "Clear facility entry",
     "facilitiesUnavailable": "Facility information unavailable.",
     "addDetails": "Add details",
+    "otherGovernorate": "Another governorate",
+    "availableNow": "Available now",
+    "availableLater": "From a later date",
+    "availableFrom": "Available from",
+    "areaError": "Enter an area greater than zero, with up to two decimal places.",
+    "fromDate": "From {date}",
+    "recordedAvailability": "Recorded availability: {value}. Choose an option to change it.",
+    "onFarm": "On the farm",
+    "amenitiesNote": "Select everything the farm has. You can add other facility details below.",
+    "additionalFacility": "+ Add another facility",
+    "amenities": {
+      "irrigationNetwork": "Irrigation network",
+      "machineryEquipment": "Machinery & equipment",
+      "packingStorage": "Packing & storage",
+      "seedlingNursery": "Seedling nursery",
+      "powerConnection": "Power connection",
+      "housing": "Housing"
+    },
+    "mapLabel": "Farm location on the map",
+    "mapLoading": "Loading map…",
+    "mapTileError": "Map tiles could not load. Check your connection and reopen this step to retry.",
+    "selectedPin": "Pin selected — drag it or click the map to adjust",
+    "selectPinHint": "Click the map, or pan and use Place pin to select its centre.",
+    "clearPin": "Clear pin",
+    "privatePinNote": "Your exact pin and road details are private to you and authorized FarmExit staff. They are not shown publicly.",
+    "locationLoading": "Loading saved location…",
+    "locationLoadError": "Saved location could not load. Retry before editing or saving.",
+    "retryLocation": "Retry loading location",
     "mapUnavailable": "Map pin unavailable",
     "placePin": "Place pin",
     "access": "Access & nearby places",
@@ -847,6 +911,9 @@
     "attachedFarm": "Attached from your farm profile",
     "leaveTitle": "Leave and continue later?",
     "leaveNote": "Save your private draft with FarmExit before leaving, or keep editing.",
-    "keepEditing": "Keep editing"
+    "keepEditing": "Keep editing",
+    "chooseGovernorate": "Select governorates",
+    "otherGovernorate": "Other governorate",
+    "addArea": "Add governorate"
   }
 }

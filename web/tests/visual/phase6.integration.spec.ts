@@ -15,9 +15,10 @@ test('seven-step flow retains data, saves one farm, uses rent units and submits 
   await page.locator('input[name=mainActivity]:visible').fill('Citrus');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   expect(requests).toHaveLength(0);
-  await page.locator('input[name=governorate]:visible').fill('Beni Suef');
+  await page.locator('select[name=governorate]:visible').selectOption('Beni Suef');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Agriculture & facilities', exact: true })).toBeVisible();
+  await page.locator('select[name=waterSource]').selectOption('well');
   expect(requests.filter((r) => r.url === '/api/farms' && r.method === 'POST')).toHaveLength(1);
   await page.locator('details').filter({ hasText: 'Production & current crops' }).locator('summary').click();
   await page.locator('input[name=currentProduction]:visible').fill('Owner-stated citrus production');
@@ -72,6 +73,7 @@ test('failed photo and document uploads remain errors and can be retried; no fal
   await expect(media.locator('input[type=file]')).not.toHaveValue('');
   await page.goto('/en/phase6/wizard?step=6');
   const docs = page.getByTestId('request-documents-panel');
+  await docs.locator('summary').filter({ hasText: 'Additional documents' }).click();
   await docs.getByTestId('document-file').setInputFiles({
     name: 'visual-only.pdf',
     mimeType: 'application/pdf',
@@ -86,7 +88,8 @@ test('authorized replacement appends a same-slot copy and preserves prior docume
   await page.goto('/en/phase6/changes');
   const panel = page.getByTestId('request-documents-panel');
   await panel.getByRole('button', { name: 'Upload new copy', exact: true }).click();
-  await expect(panel.locator('input[name=slotKey]:visible')).toHaveValue('supporting_document_1');
+  await expect(panel.locator('input[name=slotKey]')).toHaveCount(0);
+  await expect(panel.getByText('Uploading a new copy of the selected document')).toBeVisible();
   await panel.getByTestId('document-file').setInputFiles({
     name: 'new-copy.pdf',
     mimeType: 'application/pdf',
@@ -94,7 +97,8 @@ test('authorized replacement appends a same-slot copy and preserves prior docume
   });
   await panel.getByRole('button', { name: 'Upload document', exact: true }).click();
   await expect(panel.getByRole('status')).toHaveText('Uploaded');
-  await expect(panel.getByText('visual-reference.pdf', { exact: true })).toBeVisible();
+  await panel.getByText('Earlier copies', { exact: true }).click();
+  await expect(panel.getByText(/visual-reference.pdf/)).toBeVisible();
   expect(requests.filter((r) => r.url === '/api/requests/2001/documents' && r.method === 'POST')).toHaveLength(1);
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await page.getByRole('button', { name: 'Resubmit for FarmExit review', exact: true }).click();

@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
 import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
@@ -20,6 +21,15 @@ export default async function MyPortalLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
+  return (
+    <Suspense fallback={null}>
+      <AuthenticatedPortal locale={locale}>{children}</AuthenticatedPortal>
+    </Suspense>
+  );
+}
+
+async function AuthenticatedPortal({ locale, children }: { locale: string; children: ReactNode }) {
+  await connection();
   const session = await requireWebsiteSession(locale, `/${locale}/my`);
   return <MyFarmExitLayout session={session}>{children}</MyFarmExitLayout>;
 }

@@ -36,6 +36,7 @@ export function Footer({ className }: { className?: string }) {
                   <li key={link.key}>
                     <Link
                       href={link.href}
+                      prefetch={column.key === 'farms' ? false : undefined}
                       className="type-label-footer-link text-overlay-on-dark-muted transition-colors duration-150 hover:text-text-on-dark"
                     >
                       {t(`links.${link.key}`)}

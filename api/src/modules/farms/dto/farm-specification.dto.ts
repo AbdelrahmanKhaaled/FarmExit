@@ -10,12 +10,22 @@ import {
   IsString,
   MaxLength,
   ValidateNested,
+  ValidateIf,
 } from 'class-validator';
 import { ENERGY_SOURCES, IRRIGATION_METHODS, trim, WATER_SOURCES } from './create-farm.dto';
 
 /** Confirmed crop type taxonomy (web/src/lib/domain/enums.ts, 4n). */
 export const CROP_TYPES = ['fruits', 'citrus', 'fieldCrops', 'palms', 'exportCrops'] as const;
 export type CropTypeValue = (typeof CROP_TYPES)[number];
+/** Owner-stated equipment/amenities shown in the approved Add Farm design; not service-facility types. */
+export const FARM_AMENITIES = [
+  'irrigationNetwork',
+  'machineryEquipment',
+  'packingStorage',
+  'seedlingNursery',
+  'powerConnection',
+  'housing',
+] as const;
 
 /**
  * PROVISIONAL shape of `farms.production_details`: the approved ERD stores free JSON with no defined keys. Only
@@ -62,6 +72,17 @@ export class ProductionDetailsDto {
 
 /** Partial update: omitted properties are untouched. */
 export class UpdateFarmSpecificationDto {
+  @ApiPropertyOptional({
+    enum: FARM_AMENITIES,
+    isArray: true,
+    description: 'Complete selected set; [] clears only this set.',
+  })
+  @ValidateIf((_, value) => value !== undefined)
+  @IsArray()
+  @ArrayMaxSize(FARM_AMENITIES.length)
+  @ArrayUnique()
+  @IsIn(FARM_AMENITIES, { each: true })
+  amenities?: string[];
   @ApiPropertyOptional({ enum: WATER_SOURCES, nullable: true })
   @IsOptional()
   @IsIn(WATER_SOURCES)
@@ -105,6 +126,7 @@ export class UpdateFarmSpecificationDto {
 }
 
 export class FarmSpecificationResponseDto {
+  @ApiProperty({ enum: FARM_AMENITIES, isArray: true }) amenities: string[];
   @ApiProperty({ example: '12' }) farmId: string;
   @ApiProperty({ enum: WATER_SOURCES, nullable: true, type: String }) waterSource: string | null;
   @ApiProperty({ enum: IRRIGATION_METHODS, nullable: true, type: String }) irrigationMethod: string | null;

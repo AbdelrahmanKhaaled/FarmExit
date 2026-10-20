@@ -15,7 +15,15 @@ import { accountLinks, primaryNav } from './site-links';
  * mobile). The open menu panel has no dedicated Figma frame; it is composed only from approved components
  * (Sheet, Label/Nav links, Language Toggle, Button / Block).
  */
-export function MobileMenu({ signedIn, className }: { signedIn: boolean; className?: string }) {
+export function MobileMenu({
+  signedIn,
+  className,
+  sessionPending = false,
+}: {
+  signedIn: boolean;
+  className?: string;
+  sessionPending?: boolean;
+}) {
   const t = useTranslations('nav');
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -37,6 +45,7 @@ export function MobileMenu({ signedIn, className }: { signedIn: boolean; classNa
               <li key={item.key} className="border-b border-border-subtle">
                 <Link
                   href={item.href}
+                  prefetch={item.key === 'farms' ? false : undefined}
                   onClick={close}
                   className="flex min-h-52 items-center type-label-nav text-text-primary hover:text-text-brand"
                 >
@@ -47,7 +56,7 @@ export function MobileMenu({ signedIn, className }: { signedIn: boolean; classNa
           </ul>
         </nav>
         <div className="mt-24 flex flex-col gap-12">
-          {!signedIn && (
+          {!signedIn && !sessionPending && (
             <BlockButtonLink href={accountLinks.signIn} variant="outline" onClick={close}>
               {t('signIn')}
             </BlockButtonLink>

@@ -11,11 +11,15 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Dialog } from '@/components/overlay/Dialog';
 import { PortalStatus } from '@/features/my-farmexit/PortalUI';
 import { farmTypes, waterSources, irrigationMethods, cropTypes } from '@/lib/domain/enums';
+import { GOVERNORATE_API_LABEL } from '@/lib/data/marketplace-api';
+import { governorates } from '@/lib/data/marketplace';
 import type { AuthUser } from '@/lib/auth/types';
 import { toNavbarUser } from '@/lib/auth/navbar-user';
 import { WizardCard } from './WizardCard';
 import { WizardDisclosure } from './WizardDisclosure';
 import { SubmissionProgress } from './SubmissionProgress';
+import { FarmLocationMap, type FarmPin } from './FarmLocationMap';
+import type { PrivateFarmLocation } from './types';
 import { FarmFacilitiesPanel, type Facility } from './FarmFacilitiesPanel';
 import { FarmMediaPanel } from './FarmMediaPanel';
 import { RequestDocumentsPanel } from './RequestDocumentsPanel';
@@ -28,13 +32,50 @@ type Props = {
   initialListing?: ListingDraft;
   initialSpecification?: FarmSpecification | null;
   initialStep?: number;
+  initialLocation?: PrivateFarmLocation;
 };
-export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecification, initialStep = 1 }: Props) {
+const amenityKeys = [
+  'irrigationNetwork',
+  'machineryEquipment',
+  'packingStorage',
+  'seedlingNursery',
+  'powerConnection',
+  'housing',
+] as const;
+const amenityIcons = {
+  irrigationNetwork: 'irrigation',
+  machineryEquipment: 'truck',
+  packingStorage: 'building',
+  seedlingNursery: 'tree',
+  powerConnection: 'power',
+  housing: 'building',
+} as const;
+const availabilityChoices = ['Available now', 'From a later date'] as const;
+function storedAvailabilityDate(value: string | null | undefined): string {
+  const date = /^From (\d{4}-\d{2}-\d{2})$/.exec(value ?? '')?.[1];
+  return date &&
+    Number.isFinite(Date.parse(`${date}T00:00:00Z`)) &&
+    new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) === date
+    ? date
+    : '';
+}
+export function AddFarmWizard({
+  user,
+  initialFarm,
+  initialListing,
+  initialSpecification,
+  initialLocation,
+  initialStep = 1,
+}: Props) {
   const t = useTranslations('workspace.wizard');
   const ft = useTranslations('marketplace.options.farmTypes');
   const options = useTranslations('marketplace.options');
   const router = useRouter();
   const locale = useLocale();
+  const govLabels = useTranslations('marketplace.governorates');
+  const [customGovernorate, setCustomGovernorate] = useState(
+    Boolean(initialFarm?.governorate && !Object.values(GOVERNORATE_API_LABEL).includes(initialFarm.governorate)),
+  );
   const [step, setStep] = useState(Math.max(1, Math.min(7, initialStep)));
   const [visited, setVisited] = useState<number[]>([initialStep]);
   const [farm, setFarm] = useState(initialFarm);
@@ -56,6 +97,17 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
   const [facilities, setFacilities] = useState<Facility[] | null>(null);
   const [specDirty, setSpecDirty] = useState(false);
   const [listingDirty, setListingDirty] = useState(false);
+  const [availabilityDate, setAvailabilityDate] = useState(storedAvailabilityDate(initialListing?.availability));
+  const [pin, setPin] = useState<FarmPin | null>(
+    initialLocation?.privatePinLatitude != null && initialLocation.privatePinLongitude != null
+      ? { latitude: initialLocation.privatePinLatitude, longitude: initialLocation.privatePinLongitude }
+      : null,
+  );
+  const [locationDirty, setLocationDirty] = useState(false);
+  const [pinDirty, setPinDirty] = useState(false);
+  const [locationReady, setLocationReady] = useState(!initialFarm || Boolean(initialLocation));
+  const [locationError, setLocationError] = useState(false);
+  const [locationRetry, setLocationRetry] = useState(0);
   const [data, setData] = useState({
     name: initialFarm?.name ?? '',
     farmType: initialFarm?.farmType ?? '',
@@ -80,8 +132,37 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
     currentProduction: initialSpecification?.productionDetails.currentProduction ?? '',
     harvestSeasons: initialSpecification?.productionDetails.harvestSeasons ?? '',
     notes: initialSpecification?.productionDetails.notes ?? '',
+    nearestMainRoad: initialLocation?.nearestMainRoad ?? '',
+    roadDistanceKm: initialLocation?.roadDistanceKm?.toString() ?? '',
   });
+  useEffect(() => {
+    if (!initialFarm || initialLocation) return;
+    let active = true;
+    void jsonRequest<PrivateFarmLocation>(`/api/farms/${initialFarm.id}/private-location`)
+      .then((value) => {
+        if (!active) return;
+        setPin(
+          value.privatePinLatitude != null && value.privatePinLongitude != null
+            ? { latitude: value.privatePinLatitude, longitude: value.privatePinLongitude }
+            : null,
+        );
+        setData((old) => ({
+          ...old,
+          nearestMainRoad: value.nearestMainRoad ?? '',
+          roadDistanceKm: value.roadDistanceKm?.toString() ?? '',
+        }));
+        setLocationReady(true);
+        setLocationError(false);
+      })
+      .catch(() => {
+        if (active) setLocationError(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [initialFarm, initialLocation, locationRetry]);
   const [crops, setCrops] = useState(initialSpecification?.cropTypes ?? []);
+  const [amenities, setAmenities] = useState(initialSpecification?.amenities ?? []);
   const canEdit = (!farm || farm.myRoles.includes('owner')) && (!listing || editableListing(listing.status));
   const uploading = mediaBusy || docsBusy;
   const current = wizardSteps[step - 1]!;
@@ -89,6 +170,7 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
     setData((old) => ({ ...old, [key]: value }));
     setDirty(true);
     setSaved(false);
+    if (key === 'nearestMainRoad' || key === 'roadDistanceKm') setLocationDirty(true);
     if (
       [
         'listingType',
@@ -150,6 +232,10 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
       `/${locale}/my/farms/${farmId}/list?step=${next}${requestId ? `&listingId=${encodeURIComponent(requestId)}` : ''}`,
     );
   async function persist(includeListing = step >= 4) {
+    if (!locationReady) throw new Error('location unavailable');
+    if (data.roadDistanceKm && (!Number.isFinite(Number(data.roadDistanceKm)) || Number(data.roadDistanceKm) < 0)) {
+      throw new Error('invalid road distance');
+    }
     if (!requiredValid(true)) {
       setInvalid(true);
       throw new Error('required');
@@ -178,9 +264,24 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
     );
     setFarm(stored);
     syncUrl(stored.id, listing?.id);
+    if (locationDirty) {
+      const confirmed = await jsonRequest<PrivateFarmLocation>(`/api/farms/${stored.id}/private-location`, 'PATCH', {
+        ...(pinDirty ? { privatePinLatitude: pin?.latitude ?? null, privatePinLongitude: pin?.longitude ?? null } : {}),
+        nearestMainRoad: data.nearestMainRoad.trim() || null,
+        roadDistanceKm: data.roadDistanceKm === '' ? null : Number(data.roadDistanceKm),
+      });
+      setPin(
+        confirmed.privatePinLatitude != null && confirmed.privatePinLongitude != null
+          ? { latitude: confirmed.privatePinLatitude, longitude: confirmed.privatePinLongitude }
+          : null,
+      );
+      setLocationDirty(false);
+      setPinDirty(false);
+    }
     if (specDirty) {
       await jsonRequest(`/api/farms/${stored.id}/specifications`, 'PATCH', {
         cropTypes: crops,
+        amenities,
         productionDetails: {
           currentProduction: data.currentProduction.trim() || null,
           harvestSeasons: data.harvestSeasons.trim() || null,
@@ -234,6 +335,22 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
         return;
       }
       go(2);
+      return;
+    }
+    if (((action === 'next' && step === 3) || action === 'submit') && !data.waterSource) {
+      setInvalid(true);
+      setError(t('required'));
+      setStep(3);
+      return;
+    }
+    if (
+      ((action === 'next' && step === 4) || action === 'submit') &&
+      data.availability === 'From a later date' &&
+      !availabilityDate
+    ) {
+      setInvalid(true);
+      setError(t('required'));
+      setStep(4);
       return;
     }
     busy.current = true;
@@ -296,11 +413,22 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
   ) => (
     <TextInput
       key={key}
+      className="min-w-0"
       name={key}
       label={t(`fields.${key as Exclude<keyof typeof data, 'listingType'>}`)}
       value={data[key]}
       onChange={(event) => update(key, event.target.value)}
-      error={invalid && props.required && !data[key].trim() ? t('required') : undefined}
+      error={
+        invalid &&
+        key === 'areaFeddan' &&
+        (!/^\d+(\.\d{1,2})?$/.test(data.areaFeddan) ||
+          Number(data.areaFeddan) < 0.01 ||
+          Number(data.areaFeddan) > 9999999999.99)
+          ? t('areaError')
+          : invalid && props.required && !data[key].trim()
+            ? t('required')
+            : undefined
+      }
       fieldStyle="form"
       {...props}
     />
@@ -312,6 +440,21 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
     if (!value) return t('notStated');
     if (key === 'farmType' && farmTypes.includes(value as (typeof farmTypes)[number]))
       return ft(value as (typeof farmTypes)[number]);
+    if (key === 'availability') {
+      if (value === 'Available now') return t('availableNow');
+      if (value === 'From a later date') return t('availableLater');
+      const date = storedAvailabilityDate(value);
+      if (date)
+        return t('fromDate', {
+          date: new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(
+            new Date(`${date}T00:00:00Z`),
+          ),
+        });
+    }
+    if (key === 'governorate') {
+      const known = governorates.find((item) => GOVERNORATE_API_LABEL[item] === value);
+      if (known) return govLabels(known);
+    }
     const group =
       key === 'waterSource'
         ? 'waterSources'
@@ -330,6 +473,8 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
     <Select
       name={key}
       label={t(`fields.${key}`)}
+      required={key === 'waterSource'}
+      error={invalid && key === 'waterSource' && !data.waterSource ? t('required') : undefined}
       value={data[key]}
       onChange={(event) => update(key, event.target.value)}
       fieldStyle="form"
@@ -418,7 +563,7 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                   type="button"
                   size="sm"
                   variant="outline"
-                  disabled={pending || uploading || !canEdit}
+                  disabled={pending || uploading || !canEdit || !locationReady}
                   onClick={() => void perform('exit')}
                 >
                   {t('saveExit')}
@@ -431,7 +576,7 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                 variant="ghost"
                 size="sm"
                 className="tablet:hidden"
-                disabled={pending || uploading || !canEdit}
+                disabled={pending || uploading || !canEdit || !locationReady}
                 onClick={() => void perform('save')}
               >
                 {t('save')}
@@ -535,7 +680,7 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                           {farmTypes.map((type) => (
                             <label
                               key={type}
-                              className={`flex min-h-52 cursor-pointer items-center justify-between gap-12 rounded-lg border p-12 type-label-small-strong ${data.farmType === type ? 'border-brand-primary bg-bg-selected text-text-brand' : 'border-border-hairline'}`}
+                              className={`flex min-h-52 cursor-pointer items-center justify-between gap-12 rounded-lg border p-12 type-label-small-strong ${invalid && !data.farmType ? 'border-status-favorite' : data.farmType === type ? 'border-brand-primary bg-bg-selected text-text-brand' : 'border-border-hairline'}`}
                             >
                               <span className="flex items-center gap-8">
                                 <Icon name="tree" size={18} className="hidden tablet:block" />
@@ -571,44 +716,84 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                   <div className="flex flex-col gap-24">
                     <WizardCard icon="location-pin" title={t('locationCard')}>
                       <div className="grid gap-24 tablet:grid-cols-2">
-                        {text('governorate', { required: true, maxLength: 120 })}
+                        <div className="flex min-w-0 flex-col gap-16">
+                          <Select
+                            label={t('fields.governorate')}
+                            name="governorate"
+                            value={customGovernorate ? '__other' : data.governorate}
+                            required
+                            fieldStyle="form"
+                            onChange={(event) => {
+                              const custom = event.target.value === '__other';
+                              setCustomGovernorate(custom);
+                              update('governorate', custom ? '' : event.target.value);
+                            }}
+                          >
+                            <option value="">{t('select')}</option>
+                            {governorates.map((key) => (
+                              <option key={key} value={GOVERNORATE_API_LABEL[key]}>
+                                {govLabels(key)}
+                              </option>
+                            ))}
+                            <option value="__other">{t('otherGovernorate')}</option>
+                          </Select>
+                          {customGovernorate && text('governorate', { required: true, maxLength: 120 })}
+                        </div>
                         {text('areaName', { maxLength: 120 })}
                       </div>
-                      <div
-                        className="flex min-h-280 flex-col items-center justify-center gap-16 rounded-lg border border-border-subtle bg-bg-muted p-24 text-center"
-                        aria-describedby="map-unavailable"
-                      >
-                        <Icon name="location-pin" size={36} className="text-text-muted" />
-                        <p className="type-label-medium">{t('mapUnavailable')}</p>
-                        <Button type="button" variant="outline" disabled>
-                          {t('placePin')}
+                      {step === 2 && (
+                        <FarmLocationMap
+                          pin={pin}
+                          disabled={!canEdit || pending || !locationReady}
+                          onChange={(value) => {
+                            setPin(value);
+                            setPinDirty(true);
+                            setLocationDirty(true);
+                            setDirty(true);
+                            setSaved(false);
+                          }}
+                        />
+                      )}
+                      {!locationReady && (
+                        <p className="type-body-caption text-text-muted" role="status">
+                          {t(locationError ? 'locationLoadError' : 'locationLoading')}
+                        </p>
+                      )}
+                      {locationError && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setLocationError(false);
+                            setLocationRetry((value) => value + 1);
+                          }}
+                        >
+                          {t('retryLocation')}
                         </Button>
-                      </div>
-                      <p id="map-unavailable" className="type-body-caption text-text-muted">
-                        {t('noPin')}
-                      </p>
+                      )}
+                      <p className="type-body-caption text-text-muted">{t('privatePinNote')}</p>
                     </WizardCard>
                     <WizardCard icon="location-pin" title={t('access')} description={t('accessNote')}>
                       <TextInput
                         label={t('nearestRoad')}
                         name="nearestMainRoad"
-                        value=""
-                        disabled
+                        value={data.nearestMainRoad}
+                        onChange={(event) => update('nearestMainRoad', event.target.value)}
+                        maxLength={255}
+                        disabled={!canEdit || pending || !locationReady}
                         fieldStyle="form"
-                        aria-describedby="road-unavailable"
                       />
                       <TextInput
                         label={t('roadDistance')}
                         name="roadDistanceKm"
-                        value=""
-                        disabled
+                        value={data.roadDistanceKm}
+                        onChange={(event) => update('roadDistanceKm', event.target.value)}
+                        min={0}
+                        step="any"
+                        disabled={!canEdit || pending || !locationReady}
                         type="number"
                         fieldStyle="form"
-                        aria-describedby="road-unavailable"
                       />
-                      <p id="road-unavailable" className="type-body-caption text-text-muted">
-                        {t('roadUnavailable')}
-                      </p>
                     </WizardCard>
                     <WizardDisclosure icon="layer" title={t('land')} description={t('landNote')}>
                       {text('soilType', { maxLength: 120 })}
@@ -636,6 +821,39 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                           canEdit={canEdit && !pending}
                           onPendingChange={setFacilityPending}
                           onLoaded={setFacilities}
+                          amenities={
+                            <fieldset
+                              disabled={!canEdit || pending || (Boolean(initialFarm) && initialSpecification === null)}
+                            >
+                              <legend className="mb-12 type-label-form">{t('onFarm')}</legend>
+                              <div className="grid grid-cols-2 gap-12">
+                                {amenityKeys.map((key) => (
+                                  <label
+                                    key={key}
+                                    className={`flex min-h-56 cursor-pointer items-center gap-8 rounded-lg border p-12 type-label-small-strong ${amenities.includes(key) ? 'border-brand-primary bg-bg-selected text-text-brand' : 'border-border-hairline'}`}
+                                  >
+                                    <Icon name={amenityIcons[key]} size={18} className="hidden shrink-0 tablet:block" />
+                                    <span className="min-w-0 flex-1">{t(`amenities.${key}`)}</span>
+                                    <input
+                                      type="checkbox"
+                                      name="amenities"
+                                      value={key}
+                                      checked={amenities.includes(key)}
+                                      className="size-18 shrink-0 accent-brand-primary"
+                                      onChange={(event) => {
+                                        setAmenities((old) =>
+                                          event.target.checked ? [...old, key] : old.filter((value) => value !== key),
+                                        );
+                                        setSpecDirty(true);
+                                        setDirty(true);
+                                        setSaved(false);
+                                      }}
+                                    />
+                                  </label>
+                                ))}
+                              </div>
+                            </fieldset>
+                          }
                         />
                       </div>
                     )}
@@ -724,7 +942,61 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                       </p>
                     </WizardCard>
                     <WizardCard icon="clipboard-tick" title={t('availability')}>
-                      {text('availability', { maxLength: 60 })}
+                      <fieldset>
+                        <legend className="mb-12 type-label-form">{t('fields.availability')}</legend>
+                        <div className="grid grid-cols-2 gap-12">
+                          {availabilityChoices.map((value, index) => (
+                            <label
+                              key={value}
+                              className={`flex min-h-56 cursor-pointer items-center gap-8 rounded-lg border p-12 type-label-small-strong ${data.availability === value || (index === 1 && storedAvailabilityDate(data.availability)) ? 'border-brand-primary bg-bg-selected text-text-brand' : 'border-border-hairline'}`}
+                            >
+                              <input
+                                type="radio"
+                                name="availability"
+                                value={value}
+                                checked={
+                                  data.availability === value ||
+                                  (index === 1 && Boolean(storedAvailabilityDate(data.availability)))
+                                }
+                                onChange={() =>
+                                  update(
+                                    'availability',
+                                    index === 1 && availabilityDate ? `From ${availabilityDate}` : value,
+                                  )
+                                }
+                                className="size-18 shrink-0 accent-brand-primary"
+                              />
+                              {t(index === 0 ? 'availableNow' : 'availableLater')}
+                            </label>
+                          ))}
+                        </div>
+                        {(data.availability === 'From a later date' || storedAvailabilityDate(data.availability)) && (
+                          <TextInput
+                            className="mt-16 min-w-0"
+                            name="availabilityDate"
+                            label={t('availableFrom')}
+                            type="date"
+                            value={availabilityDate}
+                            required
+                            fieldStyle="form"
+                            error={invalid && !availabilityDate ? t('required') : undefined}
+                            onChange={(event) => {
+                              setAvailabilityDate(event.target.value);
+                              update(
+                                'availability',
+                                event.target.value ? `From ${event.target.value}` : 'From a later date',
+                              );
+                            }}
+                          />
+                        )}
+                        {data.availability &&
+                          !(availabilityChoices as readonly string[]).includes(data.availability) &&
+                          !storedAvailabilityDate(data.availability) && (
+                            <p className="mt-12 type-body-caption text-text-muted">
+                              {t('recordedAvailability', { value: data.availability })}
+                            </p>
+                          )}
+                      </fieldset>
                     </WizardCard>
                     <WizardCard icon="document-text" title={t('description')}>
                       <TextArea
@@ -754,11 +1026,17 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                         {(section === 1
                           ? ['name', 'farmType', 'mainActivity', 'areaFeddan', 'irrigationMethod']
                           : section === 2
-                            ? ['governorate', 'areaName', 'soilType', 'farmDescription']
+                            ? [
+                                'governorate',
+                                'areaName',
+                                'nearestMainRoad',
+                                'roadDistanceKm',
+                                'soilType',
+                                'farmDescription',
+                              ]
                             : section === 3
                               ? [
                                   'waterSource',
-                                  'energySource',
                                   'currentProduction',
                                   'harvestSeasons',
                                   'notes',
@@ -789,6 +1067,16 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                       </dl>
                       {section === 3 && (
                         <dl className="flex flex-col">
+                          <div className="grid grid-cols-2 gap-16 border-t border-border-hairline py-12 type-body-caption">
+                            <dt className="text-text-muted">{t('onFarm')}</dt>
+                            <dd className="wrap-anywhere text-end text-text-primary">
+                              {amenities.length
+                                ? amenities
+                                    .map((key) => (t as (value: string) => string)(`amenities.${key}`))
+                                    .join(', ')
+                                : t('notStated')}
+                            </dd>
+                          </div>
                           <div className="grid grid-cols-2 gap-16 border-t border-border-hairline py-12 type-body-caption">
                             <dt className="text-text-muted">{t('fields.cropTypes')}</dt>
                             <dd className="text-end">
@@ -873,7 +1161,7 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
                   type="button"
                   variant="primary"
                   className="min-w-0 flex-1 whitespace-normal tablet:flex-none"
-                  disabled={pending || uploading || (!canEdit && step === 7)}
+                  disabled={pending || uploading || (!locationReady && step > 1) || (!canEdit && step === 7)}
                   onClick={() => (canEdit ? void perform(step === 7 ? 'submit' : 'next') : go(Math.min(7, step + 1)))}
                 >
                   {pending
@@ -921,7 +1209,7 @@ export function AddFarmWizard({ user, initialFarm, initialListing, initialSpecif
         <Button
           type="button"
           variant="primary"
-          disabled={pending || uploading || !canEdit}
+          disabled={pending || uploading || !canEdit || !locationReady}
           onClick={() => void perform('exit')}
         >
           {t('saveLeave')}

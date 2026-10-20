@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button, ButtonLink } from '@/components/ui/Button';
-import { TextArea, TextInput } from '@/components/ui/Field';
+import { Select, TextArea, TextInput } from '@/components/ui/Field';
 import { Card } from '@/components/ui/Surface';
 import { Icon } from '@/components/icons/Icon';
 import { Dialog } from '@/components/overlay/Dialog';
@@ -18,6 +18,7 @@ import { jsonRequest } from '@/features/my-farms/types';
 import { managementTypes } from '@/lib/domain/enums';
 import type { ManagementRequest } from './ManagementRequestDetail';
 import type { Farm } from '@/features/my-farms/types';
+import { managementGoals, managementChallenges, formatManagementChoices } from '@/features/phase7/reference-options';
 export type ManagementFarmOption = Pick<Farm, 'id' | 'name'> &
   Partial<Pick<Farm, 'governorate' | 'areaName' | 'areaFeddan' | 'farmType' | 'waterSource' | 'irrigationMethod'>>;
 
@@ -46,6 +47,7 @@ export function ManagementWizard({
     [docsPending, setDocsPending] = useState(false);
   const busy = useRef(false);
   const [leave, setLeave] = useState(false);
+  const [customTerm, setCustomTerm] = useState(Boolean(initial?.term && initial.term !== 'One year'));
   const [farmId, setFarmId] = useState(
     initial?.farmId ?? (farms.some((f) => f.id === initialFarmId) ? initialFarmId! : (farms[0]?.id ?? '')),
   );
@@ -55,6 +57,9 @@ export function ManagementWizard({
     term: initial?.term ?? '',
     currentSituation: initial?.currentSituation ?? '',
     goals: (initial?.goals ?? []).join('\n'),
+    challenges: initial?.challenges ?? ([] as string[]),
+    outcomes: initial?.outcomes ?? '',
+    additionalInformation: initial?.additionalInformation ?? '',
   });
   const steps = ([1, 2, 3, 4, 5, 6, 7] as const).map((i) => w(`managementSteps.s${i}`));
   const context = farms.find((f) => f.id === farmId)?.name ?? initial?.farmName;
@@ -85,6 +90,14 @@ export function ManagementWizard({
     setData((old) => ({ ...old, [key]: value }));
     setDirty(true);
   }
+  const goals = data.goals
+    .split('\n')
+    .map((g) => g.trim())
+    .filter(Boolean);
+  const customGoals = data.goals
+    .split('\n')
+    .filter((g) => !managementGoals.includes(g.trim() as (typeof managementGoals)[number]))
+    .join('\n');
   function go(n: number) {
     setStep(n);
     window.scrollTo(0, 0);
@@ -95,6 +108,8 @@ export function ManagementWizard({
       ...data,
       term: data.term.trim(),
       currentSituation: data.currentSituation.trim(),
+      outcomes: data.outcomes.trim(),
+      additionalInformation: data.additionalInformation.trim(),
       goals: data.goals
         .split('\n')
         .map((g) => g.trim())
@@ -141,15 +156,26 @@ export function ManagementWizard({
           `/api/farm-management-requests/${updated.id}/submit`,
           'POST',
         );
-        if (submitted?.id !== updated.id || submitted.status !== 'underReview' || !submitted.requestNumber)
+        if (submitted?.id !== updated.id || submitted.status !== 'underFarmExitReview' || !submitted.requestNumber)
           throw new Error('confirmation');
         setReq(submitted);
         setSuccess(true);
       } else if (action === 'exit') router.push('/my/management');
       else go(Math.min(7, step + 1));
-    } catch {
+    } catch (cause) {
+      const status = cause instanceof Error ? cause.message : '';
       setError(
-        !farmId || !data.professionalNeed ? w('chooseNeed') : action === 'submit' ? t('submitError') : t('saveError'),
+        !farmId || !data.professionalNeed
+          ? w('chooseNeed')
+          : status === '401'
+            ? t('sessionError')
+            : status === '409'
+              ? t('conflictError')
+              : status === '400'
+                ? t('validationError')
+                : action === 'submit'
+                  ? t('submitError')
+                  : t('saveError'),
       );
     } finally {
       busy.current = false;
@@ -291,31 +317,41 @@ export function ManagementWizard({
                 {managementTypes.map((type) => (
                   <Choice
                     key={type}
+                    type="radio"
                     name="managementTypes"
                     value={type}
                     label={t(`managementTypeLabels.${type}`)}
                     checked={data.managementTypes.includes(type)}
-                    onChange={() =>
-                      update(
-                        'managementTypes',
-                        data.managementTypes.includes(type)
-                          ? data.managementTypes.filter((v) => v !== type)
-                          : [...data.managementTypes, type],
-                      )
-                    }
+                    onChange={() => update('managementTypes', [type])}
                   />
                 ))}
               </div>
             </WizardCard>
             <WizardCard icon="calendar" title={t('term')}>
-              <TextInput
+              <Select
                 label={t('term')}
                 name="term"
-                value={data.term}
-                maxLength={100}
-                onChange={(e) => update('term', e.target.value)}
+                value={customTerm ? 'custom' : data.term}
+                onChange={(e) => {
+                  setCustomTerm(e.target.value === 'custom');
+                  update('term', e.target.value === 'custom' ? '' : e.target.value);
+                }}
                 fieldStyle="form"
-              />
+              >
+                <option value="">{t('selectTerm')}</option>
+                <option value="One year">{t('oneYear')}</option>
+                <option value="custom">{t('customTerm')}</option>
+              </Select>
+              {customTerm && (
+                <TextInput
+                  label={t('customTerm')}
+                  name="customTerm"
+                  value={data.term}
+                  maxLength={100}
+                  onChange={(e) => update('term', e.target.value)}
+                  fieldStyle="form"
+                />
+              )}
             </WizardCard>
           </div>
           <div hidden={step !== 3} className="flex flex-col gap-24">
@@ -329,19 +365,92 @@ export function ManagementWizard({
                 onChange={(e) => update('currentSituation', e.target.value)}
                 fieldStyle="form"
               />
+              <fieldset className="flex flex-col gap-12">
+                <legend className="mb-12 type-label-small-strong">{t('challenges')}</legend>
+                <div className="grid gap-12 tablet:grid-cols-2">
+                  {[
+                    ...managementChallenges,
+                    ...data.challenges.filter(
+                      (v) => !managementChallenges.includes(v as (typeof managementChallenges)[number]),
+                    ),
+                  ].map((value) => {
+                    const index = managementChallenges.indexOf(value as (typeof managementChallenges)[number]);
+                    return (
+                      <Choice
+                        key={value}
+                        name="challenges"
+                        value={value}
+                        label={index < 0 ? value : t(`challengeOptions.c${index as 0 | 1 | 2 | 3}`)}
+                        checked={data.challenges.includes(value)}
+                        onChange={() =>
+                          update(
+                            'challenges',
+                            data.challenges.includes(value)
+                              ? data.challenges.filter((v) => v !== value)
+                              : [...data.challenges, value],
+                          )
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </fieldset>
             </WizardCard>
             <WizardCard icon="tree" title={w('goalsTitle')}>
+              <div className="flex flex-col gap-12">
+                {managementGoals.map((value, index) => (
+                  <Choice
+                    key={value}
+                    name="goalOptions"
+                    value={value}
+                    label={t(`goalOptions.g${index as 0 | 1 | 2}`)}
+                    checked={goals.includes(value)}
+                    onChange={() =>
+                      update(
+                        'goals',
+                        [
+                          ...goals.filter(
+                            (g) => managementGoals.includes(g as (typeof managementGoals)[number]) && g !== value,
+                          ),
+                          ...(goals.includes(value) ? [] : [value]),
+                          customGoals,
+                        ]
+                          .filter(Boolean)
+                          .join('\n'),
+                      )
+                    }
+                  />
+                ))}
+              </div>
               <TextArea
-                label={t('goals')}
+                label={t('customGoals')}
                 name="goals"
                 rows={4}
-                value={data.goals}
-                onChange={(e) => update('goals', e.target.value)}
+                value={customGoals}
+                onChange={(e) =>
+                  update(
+                    'goals',
+                    [
+                      ...goals.filter((g) => managementGoals.includes(g as (typeof managementGoals)[number])),
+                      e.target.value,
+                    ]
+                      .filter(Boolean)
+                      .join('\n'),
+                  )
+                }
                 fieldStyle="form"
               />
             </WizardCard>
             <WizardDisclosure icon="verify-filled" title={w('outcomes')} description={w('optionalNote')}>
-              <p className="type-body-caption text-text-muted">{w('writeOnly')}</p>
+              <TextArea
+                label={w('outcomes')}
+                name="outcomes"
+                value={data.outcomes}
+                maxLength={8000}
+                rows={4}
+                onChange={(e) => update('outcomes', e.target.value)}
+                fieldStyle="form"
+              />
             </WizardDisclosure>
           </div>
           <div hidden={step !== 4}>
@@ -370,8 +479,15 @@ export function ManagementWizard({
           </div>
           <div hidden={step !== 6}>
             <WizardCard icon="messages" title={w('additional')}>
-              <TextArea label={w('additional')} value="" rows={4} disabled fieldStyle="form" />
-              <p className="type-body-caption text-text-muted">{w('writeOnly')}</p>
+              <TextArea
+                label={w('additional')}
+                name="additionalInformation"
+                value={data.additionalInformation}
+                maxLength={8000}
+                rows={4}
+                onChange={(e) => update('additionalInformation', e.target.value)}
+                fieldStyle="form"
+              />
             </WizardCard>
           </div>
           <div hidden={step !== 7} className="flex flex-col gap-24">
@@ -402,7 +518,10 @@ export function ManagementWizard({
                         ]
                       : [
                           [t('currentSituation'), data.currentSituation],
-                          [w('goalsTitle'), data.goals],
+                          [w('goalsTitle'), formatManagementChoices(goals, managementGoals, [t('goalOptions.g0'), t('goalOptions.g1'), t('goalOptions.g2')])],
+                          [t('challenges'), formatManagementChoices(data.challenges, managementChallenges, [t('challengeOptions.c0'), t('challengeOptions.c1'), t('challengeOptions.c2'), t('challengeOptions.c3')])],
+                          [w('outcomes'), data.outcomes],
+                          [w('additional'), data.additionalInformation],
                         ]
                   ).map(([label, value]) => (
                     <div

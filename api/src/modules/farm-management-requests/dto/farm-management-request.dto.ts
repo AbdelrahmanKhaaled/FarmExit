@@ -34,6 +34,26 @@ export class CreateFarmManagementRequestDto {
   @IsArray()
   @IsString({ each: true })
   goals?: string[];
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  challenges?: string[];
+
+  @ApiPropertyOptional({ maxLength: 8000 })
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MaxLength(8000)
+  outcomes?: string;
+
+  @ApiPropertyOptional({ maxLength: 8000 })
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MaxLength(8000)
+  additionalInformation?: string;
 }
 
 export class UpdateFarmManagementRequestDto {
@@ -106,6 +126,9 @@ export class FarmManagementRequestResponseDto {
   @ApiProperty({ nullable: true, type: String }) term!: string | null;
   @ApiProperty({ nullable: true, type: String }) currentSituation!: string | null;
   @ApiProperty({ type: [String], nullable: true }) goals!: string[] | null;
+  @ApiProperty({ type: [String], nullable: true }) challenges!: string[] | null;
+  @ApiProperty({ nullable: true, type: String }) outcomes!: string | null;
+  @ApiProperty({ nullable: true, type: String }) additionalInformation!: string | null;
   @ApiProperty({ type: [FarmManagementReviewFeedbackDto] }) reviews!: FarmManagementReviewFeedbackDto[];
   @ApiProperty({ nullable: true, type: String }) createdAt!: string | null;
   @ApiProperty({ nullable: true, type: String }) updatedAt!: string | null;

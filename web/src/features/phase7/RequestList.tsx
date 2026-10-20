@@ -16,7 +16,7 @@ export function RequestList({ items, professional = false }: { items: Phase7List
   const w = useTranslations('workspace.phase7'),
     t = useTranslations(professional ? 'workspace.professionalVerification' : 'workspace.management');
   const [filter, setFilter] = useState('all');
-  const statuses = ['draft', 'underReview', 'changesRequested', 'approved', 'rejected', 'withdrawn'] as const;
+  const statuses = ['draft', 'underFarmExitReview', 'changesRequested', 'approved', 'rejected', 'withdrawn'] as const;
   const shown = filter === 'all' ? items : items.filter((r) => r.status === filter);
   return (
     <div data-testid="phase7-request-list" className="flex flex-col gap-24">

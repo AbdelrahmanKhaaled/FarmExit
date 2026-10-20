@@ -83,7 +83,7 @@ export function VerificationRequestDetail({
           `/api/professional-verification-requests/${req.id}/submit`,
           'POST',
         );
-        if (updated?.id !== req.id || updated.status !== 'underReview' || !updated.requestNumber)
+        if (updated?.id !== req.id || updated.status !== 'underFarmExitReview' || !updated.requestNumber)
           throw new Error('confirmation');
         setReq(updated);
         setSuccess(true);

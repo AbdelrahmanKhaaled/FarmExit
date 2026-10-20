@@ -89,6 +89,10 @@ for (const locale of ['en', 'ar'])
         .click();
       await page.goto(`/${locale}/phase6/wizard?step=6`, { waitUntil: 'networkidle' });
       const docs = page.getByTestId('request-documents-panel');
+      await docs
+        .locator('summary')
+        .filter({ hasText: locale === 'ar' ? 'مستندات إضافية' : 'Additional documents' })
+        .click();
       await docs.getByTestId('document-file').setInputFiles({
         name: 'visual-only.pdf',
         mimeType: 'application/pdf',

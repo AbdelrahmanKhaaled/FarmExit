@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -31,10 +32,7 @@ import { CurrentAuth } from '../auth/auth.decorators';
 import type { AuthContext } from '../auth/auth.types';
 import { ForwardingDecisionDto } from './dto/forwarding-decision.dto';
 import { ListRequestsQueryDto } from './dto/list-requests-query.dto';
-import {
-  RequestListResponseDto,
-  RequestResponseDto,
-} from './dto/request-response.dto';
+import { RequestListResponseDto, RequestResponseDto } from './dto/request-response.dto';
 import { WithdrawRequestDto } from './dto/withdraw-request.dto';
 import { UploadRequestDocumentBodyDto, UploadRequestDocumentDto } from './dto/upload-request-document.dto';
 import type { RequestDocumentMetadataDto } from './request-documents.service';
@@ -61,25 +59,20 @@ export class RequestsController {
     description: 'Returns a paginated list of all requests created by the authenticated caller across all types.',
   })
   @ApiOkResponse({ type: RequestListResponseDto })
-  listMine(
-    @CurrentAuth() auth: AuthContext,
-    @Query() query: ListRequestsQueryDto,
-  ): Promise<RequestListResponseDto> {
+  listMine(@CurrentAuth() auth: AuthContext, @Query() query: ListRequestsQueryDto): Promise<RequestListResponseDto> {
     return this.requests.listMine(auth.userId, query);
   }
 
   @Get(':id')
   @ApiOperation({
     summary: 'View own request details',
-    description: 'Returns full details, permitted status history, review feedback, and attached documents for a request owned by the caller.',
+    description:
+      'Returns full details, permitted status history, review feedback, and attached documents for a request owned by the caller.',
   })
   @ApiParam({ name: 'id', example: '1', description: 'Request ID' })
   @ApiOkResponse({ type: RequestResponseDto })
   @ApiNotFoundResponse({ description: 'Request not found or not owned by caller' })
-  getMine(
-    @CurrentAuth() auth: AuthContext,
-    @Param('id', ParseBigIntIdPipe) id: bigint,
-  ): Promise<RequestResponseDto> {
+  getMine(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint): Promise<RequestResponseDto> {
     return this.requests.getMine(auth.userId, id);
   }
 
@@ -87,7 +80,8 @@ export class RequestsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Submit a draft request for FarmExit review',
-    description: 'Transitions a draft request into review status. Drafts cannot be reviewed or forwarded until submitted.',
+    description:
+      'Transitions a draft request into review status. Drafts cannot be reviewed or forwarded until submitted.',
   })
   @ApiParam({ name: 'id', example: '1', description: 'Request ID' })
   @ApiOkResponse({ type: RequestResponseDto })
@@ -104,7 +98,8 @@ export class RequestsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Withdraw an active request',
-    description: 'Allows a requester to withdraw a pending, draft, or under-review request when permitted by the workflow.',
+    description:
+      'Allows a requester to withdraw a pending, draft, or under-review request when permitted by the workflow.',
   })
   @ApiParam({ name: 'id', example: '1', description: 'Request ID' })
   @ApiOkResponse({ type: RequestResponseDto })
@@ -122,7 +117,8 @@ export class RequestsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Owner decision on a forwarded request',
-    description: 'Allows the recipient party (e.g. farm owner) to record an acceptance or decline on a mediated forwarded request.',
+    description:
+      'Allows the recipient party (e.g. farm owner) to record an acceptance or decline on a mediated forwarded request.',
   })
   @ApiParam({ name: 'id', example: '1', description: 'Request ID' })
   @ApiParam({ name: 'forwardingId', example: '1', description: 'Forwarding record ID' })
@@ -139,7 +135,18 @@ export class RequestsController {
     return this.requests.recordForwardingDecision(auth.userId, id, forwardingId, dto);
   }
 
+  @Get(':id/documents')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'List private document metadata for an owned request' })
+  listDocuments(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id', ParseBigIntIdPipe) id: bigint,
+  ): Promise<RequestDocumentMetadataDto[]> {
+    return this.requestDocuments.listMetadata(auth.userId, id);
+  }
+
   @Post(':id/documents')
+  @Header('Cache-Control', 'private, no-store')
   @UseInterceptors(UPLOAD)
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadRequestDocumentBodyDto })
@@ -149,17 +156,13 @@ export class RequestsController {
     @CurrentAuth() auth: AuthContext,
     @Param('id', ParseBigIntIdPipe) id: bigint,
     @Body() dto: UploadRequestDocumentDto,
-    @UploadedFile() file: UploadedImageFile,
+    @UploadedFile() file: UploadedImageFile | undefined,
   ): Promise<RequestDocumentMetadataDto> {
-    return this.requestDocuments.upload(auth.userId, id, dto.slotKey, {
-      buffer: file.buffer,
-      mimetype: file.mimetype,
-      originalname: file.originalname,
-      size: file.size,
-    }, dto.documentType);
+    return this.requestDocuments.upload(auth.userId, id, dto.slotKey, file, dto.documentType);
   }
 
   @Get(':id/documents/:documentId/download')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Download an owned request document (or staff with access)' })
   downloadDocument(
     @CurrentAuth() auth: AuthContext,

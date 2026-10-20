@@ -10,7 +10,10 @@ export async function GET(request: Request, { params }: Params) {
   const { id } = await params;
   const res = await fetchFarmExitApi(request, `/requests/${id}/documents`, { method: 'GET', accessToken });
   const data = await res.json().catch(() => null);
-  return NextResponse.json(data ?? { message: 'error' }, { status: res.status });
+  return NextResponse.json(data ?? { message: 'error' }, {
+    status: res.status,
+    headers: { 'Cache-Control': 'private, no-store' },
+  });
 }
 
 export async function POST(request: Request, { params }: Params) {
@@ -24,5 +27,8 @@ export async function POST(request: Request, { params }: Params) {
     accessToken,
   });
   const data = await res.json().catch(() => null);
-  return NextResponse.json(data ?? { message: 'error' }, { status: res.status });
+  return NextResponse.json(data ?? { message: 'error' }, {
+    status: res.status,
+    headers: { 'Cache-Control': 'private, no-store' },
+  });
 }

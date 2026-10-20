@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 import type { ProfessionalProfile } from '../../src/features/my-professional/ProfessionalHub';
-export async function isolatePhase7(page: Page, options: { fail?: boolean; malformedSubmit?: boolean } = {}) {
+export async function isolatePhase7(page: Page, options: { fail?: boolean; malformedSubmit?: boolean; requireProfileFirst?: boolean } = {}) {
+  let profileCreated = false;
   const mutations: { url: string; method: string; body: unknown }[] = [];
   let management = {
     id: '7001',
@@ -58,12 +59,15 @@ export async function isolatePhase7(page: Page, options: { fail?: boolean; malfo
     if (options.fail && method !== 'GET') return route.fulfill({ status: 503, json: { message: 'Isolated failure' } });
     if (url.endsWith('/documents')) {
       if (method === 'GET') return route.fulfill({ json: docs });
-      const doc = { ...docs[0]!, id: String(7401 + docs.length), originalName: 'new-copy.pdf' };
+      const multipart = req.postDataBuffer()?.toString('utf8') ?? '';
+      const slotKey = /name="slotKey"\r\n\r\n([^\r]+)/.exec(multipart)?.[1] ?? 'missing';
+      const doc = { ...docs[0]!, slotKey, id: String(7401 + docs.length), originalName: 'new-copy.pdf' };
       docs.unshift(doc);
       return route.fulfill({ json: doc });
     }
     if (url.endsWith('/facilities')) return route.fulfill({ json: { items: [] } });
     if (url === '/api/professional-profile/capabilities' && method === 'POST') {
+      if (options.requireProfileFirst && !profileCreated) return route.fulfill({ status: 404, json: { message: 'Professional profile not found' } });
       profile = {
         ...profile,
         capabilities: [
@@ -102,6 +106,7 @@ export async function isolatePhase7(page: Page, options: { fail?: boolean; malfo
       return route.fulfill({ json: profile });
     }
     if (url === '/api/professional-profile') {
+      if (method === 'PUT') profileCreated = true;
       profile = { ...profile, ...body };
       return route.fulfill({ json: profile });
     }
@@ -109,13 +114,13 @@ export async function isolatePhase7(page: Page, options: { fail?: boolean; malfo
       return route.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 50 } });
     if (url.includes('professional-verification-requests')) {
       if (url.endsWith('/submit'))
-        verification = { ...verification, status: options.malformedSubmit ? 'draft' : 'underReview' };
+        verification = { ...verification, status: options.malformedSubmit ? 'draft' : 'underFarmExitReview' };
       else verification = { ...verification, ...body };
       return route.fulfill({ json: verification });
     }
     if (url.includes('management-requests')) {
       if (url.endsWith('/submit'))
-        management = { ...management, status: options.malformedSubmit ? 'draft' : 'underReview' };
+        management = { ...management, status: options.malformedSubmit ? 'draft' : 'underFarmExitReview' };
       else management = { ...management, ...body };
       return route.fulfill({ json: management });
     }

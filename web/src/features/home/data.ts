@@ -103,8 +103,8 @@ const kebab = (key: string) => key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}
 export const homeLinks = {
   farms: '/farms',
   farmDetails: (key: FarmKey) => `/farms/${kebab(key)}`,
-  listYourFarm: '/list-your-farm',
+  listYourFarm: '/my/farms/new',
   management: '/management',
-  managementRequest: '/management/request',
+  managementRequest: '/my/management/new',
   managementApply: (key: RequestKey) => `/management/${kebab(key)}`,
 } as const;

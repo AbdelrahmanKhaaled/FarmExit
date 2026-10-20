@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
@@ -65,7 +65,21 @@ function pairs<T>(items: T[]) {
   return rows;
 }
 
-export function FarmDetailsView({ details, similar }: { details: FarmDetails; similar: MarketplaceListing[] }) {
+type Href = ComponentProps<typeof Link>['href'];
+
+export function FarmDetailsView({
+  details,
+  similar,
+  listingSlug,
+  requestHref: requestHrefProp,
+  offerHref: offerHrefProp,
+}: {
+  details: FarmDetails;
+  similar: MarketplaceListing[];
+  listingSlug?: string;
+  requestHref?: Href;
+  offerHref?: Href;
+}) {
   const locale = useLocale() as Locale;
   const t = useTranslations('farm.details');
   const tc = useTranslations('farm.card');
@@ -75,7 +89,7 @@ export function FarmDetailsView({ details, similar }: { details: FarmDetails; si
   const { listing } = details;
   const name = L(listing.name);
   const sale = listing.purpose === 'sale';
-  const governorate = tm(`governorates.${listing.governorate}`);
+  const governorate = listing.governorateDisplay?.[locale] ?? tm(`governorates.${listing.governorate}`);
   const location = tc('location', { area: L(listing.area.label), governorate });
   const short = (amount: number) => t('price.amount', shortEgp(amount));
   const areaText = tc('areaValue', { count: listing.areaFeddan });
@@ -95,12 +109,21 @@ export function FarmDetailsView({ details, similar }: { details: FarmDetails; si
     }),
   };
 
-  // FarmExit is the intermediary: the request starts with FarmExit (guests sign in first). No direct owner contact.
-  const requestHref = {
-    pathname: accountLinks.signIn,
-    query: { next: `/farms/${listing.slug}`, request: sale ? 'details' : 'rental' },
-  };
-  const actionProps = { name, purpose: listing.purpose, price, score: listing.score, requestHref };
+  const requestHref =
+    requestHrefProp ??
+    ({
+      pathname: accountLinks.signIn,
+      query: { returnTo: `/farms/${listing.slug}`, request: sale ? 'details' : 'rental' },
+    } satisfies Href);
+  const offerHref =
+    offerHrefProp ??
+    (sale
+      ? ({
+          pathname: accountLinks.signIn,
+          query: { returnTo: `/my/proposals/new?slug=${encodeURIComponent(listing.slug)}` },
+        } satisfies Href)
+      : undefined);
+  const actionProps = { name, purpose: listing.purpose, price, score: listing.score, requestHref, offerHref };
 
   const listedDate = details.reference
     ? new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG-u-nu-latn' : 'en-US', {
@@ -158,7 +181,7 @@ export function FarmDetailsView({ details, similar }: { details: FarmDetails; si
   const { nearby, access, roadLabel } = details.location;
 
   return (
-    <SavedFarmProvider>
+    <SavedFarmProvider listingSlug={listingSlug ?? listing.slug} returnTo={`/farms/${listing.slug}`}>
       <main id="main" data-testid="farm-details" data-slug={listing.slug}>
         <Container className="flex h-128 items-center justify-between gap-24 tablet:h-148">
           <BackToResults label={t('back')} />
@@ -218,12 +241,12 @@ export function FarmDetailsView({ details, similar }: { details: FarmDetails; si
                 {keyFacts.map((fact) => (
                   <div
                     key={fact.label}
-                    className="flex items-center gap-12 rounded-xl border border-border-hairline bg-bg-surface py-12 ps-16 pe-20"
+                    className="flex min-w-0 max-w-full items-center gap-12 rounded-xl border border-border-hairline bg-bg-surface py-12 ps-16 pe-20"
                   >
-                    <Icon name={fact.icon} size={22} className="text-text-brand" />
-                    <div className="flex flex-col gap-1">
+                    <Icon name={fact.icon} size={22} className="shrink-0 text-text-brand" />
+                    <div className="flex min-w-0 flex-col gap-1">
                       <dt className="type-overline-spec text-text-muted">{fact.label}</dt>
-                      <dd className="type-label-large text-text-primary">{fact.value}</dd>
+                      <dd className="type-label-large wrap-anywhere text-text-primary">{fact.value}</dd>
                     </div>
                   </div>
                 ))}
@@ -252,16 +275,22 @@ export function FarmDetailsView({ details, similar }: { details: FarmDetails; si
                   <div
                     key={i}
                     className={cn(
-                      'flex flex-col py-14 tablet:flex-row tablet:gap-32',
+                      'flex flex-col tablet:flex-row tablet:gap-32 tablet:py-14',
                       i < rows.length - 1 && 'border-b border-border-subtle',
                     )}
                   >
-                    {row.map((spec) => (
-                      <div key={spec.label} className="flex min-w-0 flex-1 items-center gap-14 py-8">
+                    {row.map((spec, index) => (
+                      <div
+                        key={spec.label}
+                        className={cn(
+                          'flex min-h-60 min-w-0 flex-1 items-center gap-14 py-10 tablet:py-0',
+                          index > 0 && 'max-tablet:border-t max-tablet:border-border-subtle',
+                        )}
+                      >
                         <Medallion icon={spec.icon} />
                         <div className="flex min-w-0 flex-col gap-3">
                           <dt className="type-overline-spec text-text-muted">{spec.label}</dt>
-                          <dd className="type-label-large break-words text-text-primary">{spec.value}</dd>
+                          <dd className="type-label-large wrap-anywhere text-text-primary">{spec.value}</dd>
                         </div>
                       </div>
                     ))}
@@ -381,7 +410,7 @@ export function FarmDetailsView({ details, similar }: { details: FarmDetails; si
                   {t('band.title')}
                 </h2>
                 <p className="type-body-large text-overlay-on-dark-body">{t('band.body')}</p>
-                <ol className="flex flex-col gap-12 pt-12 tablet:flex-row tablet:gap-24">
+                <ol className="sr-only tablet:not-sr-only tablet:flex tablet:gap-24 tablet:pt-12">
                   {(['one', 'two', 'three'] as const).map((step, i) => (
                     <li key={step} className="flex flex-1 flex-col gap-6 border-t border-overlay-gold-hairline pt-14">
                       <span className="type-numeric-index text-brand-gold">{`0${i + 1}`}</span>
@@ -414,7 +443,7 @@ export function FarmDetailsView({ details, similar }: { details: FarmDetails; si
                 title={t('similar.title')}
                 subtitle={details.similar.subtitle ? L(details.similar.subtitle) : undefined}
               />
-              <ul className="-mx-16 flex snap-x snap-mandatory gap-16 overflow-x-auto px-16 pb-4 tablet:-mx-40 tablet:gap-24 tablet:px-40 desktop:mx-0 desktop:grid desktop:grid-cols-3 desktop:overflow-visible desktop:px-0 desktop:pb-0">
+              <ul className="-mx-16 flex items-start snap-x snap-mandatory gap-16 overflow-x-auto px-16 pb-4 max-desktop:[&>li>article]:h-auto tablet:-mx-40 tablet:gap-24 tablet:px-40 desktop:mx-0 desktop:grid desktop:grid-cols-3 desktop:items-stretch desktop:overflow-visible desktop:px-0 desktop:pb-0">
                 {similar.map((s) => (
                   <li key={s.slug} className="w-310 shrink-0 snap-start tablet:w-460 desktop:w-auto">
                     <FarmCard

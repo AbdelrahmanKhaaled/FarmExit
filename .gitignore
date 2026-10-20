@@ -60,3 +60,6 @@ api/backups/
 # Dashboard demo seed artifacts
 api/prisma/backups/
 api/prisma/.dashboard-demo-manifest.json
+/web/artifacts/
+/web/figma-baselines/
+/web/web/

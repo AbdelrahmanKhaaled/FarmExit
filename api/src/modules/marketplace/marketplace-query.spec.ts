@@ -47,7 +47,7 @@ describe('public marketplace query', () => {
       toPublicListing({
         id: 4n,
         publishedAt: new Date('2026-10-13T12:00:00.000Z'),
-        farm: { name: 'North Orchard', governorate: 'Beheira', areaName: 'Delengat', areaFeddan: new Prisma.Decimal('12.50') },
+        farm: { id: 10n, name: 'North Orchard', governorate: 'Beheira', areaName: 'Delengat', areaFeddan: new Prisma.Decimal('12.50') },
         listingDetail: {
           slug: 'sale-abcdef0123456789abcdef0123456789',
           listingType: 'sale',
@@ -67,7 +67,7 @@ describe('public marketplace query', () => {
     const item = toPublicListing({
       id: 4n,
       publishedAt: new Date('2026-10-13T12:00:00.000Z'),
-      farm: { name: 'North Orchard', governorate: 'Beheira', areaName: 'Delengat', areaFeddan: new Prisma.Decimal('12.50') },
+      farm: { id: 10n, name: 'North Orchard', governorate: 'Beheira', areaName: 'Delengat', areaFeddan: new Prisma.Decimal('12.50') },
       listingDetail: {
         slug: 'farm-4-sale-abcdef0123456789',
         listingType: 'sale',
@@ -93,6 +93,7 @@ describe('public marketplace query', () => {
       highlights: ['citrus'],
       publishedAt: '2026-10-13T12:00:00.000Z',
     });
-    expect(JSON.stringify(item)).not.toMatch(/privatePin|storageKey|licenceStatus|mobile|email|score|image/);
+    expect(JSON.stringify(item)).not.toMatch(/privatePin|storageKey|licenceStatus|mobile|email|scoreValue|scoreMax|image/);
+    expect(item).toHaveProperty('farmExitScore', null);
   });
 });

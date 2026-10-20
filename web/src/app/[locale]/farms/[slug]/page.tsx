@@ -3,44 +3,30 @@ import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
-import { sampleFarmDetails } from '@/lib/data/sample/farm-details';
+import { farmDetailsFromPublicListing } from '@/lib/data/public-farm-details';
+import { loadPublicListingBySlug } from '@/lib/data/load-farm-marketplace';
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
 import { FarmDetailsView } from '@/features/farm-details/FarmDetailsView';
+import { getWebsiteSession } from '@/lib/auth/session.server';
+import { gatedPortalHref } from '@/lib/auth/portal-href';
 
-/*
- * Farm Details — /[locale]/farms/[slug] (Figma: Farm Details page; Arabic: 08 · Arabic Web → AR / 01 Public /
- * Farm Details). Every published sample listing is prerendered; an unknown slug is a 404.
- */
-
-/* Without it, the first request for an unlisted slug gets the App Shell (200) while notFound() renders in the background. */
-export const ensureStatic = 'navigation';
-
-export function generateStaticParams() {
-  return sampleFarmDetails.slugs().map((slug) => ({ slug }));
-}
+export const instant = false;
 
 export async function generateMetadata({ params }: PageProps<'/[locale]/farms/[slug]'>): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!hasLocale(routing.locales, locale)) return {};
-  const details = sampleFarmDetails.bySlug(slug);
-  if (!details) return {};
-  const { listing } = details;
+  const listing = await loadPublicListingBySlug(slug);
+  if (!listing) return {};
   const t = await getTranslations({ locale, namespace: 'farm' });
-  const tm = await getTranslations({ locale, namespace: 'marketplace' });
-  const name = listing.name[locale];
+  const name = listing.name[locale as 'en' | 'ar'];
   return {
     title: t('details.metaTitle', { name }),
-    description: details.description
-      ? details.description[locale]
-      : t('details.metaDescription', {
-          name,
-          area: t('card.areaValue', { count: listing.areaFeddan }),
-          location: t('card.location', {
-            area: listing.area.label[locale],
-            governorate: tm(`governorates.${listing.governorate}`),
-          }),
-        }),
+    description: listing.listingDescription ?? t('details.metaDescription', {
+      name,
+      area: t('card.areaValue', { count: listing.areaFeddan }),
+      location: listing.area.label[locale as 'en' | 'ar'],
+    }),
   };
 }
 
@@ -48,17 +34,27 @@ export default async function FarmDetailsPage({ params }: PageProps<'/[locale]/f
   const { locale, slug } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const details = sampleFarmDetails.bySlug(slug);
-  if (!details) notFound();
-  const similar = details.similar.slugs.flatMap((s) => sampleFarmDetails.bySlug(s)?.listing ?? []);
+  const listing = await loadPublicListingBySlug(slug);
+  if (!listing) notFound();
+  const details = farmDetailsFromPublicListing(listing);
+  const session = await getWebsiteSession();
+  const inquiryPath = `/my/farm-details-requests/new?slug=${encodeURIComponent(slug)}`;
+  const requestHref = gatedPortalHref(locale, session, inquiryPath);
+  const offerHref = listing.purpose === 'sale'
+    ? gatedPortalHref(locale, session, `/my/proposals/new?slug=${encodeURIComponent(slug)}`)
+    : undefined;
 
   return (
     <>
       <Navbar />
-      <FarmDetailsView details={details} similar={similar} />
+      <FarmDetailsView
+        details={details}
+        similar={[]}
+        listingSlug={slug}
+        requestHref={requestHref}
+        offerHref={offerHref}
+      />
       <Footer />
-      {/* Room for the fixed Sticky Action Bar below the footer (mobile and tablet). */}
-      <div aria-hidden="true" className="h-89 desktop:hidden" />
     </>
   );
 }

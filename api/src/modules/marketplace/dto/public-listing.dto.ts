@@ -19,6 +19,14 @@ export class PublicListingDto {
   @ApiProperty({ nullable: true, type: String }) listingDescription: string | null;
   @ApiProperty({ type: [String] }) highlights: string[];
   @ApiProperty({ type: String, format: 'date-time', nullable: true }) publishedAt: string | null;
+  @ApiProperty({
+    nullable: true,
+    type: Number,
+    description:
+      'FarmExit Score on a 0–5 scale from the latest published FarmExit evaluation for this farm. ' +
+      'Null when no score is authorized for public release.',
+  })
+  farmExitScore: number | null;
 }
 
 export class PublicListingListDto {

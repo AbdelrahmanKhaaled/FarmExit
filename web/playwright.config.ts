@@ -43,13 +43,13 @@ export default defineConfig({
     // Arabic tablet and mobile run the Marketplace (Phase 3) and Farm Details (Phase 4) specs only.
     {
       name: 'tablet-ar',
-      testMatch: /(marketplace|farm-details)\.spec\.ts/,
+      testMatch: /(marketplace|farm-details|phase10-integration|phase5-auth|auth)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 1366 }, locale: 'ar-EG' },
       metadata: { locale: 'ar' },
     },
     {
       name: 'mobile-ar',
-      testMatch: /(marketplace|farm-details)\.spec\.ts/,
+      testMatch: /(marketplace|farm-details|phase10-integration|phase5-auth|auth)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 390, height: 844 },
@@ -67,6 +67,9 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
     // Keeps the dev-only Component Preview in this production build so shared components are tested (src/lib/dev-preview.ts).
-    env: { FX_DEV_PREVIEW: '1' },
+    env: {
+      FX_DEV_PREVIEW: '1',
+      FARMEXIT_API_URL: process.env.FARMEXIT_API_URL ?? 'http://127.0.0.1:4001/api/v1',
+    },
   },
 });

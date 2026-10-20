@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
 import { Icon, type IconName } from '@/components/icons/Icon';
@@ -10,7 +10,8 @@ import { PhotoGlassBadge } from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
 import { FavoriteButton } from '@/components/ui/IconButton';
 import { Card } from '@/components/ui/Surface';
-import { FarmExitScore } from './FarmExitScore';
+import { FarmExitScoreBlock } from './FarmExitScore';
+import { SavedFarmProvider, useSavedFarm } from '@/features/farm-details/saved-farm';
 
 /*
  * Figma: Components → Group / Farm Card → Farm Card (Layout = Grid, State = Default · Hover · Saved).
@@ -38,6 +39,7 @@ export type FarmCardData = {
   /** FarmExit Score out of 5 (FarmExit's own evaluation); omitted when no approved value exists. */
   score?: number | null;
   href: string;
+  listingId?: string;
 };
 
 const ATTRIBUTES: { key: 'area' | 'crop' | 'water'; icon: IconName }[] = [
@@ -59,6 +61,8 @@ export function FarmCard({ farm, sizes }: { farm: FarmCardData; sizes: string })
         illustrative={farm.illustrative}
         name={farm.name}
         aspect="aspect-[366/296]"
+        listingId={farm.listingId}
+        listingSlug={farm.href.split('/').pop()}
       />
 
       <div className="flex grow flex-col px-24 pt-20 pb-24">
@@ -80,7 +84,7 @@ export function FarmCard({ farm, sizes }: { farm: FarmCardData; sizes: string })
           ))}
         </ul>
 
-        {farm.score != null && <FarmExitScore score={farm.score} className="mt-20" />}
+        <FarmExitScoreBlock score={farm.score ?? null} className="mt-20" />
 
         <div className="mt-auto pt-20">
           <div className="flex items-start justify-between gap-12 border-t border-border-hairline pt-20">
@@ -117,6 +121,8 @@ export function FarmCardMedia({
   illustrative,
   name,
   aspect,
+  listingId,
+  listingSlug,
 }: {
   src: string;
   alt: string;
@@ -126,8 +132,11 @@ export function FarmCardMedia({
   name: string;
   /** Aspect-ratio utility for the photo, e.g. aspect-[366/296] (Grid) or aspect-[461/300] (Marketplace). */
   aspect: string;
+  listingId?: string;
+  listingSlug?: string;
 }) {
   const t = useTranslations('farm.card');
+  const locale = useLocale();
   const [saved, setSaved] = useState(false);
   return (
     <div className="px-8 pt-8">
@@ -141,9 +150,24 @@ export function FarmCardMedia({
         )}
         {/* 38px button centred in its 44px hit area, so the visible button sits 12px from the corner. */}
         <div className="absolute end-9 top-9 z-10">
-          <FavoriteButton saved={saved} label={t('save', { name })} onClick={() => setSaved((v) => !v)} />
+          {listingId && listingSlug ? (
+            <SavedFarmProvider
+              listingSlug={listingSlug}
+              listingId={listingId}
+              returnTo={`/${locale}/farms/${listingSlug}`}
+            >
+              <ListingFavorite label={t('save', { name })} />
+            </SavedFarmProvider>
+          ) : (
+            <FavoriteButton saved={saved} label={t('save', { name })} onClick={() => setSaved((v) => !v)} />
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+function ListingFavorite({ label }: { label: string }) {
+  const { saved, loading, toggle } = useSavedFarm();
+  return <FavoriteButton saved={saved} disabled={loading} label={label} onClick={toggle} />;
 }

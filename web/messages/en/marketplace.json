@@ -31,6 +31,11 @@
   },
   "results": {
     "count": "{count, plural, =0 {No sample listings} one {Showing # sample listing} other {Showing # sample listings}}",
+    "countLive": "{count, plural, =0 {No published listings} one {Showing # of {total} published} other {Showing # of {total} published}}",
+    "pageStatusLive": "Page {page} · {count} on this page · {total} published total",
+    "loading": "Loading published listings…",
+    "apiUnavailable": "Published listings are temporarily unavailable. Try again shortly.",
+    "metaLive": "Published listings reviewed by FarmExit before release",
     "meta": "Sample data · every listing is reviewed by FarmExit before it is published",
     "pageStatus": "{count, plural, one {Showing # sample listing} other {Showing # sample listings}} · page {page}",
     "loadMore": "Load more farms",
@@ -48,8 +53,13 @@
     "link": "How FarmExit works"
   },
   "filters": {
+    "summaryLive": "{applied} applied · {results} published listings",
+    "summaryPending": "{applied} filters selected · apply to see results",
+    "showLive": "Show {count} published listings",
+    "applyDraft": "Apply filters",
     "title": "Filters",
     "label": "Filter listings",
+    "unsupportedPublic": "Crop type, water, irrigation and energy filters are not available on the public marketplace API yet. Other filters still apply.",
     "clearAll": "Clear all",
     "button": "Filters · {count}",
     "summary": "{applied} applied · {results, plural, one {# sample listing} other {# sample listings}}",

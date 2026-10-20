@@ -1,0 +1,16 @@
+{
+  "metaTitle": "Management marketplace · FarmExit",
+  "metaDescription": "Farm owners post management requests. Professional managers apply with proposals reviewed by FarmExit.",
+  "breadcrumb": {
+    "label": "Breadcrumb",
+    "home": "Home",
+    "management": "Management"
+  },
+  "title": "Management marketplace",
+  "description": "Owners seek farm managers and agricultural engineers. FarmExit reviews each request before it is published. This is not a general job board.",
+  "trustNote": "Sample requests shown for layout review until public management discovery APIs are available.",
+  "submitRequest": "Submit a management request",
+  "notLiveTitle": "Public discovery not available yet",
+  "notLiveBody": "Farm management requests exist today as private owner submissions reviewed by FarmExit staff. There is no approved public API to browse published management opportunities or to apply as a manager from this website.",
+  "trackRequests": "Track your requests"
+}

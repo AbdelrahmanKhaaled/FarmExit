@@ -19,6 +19,8 @@ export const PUBLIC_LISTING_FIELDS = [
   'listingDescription',
   'highlights',
   'publishedAt',
+  /** FarmExit Score on a 0–5 scale when a published evaluation authorizes public release; otherwise null. */
+  'farmExitScore',
 ] as const;
 
 /** Never copy these onto a public listing response, even if a private or staff DTO has them. */

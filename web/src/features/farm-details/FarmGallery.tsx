@@ -8,7 +8,7 @@ import { Icon } from '@/components/icons/Icon';
 import { PhotoGlassBadge } from '@/components/ui/Badge';
 import { FavoriteButton } from '@/components/ui/IconButton';
 import { Dialog } from '@/components/overlay/Dialog';
-import { ScoreGlass } from '@/features/farms/FarmExitScore';
+import { ScoreGlassBlock } from '@/features/farms/FarmExitScore';
 import { useSavedFarm } from './saved-farm';
 
 /*
@@ -117,9 +117,7 @@ export function FarmGallery({
         </div>
         <div className="absolute end-24 bottom-24 hidden tablet:block">{counter}</div>
 
-        {score !== null && (
-          <ScoreGlass score={score} className="absolute start-16 bottom-16 tablet:start-24 tablet:bottom-24" />
-        )}
+        <ScoreGlassBlock score={score} className="absolute start-16 bottom-16 tablet:start-24 tablet:bottom-24" />
       </div>
 
       {thumbs.length > 0 && (

@@ -32,6 +32,8 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     'playwright-report/**',
     'test-results/**',
+    'tests/visual/.next/**',
+    'tests/visual/next-env.d.ts',
     'src/styles/token-manifest.generated.ts',
   ]),
 ]);

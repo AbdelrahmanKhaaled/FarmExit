@@ -37,6 +37,42 @@ function ScoreSegments({ score }: { score: number }) {
  * gap 12: gold seal 28 · "FarmExit Score" (Overline/Score, brand) over the evaluation line (Label/Caption, muted) ·
  * 4.8 (Heading/Score, brand) /5 (Label/Button, muted); then the segment meter.
  */
+/** Score card when FarmExit has not yet published an assessment for this listing. */
+export function FarmExitScorePending({ className }: { className?: string }) {
+  const t = useTranslations('farm.score');
+  return (
+    <div
+      role="group"
+      aria-label={t('pendingA11y')}
+      data-testid="farmexit-score-pending"
+      className={cn(
+        'flex flex-col gap-12 rounded-2xl border border-border-hairline bg-linear-to-b from-bg-surface to-bg-ivory p-16',
+        className,
+      )}
+    >
+      <div className="flex items-center gap-10">
+        <Icon name="verify-filled" size={28} className="text-text-muted opacity-60" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <p className={cn(LABEL, 'text-text-brand')}>{t('label')}</p>
+          <p className="type-label-caption text-text-muted">{t('note')}</p>
+        </div>
+        <p className="type-label-large text-text-muted">{t('pending')}</p>
+      </div>
+      <div aria-hidden="true" className="flex h-6 gap-4">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span key={i} className="flex-1 rounded-[3px] bg-track-default" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Always shows the score card: numeric when published, otherwise pending assessment. */
+export function FarmExitScoreBlock({ score, className }: { score: number | null; className?: string }) {
+  if (score != null) return <FarmExitScore score={score} className={className} />;
+  return <FarmExitScorePending className={className} />;
+}
+
 export function FarmExitScore({ score, className }: { score: number; className?: string }) {
   const t = useTranslations('farm.score');
   return (
@@ -69,6 +105,29 @@ export function FarmExitScore({ score, className }: { score: number; className?:
  * Figma: Group / Farm Details → Score Glass (Show Reviewed = off). Compact chip on hero photography: deep glass,
  * gold hairline, r16, Glass/Hero Panel; seal 24 · label (Overline/Score) · 4.8 (Heading/Score) /5 (Body/Caption).
  */
+export function ScoreGlassPending({ className }: { className?: string }) {
+  const t = useTranslations('farm.score');
+  return (
+    <p
+      aria-label={t('pendingA11y')}
+      className={cn(
+        'inline-flex items-center gap-10 rounded-2xl border border-overlay-gold-hairline bg-overlay-deep-glass py-10 ps-12 pe-16',
+        'effect-hero-panel text-text-on-dark',
+        className,
+      )}
+    >
+      <Icon name="verify-filled" size={24} className="text-brand-gold opacity-70" />
+      <span aria-hidden="true" className={LABEL}>{t('label')}</span>
+      <span aria-hidden="true" className="type-body-caption text-overlay-on-dark-muted">{t('pending')}</span>
+    </p>
+  );
+}
+
+export function ScoreGlassBlock({ score, className }: { score: number | null; className?: string }) {
+  if (score != null) return <ScoreGlass score={score} className={className} />;
+  return <ScoreGlassPending className={className} />;
+}
+
 export function ScoreGlass({ score, className }: { score: number; className?: string }) {
   const t = useTranslations('farm.score');
   return (
@@ -93,6 +152,15 @@ export function ScoreGlass({ score, className }: { score: number; className?: st
 }
 
 /** Figma: Sticky Action Bar › Score Line — "FarmExit Score 4.8 /5" (Label/Caption Strong, text/gold). */
+export function ScoreLinePending({ className }: { className?: string }) {
+  const t = useTranslations('farm.score');
+  return (
+    <p aria-label={t('pendingA11y')} className={cn('type-label-caption text-text-muted', className)}>
+      <span aria-hidden="true">{t('label')}: {t('pending')}</span>
+    </p>
+  );
+}
+
 export function ScoreLine({ score, className }: { score: number; className?: string }) {
   const t = useTranslations('farm.score');
   return (

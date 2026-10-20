@@ -30,7 +30,9 @@
     "note": "تقييم FarmExit الداخلي — مش تقييم عملاء",
     "outOf": "من 5",
     "a11y": "تقييم FarmExit {score} من 5. تقييم داخلي من FarmExit، مش تقييم عملاء.",
-    "line": "تقييم FarmExit {score} من 5"
+    "line": "تقييم FarmExit {score} من 5",
+    "pending": "التقييم قيد الإعداد",
+    "pendingA11y": "تقييم FarmExit قيد الإعداد. تقييم داخلي من FarmExit، مش تقييم عملاء."
   },
   "details": {
     "metaTitle": "{name} · FarmExit",
@@ -72,6 +74,7 @@
       "requestRent": "اطلب بيانات الإيجار",
       "stickySale": "اطلب التفاصيل",
       "stickyRent": "اطلب بيانات الإيجار",
+      "makeOffer": "قدّم عرض شراء",
       "contact": "تواصل مع صاحب المزرعة عن طريق FarmExit",
       "contactShort": "تواصل مع صاحب المزرعة",
       "save": "احفظ المزرعة",

@@ -1,0 +1,30 @@
+/* Scope legacy form/detail presentation to the authenticated workspace only. */
+.fx-workspace .type-display-h4 {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.fx-workspace .type-display-h3 {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.fx-workspace :where(div, section, article).bg-bg-surface:not([class*='rounded-']) {
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-card);
+}
+.fx-workspace textarea {
+  min-height: 120px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+:lang(ar) .fx-workspace .type-display-h4 {
+  letter-spacing: 0;
+}
+@media (width < 768px) {
+  .fx-workspace .type-display-h4 {
+    font-size: 26px;
+  }
+}

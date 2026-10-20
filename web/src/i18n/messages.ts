@@ -8,6 +8,7 @@ export const namespaces = [
   'marketplace',
   'farm',
   'management',
+  'managementPage',
   'partnership',
   'auth',
   'workspace',
@@ -35,6 +36,7 @@ export type Messages = {
   marketplace: typeof import('../../messages/en/marketplace.json');
   farm: typeof import('../../messages/en/farm.json');
   management: typeof import('../../messages/en/management.json');
+  managementPage: typeof import('../../messages/en/managementPage.json');
   partnership: typeof import('../../messages/en/partnership.json');
   auth: typeof import('../../messages/en/auth.json');
   workspace: typeof import('../../messages/en/workspace.json');

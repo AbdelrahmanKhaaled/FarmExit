@@ -5,12 +5,13 @@ import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { sampleFarmMarketplace } from '@/lib/data/sample/farm-listings';
 import { Container } from '@/components/layout/Container';
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
 import { MarketplaceResults, MarketplaceResultsStatic } from '@/features/marketplace/MarketplaceResults';
 import { MarketplaceSearch, MarketplaceSearchStatic } from '@/features/marketplace/MarketplaceSearch';
+
+export const instant = false;
 
 /*
  * Farm Marketplace — Explore Farms (Figma: Marketplace page, Desktop 1440 · Tablet 1024 · Mobile 390;
@@ -30,8 +31,6 @@ export default async function FarmsPage({ params }: PageProps<'/[locale]/farms'>
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations('marketplace');
-  const listings = sampleFarmMarketplace.all();
-
   return (
     <>
       <Navbar />
@@ -65,8 +64,8 @@ export default async function FarmsPage({ params }: PageProps<'/[locale]/farms'>
         </section>
 
         <Container size="app" className="pt-24 pb-72 tablet:pt-40 tablet:pb-96 desktop:pt-48 desktop:pb-120">
-          <Suspense fallback={<MarketplaceResultsStatic listings={listings} />}>
-            <MarketplaceResults listings={listings} />
+          <Suspense fallback={<MarketplaceResultsStatic />}>
+            <MarketplaceResults />
           </Suspense>
         </Container>
       </main>

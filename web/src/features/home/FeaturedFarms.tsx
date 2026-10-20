@@ -1,14 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { ButtonLink } from '@/components/ui/Button';
 import { FilterChip } from '@/components/ui/Chip';
 import { SortSelect } from '@/components/ui/SortSelect';
 import { Container } from '@/components/layout/Container';
 import { SectionHeader } from '@/components/layout/Section';
 import { FarmCard } from '@/features/farms/FarmCard';
-import { featuredFarms, homeLinks, type ListingType } from './data';
+import { homeLinks, type ListingType } from './data';
+import { fetchPublicMarketplace, publicListingToMarketplaceListing } from '@/lib/data/marketplace-api';
+import type { MarketplaceListing } from '@/lib/data/marketplace';
+import { formatEgp } from '@/lib/format';
 
 /*
  * Figma: Homepage › Section / Featured Farms — Section Header, toolbar (Filter Chips with live counts + Sort Select,
@@ -25,26 +28,53 @@ const SORTS: Sort[] = ['newest', 'priceAsc', 'priceDesc'];
 export function FeaturedFarms() {
   const t = useTranslations('home.farms');
   const tc = useTranslations('farm.card');
+  const tm = useTranslations('marketplace');
+  const locale = useLocale() as 'en' | 'ar';
 
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<Sort>('newest');
 
-  const counts = useMemo(
-    () => ({
-      all: featuredFarms.length,
-      sale: featuredFarms.filter((f) => f.listing === 'sale').length,
-      rent: featuredFarms.filter((f) => f.listing === 'rent').length,
-    }),
-    [],
-  );
+  const [counts, setCounts] = useState({ all: 0, sale: 0, rent: 0 });
+  const [farms, setFarms] = useState<MarketplaceListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [unavailable, setUnavailable] = useState(false);
 
-  const farms = useMemo(() => {
-    const list = featuredFarms.filter((f) => filter === 'all' || f.listing === filter);
-    if (sort === 'newest') return list;
-    const dir = sort === 'priceAsc' ? 1 : -1;
-    return [...list].sort((a, b) =>
-      a.listing === b.listing ? (a.priceValue - b.priceValue) * dir : a.listing === 'sale' ? -1 : 1,
-    );
+  useEffect(() => {
+    let active = true;
+    void Promise.all(
+      ['sale', 'rent'].map((listingType) => fetchPublicMarketplace({ listingType, page: '1', pageSize: '1' })),
+    )
+      .then(([sale, rent]) => {
+        if (active && sale && rent) setCounts({ all: sale.total + rent.total, sale: sale.total, rent: rent.total });
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const query: Record<string, string> = { page: '1', pageSize: '6', sort };
+    if (filter !== 'all') query.listingType = filter;
+    void fetchPublicMarketplace(query)
+      .then((data) => {
+        if (!active) return;
+        setFarms(data?.items.map(publicListingToMarketplaceListing) ?? []);
+        setUnavailable(!data);
+      })
+      .catch(() => {
+        if (active) {
+          setFarms([]);
+          setUnavailable(true);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [filter, sort]);
 
   return (
@@ -69,26 +99,45 @@ export function FeaturedFarms() {
           />
         </div>
 
+        {(loading || unavailable || farms.length === 0) && (
+          <p role="status" className="mt-24 type-body-caption text-text-muted">
+            {loading ? tm('results.loading') : unavailable ? tm('results.apiUnavailable') : tm('empty.title')}
+          </p>
+        )}
         <ul className="mt-28 grid grid-cols-1 gap-16 tablet:mt-24 tablet:grid-cols-2 tablet:gap-24 desktop:grid-cols-3">
           {farms.map((farm) => (
-            <li key={farm.key}>
+            <li key={farm.slug}>
               <FarmCard
                 sizes="(min-width: 1280px) 366px, (min-width: 768px) 50vw, 100vw"
                 farm={{
-                  name: t(`items.${farm.key}.name`),
-                  listingLabel: tc(`listing.${farm.listing}`),
-                  location: t(`items.${farm.key}.location`),
-                  area: t(`items.${farm.key}.area`),
-                  crop: t(`items.${farm.key}.crop`),
-                  water: t(`items.${farm.key}.water`),
-                  priceLabel: tc(`priceLabel.${farm.listing}`),
-                  price: t(`items.${farm.key}.price`),
-                  priceSub: t(`items.${farm.key}.priceSub`),
-                  imageAlt: t(`items.${farm.key}.imageAlt`),
+                  name: farm.name[locale],
+                  listingLabel: tc(`listing.${farm.purpose}`),
+                  location: tc('location', {
+                    area: farm.area.label[locale],
+                    governorate: farm.governorateDisplay?.[locale] ?? '',
+                  }),
+                  area: tc('areaValue', { count: farm.areaFeddan }),
+                  crop: tc('notStated'),
+                  water: tc('notStated'),
+                  priceLabel: tc(`priceLabel.${farm.purpose}`),
+                  price:
+                    (farm.purpose === 'sale' ? farm.askingPrice : farm.annualRentPerFeddan) !== null
+                      ? tc('price', {
+                          amount: formatEgp((farm.purpose === 'sale' ? farm.askingPrice : farm.annualRentPerFeddan)!),
+                        })
+                      : tc('notStated'),
+                  priceSub:
+                    farm.purpose === 'rent'
+                      ? tc('rentPerFeddan')
+                      : farm.pricePerFeddan !== null
+                        ? tc('pricePerFeddan', { amount: formatEgp(farm.pricePerFeddan) })
+                        : tc('pricePerFeddanNotStated'),
+                  imageAlt: farm.image.alt[locale],
                   image: farm.image,
-                  illustrative: farm.illustrative,
+                  illustrative: farm.image.isIllustrative,
                   score: farm.score,
-                  href: homeLinks.farmDetails(farm.key),
+                  href: `/farms/${farm.slug}`,
+                  listingId: farm.listingId,
                 }}
               />
             </li>

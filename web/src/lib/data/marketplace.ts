@@ -21,6 +21,10 @@ export interface MarketplaceListing {
   purpose: ListingPurpose;
   name: Localized;
   governorate: GovernorateKey;
+  /** When the API governorate does not match a message key, show this label instead. */
+  governorateDisplay?: Localized;
+  /** Published listing request id (API); used for save/bookmark. */
+  listingId?: string;
   /** Town / area inside the governorate (Location › Area filter). */
   area: { key: string; label: Localized };
   areaFeddan: number;
@@ -48,6 +52,9 @@ export interface MarketplaceListing {
   score: number | null;
   /** Order of "Newest listings" (higher = newer). */
   publishedRank: number;
+  highlights?: string[];
+  listingDescription?: string | null;
+  availability?: string | null;
 }
 
 /** Governorates present in the sample data (labels in messages/<locale>/marketplace.json). */

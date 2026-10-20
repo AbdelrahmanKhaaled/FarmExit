@@ -18,7 +18,7 @@ export const primaryNav = [
 
 export const accountLinks = {
   signIn: '/sign-in',
-  listYourFarm: '/list-your-farm',
+  listYourFarm: '/my/farms/new',
   myFarmExit: '/my',
   notifications: '/my/notifications',
 } as const satisfies Record<string, Href>;
@@ -35,9 +35,9 @@ export const footerColumns = [
   {
     key: 'management',
     links: [
-      { key: 'requestManager', href: '/management/request' },
+      { key: 'requestManager', href: '/my/management/new' },
       { key: 'openRequests', href: '/management' },
-      { key: 'joinAsManager', href: '/management/join' },
+      { key: 'joinAsManager', href: '/my/professional' },
       { key: 'ownerPortal', href: '/my' },
     ],
   },

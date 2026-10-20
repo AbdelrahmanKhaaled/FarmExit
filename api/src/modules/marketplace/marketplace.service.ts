@@ -15,11 +15,13 @@ import {
   toPublicListing,
   type PublicListingSource,
 } from './marketplace-query';
+import { loadPublishedFarmExitScores } from './public-farm-score';
 
 const notFound = (): NotFoundException => new NotFoundException('Listing not found');
 
 /**
- * Public read of listings an admin has published. No authentication, images, contacts, coordinates, or scores.
+ * Public read of listings an admin has published. No authentication, images, contacts, or coordinates.
+ * FarmExit Score is included only from evaluations in published status.
  * Buyer and seller contact stays with FarmExit.
  */
 @Injectable()
@@ -38,10 +40,7 @@ export class MarketplaceService {
       ? await this.prisma.request.findMany({ where, orderBy, skip, take: pageSize, select: publicListingSelect })
       : await this.pageByListedPrice(where, query.sort === 'priceDesc' ? 'desc' : 'asc', skip, pageSize);
     return {
-      items: rows.flatMap((row) => {
-        const item = toPublicListing(row);
-        return item ? [item] : [];
-      }),
+      items: await this.publicItems(rows),
       page,
       pageSize,
       total,
@@ -67,9 +66,21 @@ export class MarketplaceService {
       },
       select: publicListingSelect,
     });
-    const item = request ? toPublicListing(request) : null;
+    const items = request ? await this.publicItems([request]) : [];
+    const item = items[0];
     if (!item) throw notFound();
     return item;
+  }
+
+  private async publicItems(rows: PublicListingSource[]) {
+    const farmIds = rows.flatMap((row) => (row.farm ? [row.farm.id] : []));
+    const scores = await loadPublishedFarmExitScores(this.prisma, farmIds);
+    return rows.flatMap((row) => {
+      const farmId = row.farm?.id.toString();
+      const score = farmId ? (scores.get(farmId) ?? null) : null;
+      const item = toPublicListing(row, score);
+      return item ? [item] : [];
+    });
   }
 
   /** A stored fractional pound is not a public price. Those listings stay out of the count and the page. */

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ComponentProps } from 'react';
+import { useEffect, useRef, useState, type ComponentProps } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
@@ -8,7 +8,7 @@ import { Icon } from '@/components/icons/Icon';
 import { BlockButtonLink, ButtonLink } from '@/components/ui/Button';
 import { FavoriteButton } from '@/components/ui/IconButton';
 import type { ListingPurpose } from '@/lib/domain/enums';
-import { FarmExitScore, ScoreLine } from '@/features/farms/FarmExitScore';
+import { FarmExitScoreBlock, ScoreLine, ScoreLinePending } from '@/features/farms/FarmExitScore';
 import { useSavedFarm } from './saved-farm';
 
 /*
@@ -34,6 +34,8 @@ type ActionProps = {
   price: FarmPrice;
   score: number | null;
   requestHref: Href;
+  /** Published sale listings: sign-in then nonbinding purchase proposal form. */
+  offerHref?: Href;
 };
 
 export const INLINE_PRICE_ID = 'farm-price-actions';
@@ -53,7 +55,7 @@ function PriceBlock({ price, className }: { price: FarmPrice; className?: string
 }
 
 /** Desktop sidebar: white, hairline, r24, padding 28, gap 20, Elevation/Premium Lift; sticky under the navbar. */
-export function RequestPanel({ name, purpose, price, score, requestHref }: ActionProps) {
+export function RequestPanel({ name, purpose, price, score, requestHref, offerHref }: ActionProps) {
   const t = useTranslations('farm.details.actions');
   const { saved, toggle } = useSavedFarm();
   return (
@@ -62,11 +64,19 @@ export function RequestPanel({ name, purpose, price, score, requestHref }: Actio
       className="flex flex-col gap-20 rounded-card border border-border-hairline bg-bg-surface p-28 effect-premium-lift"
     >
       <PriceBlock price={price} className="gap-4" />
-      {score !== null && <FarmExitScore score={score} />}
+      <FarmExitScoreBlock
+        score={score}
+        className={score === null ? '[&>div:first-child]:flex-wrap [&>div:first-child>p]:basis-full' : undefined}
+      />
       <div className="flex flex-col gap-12">
         <BlockButtonLink href={requestHref} variant="primary">
           {purpose === 'sale' ? t('requestSale') : t('requestRent')}
         </BlockButtonLink>
+        {offerHref && (
+          <BlockButtonLink href={offerHref} variant="outline" data-testid="make-offer-cta">
+            {t('makeOffer')}
+          </BlockButtonLink>
+        )}
         <BlockButtonLink href={requestHref} variant="outline" multiline>
           {t('contact')}
         </BlockButtonLink>
@@ -97,7 +107,7 @@ export function RequestPanel({ name, purpose, price, score, requestHref }: Actio
  * Tablet / mobile: the Request Panel becomes an inline "Price & Actions" card in the overview (r24, Premium Rest).
  * Tablet: price + Request (Primary L) + Contact owner (Outline L) + Save in one row. Mobile: stacked, full width.
  */
-export function PriceActions({ name, purpose, price, score, requestHref }: ActionProps) {
+export function PriceActions({ name, purpose, price, score, requestHref, offerHref }: ActionProps) {
   const t = useTranslations('farm.details.actions');
   const { saved, toggle } = useSavedFarm();
   return (
@@ -108,19 +118,36 @@ export function PriceActions({ name, purpose, price, score, requestHref }: Actio
         'tablet:flex-row tablet:flex-wrap tablet:items-center tablet:gap-x-24 tablet:px-28 tablet:py-24',
       )}
     >
-      <PriceBlock price={price} className="gap-2 tablet:flex-1" />
-      <div className="flex flex-col gap-10 tablet:flex-row tablet:items-center tablet:gap-12">
+      <PriceBlock price={price} className="gap-2 tablet:min-w-200 tablet:flex-1" />
+      <div className="flex min-w-0 flex-col gap-10 tablet:flex-row tablet:flex-wrap tablet:items-center tablet:gap-12">
         <ButtonLink href={requestHref} variant="primary" size="lg">
           {purpose === 'sale' ? t('requestSale') : t('requestRent')}
         </ButtonLink>
-        <ButtonLink href={requestHref} variant="outline" size="lg">
-          {t('contactShort')}
+        {offerHref && (
+          <ButtonLink href={offerHref} variant="accent" size="lg" data-testid="make-offer-cta">
+            {t('makeOffer')}
+          </ButtonLink>
+        )}
+        <ButtonLink
+          href={requestHref}
+          variant="outline"
+          size="lg"
+          className="h-auto min-h-52 whitespace-normal py-12 tablet:max-w-240"
+        >
+          {t('contact')}
         </ButtonLink>
         <span className="hidden tablet:inline-flex">
           <FavoriteButton saved={saved} label={t('saveLabel', { name })} onClick={toggle} />
         </span>
       </div>
-      {score !== null && <FarmExitScore score={score} className="tablet:basis-full" />}
+      <FarmExitScoreBlock
+        score={score}
+        className={cn(
+          'tablet:basis-full',
+          score === null &&
+            '[&>div:first-child]:flex-wrap [&>div:first-child>p]:basis-full tablet:[&>div:first-child>p]:basis-auto',
+        )}
+      />
     </div>
   );
 }
@@ -133,6 +160,31 @@ export function StickyActionBar({ name, purpose, price, score, requestHref }: Ac
   const t = useTranslations('farm.details.actions');
   const { saved, toggle } = useSavedFarm();
   const [inlineVisible, setInlineVisible] = useState(true);
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const bar = barRef.current;
+    if (!bar) return;
+    const body = document.body;
+    const root = document.documentElement;
+    const previousPadding = body.style.paddingBlockEnd;
+    const previousScrollPadding = root.style.scrollPaddingBlockEnd;
+    const basePadding = Number.parseFloat(getComputedStyle(body).paddingBlockEnd) || 0;
+    const reserveSpace = () => {
+      const height = bar.getBoundingClientRect().height;
+      // Reserve the actual EN/AR/safe-area height after the footer as well as in scroll-into-view.
+      body.style.paddingBlockEnd = `${basePadding + height}px`;
+      root.style.scrollPaddingBlockEnd = `${height + 16}px`;
+    };
+    const observer = new ResizeObserver(reserveSpace);
+    observer.observe(bar);
+    reserveSpace();
+    return () => {
+      observer.disconnect();
+      body.style.paddingBlockEnd = previousPadding;
+      root.style.scrollPaddingBlockEnd = previousScrollPadding;
+    };
+  }, []);
 
   useEffect(() => {
     const target = document.getElementById(INLINE_PRICE_ID);
@@ -144,18 +196,19 @@ export function StickyActionBar({ name, purpose, price, score, requestHref }: Ac
 
   return (
     <div
+      ref={barRef}
       role="region"
       aria-label={t('barLabel')}
       data-shown={!inlineVisible}
       data-testid="sticky-action-bar"
       className={cn(
-        'fixed inset-x-0 bottom-0 z-30 flex items-center gap-12 border-t border-border-nav bg-overlay-nav px-16 pt-12 pb-24 effect-nav-glass',
+        'fixed inset-x-0 bottom-0 z-30 flex items-center gap-12 border-t border-border-nav bg-overlay-nav px-16 pt-12 pb-[max(24px,env(safe-area-inset-bottom))] effect-nav-glass',
         'tablet:px-40 tablet:max-desktop:hidden tablet:max-desktop:data-[shown=true]:flex desktop:hidden',
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col">
         <p className="truncate type-heading-card-title text-text-primary">{price.amount}</p>
-        {score !== null && <ScoreLine score={score} />}
+        {score !== null ? <ScoreLine score={score} /> : <ScoreLinePending />}
       </div>
       <FavoriteButton saved={saved} label={t('saveLabel', { name })} onClick={toggle} />
       <ButtonLink href={requestHref} variant="primary" size="lg">

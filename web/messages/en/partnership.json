@@ -1,1 +1,78 @@
-{}
+{
+  "metaTitle": "Partnership marketplace · FarmExit",
+  "metaDescription": "Farm partnership opportunities reviewed by FarmExit. Applications are non-binding until FarmExit coordinates next steps.",
+  "breadcrumb": {
+    "label": "Breadcrumb",
+    "home": "Home",
+    "partnerships": "Partnerships"
+  },
+  "title": "Partnership marketplace",
+  "description": "Farm owners publish partnership opportunities. FarmExit reviews each opportunity before it appears here. Applications are non-binding expressions of interest.",
+  "notLiveTitle": "Public discovery not available yet",
+  "notLiveBody": "Partnership requests and applications are supported for signed-in farm owners and applicants, but there is no approved public API to list published partnership opportunities on this website.",
+  "nonBindingNote": "When public discovery launches, applications will remain non-binding expressions of interest coordinated by FarmExit.",
+  "trustNote": "Sample opportunities shown for layout review until public partnership discovery APIs are available.",
+  "ctaOwner": "Publish a partnership opportunity",
+  "items": {
+    "vegetable": {
+      "title": "Vegetable production partnership",
+      "location": "Wadi El Natrun, Beheira",
+      "area": "80 fed.",
+      "activity": "Vegetables",
+      "term": "3 seasons",
+      "scope": "Capital and operations partnership",
+      "highlights": {
+        "one": "Irrigation infrastructure in place",
+        "two": "Export-oriented packing plan",
+        "three": "FarmExit-mediated coordination"
+      },
+      "requirements": "Individual or company applicants with agricultural operations experience.",
+      "applicants": "5 applications received"
+    },
+    "dates": {
+      "title": "Date palm orchard partnership",
+      "location": "Ismailia",
+      "area": "45 fed.",
+      "activity": "Dates",
+      "term": "5 years",
+      "scope": "Investment partnership",
+      "highlights": {
+        "one": "Mature palms",
+        "two": "On-site housing",
+        "three": "Reviewed financial summary"
+      },
+      "requirements": "Company applicants preferred; audited accounts required in the application.",
+      "applicants": "2 applications received"
+    },
+    "livestock": {
+      "title": "Mixed crop & livestock partnership",
+      "location": "Fayoum",
+      "area": "120 fed.",
+      "activity": "Mixed",
+      "term": "Open",
+      "scope": "Operating partnership",
+      "highlights": {
+        "one": "Feed storage",
+        "two": "Veterinary access",
+        "three": "Seasonal crop rotation"
+      },
+      "requirements": "Partners with livestock management track record.",
+      "applicants": "8 applications received"
+    }
+  },
+  "card": {
+    "badge": "Partnership opportunity",
+    "reviewed": "Reviewed by FarmExit",
+    "specs": {
+      "area": "Area",
+      "activity": "Activity",
+      "term": "Term"
+    },
+    "scope": "Partnership scope",
+    "highlights": "Highlights",
+    "requirements": "Applicant requirements",
+    "apply": "Express interest",
+    "applyFor": "Express interest: {title}",
+    "nonBinding": "Non-binding application through FarmExit"
+  }
+}

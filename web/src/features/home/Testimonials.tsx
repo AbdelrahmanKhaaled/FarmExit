@@ -20,6 +20,7 @@ import { testimonials } from './data';
  */
 export function Testimonials() {
   const t = useTranslations('home.testimonials');
+  const ts = useTranslations('home');
   const [focus, setFocus] = useState(1);
   const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
 
@@ -45,6 +46,7 @@ export function Testimonials() {
           </div>
         </div>
 
+        <p className="type-body-caption text-text-muted">{ts('sampleContentNote')}</p>
         <ul
           className={cn(
             // Swipe row below desktop: bleeds to the screen edge, snaps per card.

@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons/Icon';
@@ -19,7 +20,7 @@ export type RequestCardData = {
   services: string[];
   requirements: string;
   applicants: string;
-  href: string;
+  href: ComponentProps<typeof Link>['href'];
 };
 
 const SPECS = ['area', 'activity', 'term'] as const;

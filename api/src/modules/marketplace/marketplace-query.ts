@@ -29,6 +29,7 @@ export type PublicListingSource = {
   id: bigint;
   publishedAt: Date | null;
   farm: {
+    id: bigint;
     name: string;
     governorate: string;
     areaName: string | null;
@@ -51,7 +52,7 @@ export type PublicListingSource = {
 export const publicListingSelect = {
   id: true,
   publishedAt: true,
-  farm: { select: { name: true, governorate: true, areaName: true, areaFeddan: true } },
+  farm: { select: { id: true, name: true, governorate: true, areaName: true, areaFeddan: true } },
   listingDetail: {
     select: {
       slug: true,
@@ -181,7 +182,7 @@ export function compareListedPrice(left: ListedPriceSource, right: ListedPriceSo
   return direction === 'asc' ? order : -order;
 }
 
-export function toPublicListing(source: PublicListingSource): PublicListingDto | null {
+export function toPublicListing(source: PublicListingSource, farmExitScore: number | null = null): PublicListingDto | null {
   const farm = source.farm;
   const detail = source.listingDetail;
   if (!farm || !detail || !hasPublicPrice(detail)) return null;
@@ -201,6 +202,7 @@ export function toPublicListing(source: PublicListingSource): PublicListingDto |
     listingDescription: detail.listingDescription,
     highlights: highlightsOut(detail.highlights),
     publishedAt: source.publishedAt?.toISOString() ?? null,
+    farmExitScore,
   };
 }
 

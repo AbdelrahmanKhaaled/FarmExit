@@ -31,7 +31,8 @@ export class MarketplaceController {
     summary: 'Published farm listings',
     description:
       'No authentication. Only published public listings on farms that have not been deleted. ' +
-      'Location is the governorate and general area. Images, contacts, coordinates, documents and scores are omitted.',
+      'Location is the governorate and general area. Images, contacts, coordinates and documents are omitted. ' +
+      'farmExitScore is set only from a published FarmExit evaluation.',
   })
   @ApiOkResponse({ type: PublicListingListDto })
   @ApiBadRequestResponse({ description: 'Invalid filter, sort, or page' })

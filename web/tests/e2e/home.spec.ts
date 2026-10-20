@@ -85,12 +85,16 @@ test.describe('homepage', () => {
     await expect(search.getByRole('button', { name: T[locale].findRequests })).toBeVisible();
   });
 
-  test('featured farms filter by listing type (desktop and tablet toolbar)', async ({ page }) => {
+  test('featured farms filter by listing type (desktop and tablet toolbar)', async ({ page, request }) => {
     test.skip(page.viewportSize()!.width < 768, 'The toolbar is hidden on mobile, as in the Mobile 390 frame.');
     const section = page.locator('section[aria-labelledby="farms-title"]');
-    await expect(section.locator('article')).toHaveCount(6);
+    const response = await request.get('/api/marketplace/farms?page=1&pageSize=6&sort=newest');
+    expect(response.ok()).toBeTruthy();
+    await expect(section.locator('article')).toHaveCount((await response.json()).items.length);
+    const rent = await request.get('/api/marketplace/farms?listingType=rent&page=1&pageSize=6&sort=newest');
+    expect(rent.ok()).toBeTruthy();
     await section.getByRole('button', { name: new RegExp(T[locale].forRent) }).click();
-    await expect(section.locator('article')).toHaveCount(3);
+    await expect(section.locator('article')).toHaveCount((await rent.json()).items.length);
   });
 
   test('testimonial arrows move the highlighted card', async ({ page }) => {

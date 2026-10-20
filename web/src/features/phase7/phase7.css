@@ -1,0 +1,18 @@
+/* Only Phase 7 task markers opt out of the portal shell. Other routes keep their shell. */
+div:has(> main[data-testid='my-farmexit'] [data-phase7-task]) {
+  padding-bottom: 0;
+}
+div:has(> main[data-testid='my-farmexit'] [data-phase7-task]) > :is(header, footer, nav) {
+  display: none;
+}
+main[data-testid='my-farmexit']:has([data-phase7-task]) {
+  padding: 0;
+}
+main[data-testid='my-farmexit']:has([data-phase7-task]) > div {
+  display: block;
+  max-width: none;
+  padding: 0;
+}
+main[data-testid='my-farmexit']:has([data-phase7-task]) > div > aside {
+  display: none;
+}

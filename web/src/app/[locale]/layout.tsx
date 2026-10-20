@@ -14,7 +14,7 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({ children, params }: LayoutProps<'/[locale]'>) {
+export default async function LocaleLayout({ children, auth, params }: LayoutProps<'/[locale]'>) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
@@ -22,7 +22,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
   return (
     <html lang={locale} dir={localeDirection[locale]} className={fontVariables}>
       <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          {children}
+          {auth}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

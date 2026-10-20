@@ -30,7 +30,9 @@
     "note": "FarmExit's own evaluation — not a customer rating",
     "outOf": "/5",
     "a11y": "FarmExit Score {score} out of 5. FarmExit's own evaluation, not a customer rating.",
-    "line": "FarmExit Score {score} /5"
+    "line": "FarmExit Score {score} /5",
+    "pending": "Pending assessment",
+    "pendingA11y": "FarmExit Score pending assessment. FarmExit's own evaluation, not a customer rating."
   },
   "details": {
     "metaTitle": "{name} · FarmExit",
@@ -72,6 +74,7 @@
       "requestRent": "Request rental information",
       "stickySale": "Request details",
       "stickyRent": "Request rental info",
+      "makeOffer": "Make an offer",
       "contact": "Contact owner via FarmExit",
       "contactShort": "Contact owner",
       "save": "Save farm",

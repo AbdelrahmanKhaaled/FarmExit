@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/Surface';
 import type { MarketplaceListing } from '@/lib/data/marketplace';
 import { formatEgp } from '@/lib/format';
 import { FarmCardMedia } from './FarmCard';
-import { FarmExitScore } from './FarmExitScore';
+import { FarmExitScoreBlock } from './FarmExitScore';
 
 /*
  * Figma: Components → Group / Farm Card → Farm Card (Layout = Marketplace), 477 wide in the desktop 2-column grid
@@ -24,6 +24,7 @@ export function MarketplaceFarmCard({ listing, href }: { listing: MarketplaceLis
   const to = useTranslations('marketplace.options');
   const tg = useTranslations('marketplace.governorates');
   const locale = useLocale() as 'en' | 'ar';
+  const governorateLabel = listing.governorateDisplay?.[locale] ?? tg(listing.governorate);
   const name = listing.name[locale];
   const sale = listing.purpose === 'sale';
 
@@ -53,6 +54,8 @@ export function MarketplaceFarmCard({ listing, href }: { listing: MarketplaceLis
         illustrative={listing.image.isIllustrative}
         name={name}
         aspect="aspect-[461/300]"
+        listingId={listing.listingId}
+        listingSlug={listing.slug}
       />
 
       <div className="flex grow flex-col gap-24 px-24 pt-24 pb-28 tablet:px-28">
@@ -61,7 +64,7 @@ export function MarketplaceFarmCard({ listing, href }: { listing: MarketplaceLis
           <h3 className="type-heading-h4 text-text-primary">{name}</h3>
           <p className="flex items-center gap-6 type-body-default text-text-muted">
             <Icon name="location-pin" size={16} />
-            {t('location', { area: listing.area.label[locale], governorate: tg(listing.governorate) })}
+            {t('location', { area: listing.area.label[locale], governorate: governorateLabel })}
           </p>
         </div>
 
@@ -74,7 +77,7 @@ export function MarketplaceFarmCard({ listing, href }: { listing: MarketplaceLis
           ))}
         </dl>
 
-        {listing.score !== null && <FarmExitScore score={listing.score} />}
+        <FarmExitScoreBlock score={listing.score} />
 
         <div className="mt-auto flex flex-col gap-4">
           <p className="type-label-meta text-text-muted">{t(`priceLabel.${listing.purpose}`)}</p>

@@ -16,11 +16,10 @@ import {
   FARM_SIZE_RANGE,
   marketplaceSorts,
   PRICE_RANGE,
-  queryListings,
   type FarmMarketplaceSource,
   type MarketplaceFilters,
-  type MarketplaceListing,
 } from '@/lib/data/marketplace';
+import { useMarketplaceListings } from './use-marketplace-listings';
 import { formatEgp } from '@/lib/format';
 import { FilterPanel } from './FilterPanel';
 import { appliedCount, defaultState, type MarketplaceState } from './url-state';
@@ -36,25 +35,29 @@ import { useMarketplaceState } from './use-marketplace-state';
  *   "Load more farms" instead of pagination.
  * The result count always matches the listings on screen.
  */
-const PAGE_SIZE = 9;
 const MOBILE_STEP = 3;
 
-type Props = { state: MarketplaceState; setState: (state: MarketplaceState) => void; listings: MarketplaceListing[] };
+type Props = { state: MarketplaceState; setState: (state: MarketplaceState) => void };
 
-export function MarketplaceResultsView({ state, setState, listings }: Props) {
-  const source = useMemo<FarmMarketplaceSource>(() => ({ all: () => listings }), [listings]);
+export function MarketplaceResultsView({ state, setState }: Props) {
+  const {
+    items: results,
+    total,
+    loading,
+    unavailable,
+    unsupported,
+    pageCount,
+    mobile: isMobile,
+  } = useMarketplaceListings(state);
+  const source = useMemo<FarmMarketplaceSource>(() => ({ all: () => results }), [results]);
   const t = useTranslations('marketplace');
   const locale = useLocale() as 'en' | 'ar';
   const { filters, sort } = state;
 
-  const results = useMemo(() => queryListings(source, { filters, sort }), [source, filters, sort]);
-  const pageCount = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
   const page = Math.min(state.page, pageCount);
-  const pageStart = (page - 1) * PAGE_SIZE;
-  const pageCountShown = Math.min(PAGE_SIZE, results.length - pageStart);
+  const pageCountShown = results.length;
 
-  // Mobile "Load more": restart at 3 whenever the result set changes.
-  const resultKey = JSON.stringify({ filters, sort });
+  const resultKey = JSON.stringify({ filters, sort, page: isMobile ? undefined : page });
   const [mobile, setMobile] = useState({ key: resultKey, limit: MOBILE_STEP });
   const limit = mobile.key === resultKey ? mobile.limit : MOBILE_STEP;
   const mobileShown = Math.min(limit, results.length);
@@ -65,10 +68,7 @@ export function MarketplaceResultsView({ state, setState, listings }: Props) {
     side: 'bottom',
     draft: filters,
   });
-  const draftCount = useMemo(
-    () => queryListings(source, { filters: drawer.draft, sort }).length,
-    [source, drawer.draft, sort],
-  );
+  const draftCount = drawer.open && JSON.stringify(drawer.draft) === JSON.stringify(filters) ? total : null;
 
   const update = (next: MarketplaceFilters) => setState({ ...state, filters: next, page: 1 });
   const clearAll = () => update({ ...defaultFilters, purpose: filters.purpose });
@@ -95,10 +95,12 @@ export function MarketplaceResultsView({ state, setState, listings }: Props) {
         <div className="flex flex-col gap-16 tablet:flex-row tablet:items-end tablet:gap-24">
           <div className="flex min-w-0 grow flex-col gap-4">
             <p role="status" className="type-heading-h4 text-text-primary">
-              <span className="tablet:hidden">{t('results.count', { count: mobileShown })}</span>
-              <span className="hidden tablet:inline">{t('results.count', { count: pageCountShown })}</span>
+              <span className="tablet:hidden">{t('results.countLive', { count: mobileShown, total })}</span>
+              <span className="hidden tablet:inline">{t('results.countLive', { count: pageCountShown, total })}</span>
             </p>
-            <p className="type-body-caption text-text-muted">{t('results.meta')}</p>
+            <p className="type-body-caption text-text-muted">
+              {unavailable ? t('results.apiUnavailable') : t('results.metaLive')}
+            </p>
           </div>
           <div className="flex items-center gap-12">
             <div className="flex desktop:hidden">
@@ -121,6 +123,12 @@ export function MarketplaceResultsView({ state, setState, listings }: Props) {
         {/* Applied filters (tablet / mobile) */}
         <AppliedFilters filters={filters} onChange={update} onClearAll={clearAll} locale={locale} source={source} />
 
+        {unsupported && (
+          <p className="rounded-xl border border-border-hairline bg-bg-muted px-16 py-12 type-body-caption text-text-muted">
+            {t('filters.unsupportedPublic')}
+          </p>
+        )}
+
         <TrustNote
           title={t('trust.title')}
           body={t('trust.body')}
@@ -128,7 +136,9 @@ export function MarketplaceResultsView({ state, setState, listings }: Props) {
           href={{ pathname: '/', hash: 'how-it-works' }}
         />
 
-        {results.length === 0 ? (
+        {loading ? (
+          <p className="type-body-default text-text-muted">{t('results.loading')}</p>
+        ) : results.length === 0 ? (
           <EmptyState
             title={t('empty.title')}
             body={t('empty.body')}
@@ -150,10 +160,9 @@ export function MarketplaceResultsView({ state, setState, listings }: Props) {
               className="grid grid-cols-1 gap-16 tablet:grid-cols-2 tablet:gap-24"
             >
               {results.map((listing, i) => {
-                const onPage = i >= pageStart && i < pageStart + PAGE_SIZE;
                 const loaded = i < limit;
                 return (
-                  <li key={listing.slug} className={cn(!onPage && 'tablet:hidden', !loaded && 'max-tablet:hidden')}>
+                  <li key={listing.slug} className={cn(!loaded && 'max-tablet:hidden')}>
                     <MarketplaceFarmCard listing={listing} href={`/farms/${listing.slug}`} />
                   </li>
                 );
@@ -171,18 +180,24 @@ export function MarketplaceResultsView({ state, setState, listings }: Props) {
                 nextLabel={t('pagination.next')}
                 pageLabel={(p) => t('pagination.page', { page: p })}
               />
-              {limit < results.length && (
+              {(limit < results.length || (isMobile && state.page < pageCount)) && (
                 <BlockButton
                   variant="outline"
                   className="tablet:hidden"
-                  onClick={() => setMobile({ key: resultKey, limit: limit + MOBILE_STEP })}
+                  disabled={loading}
+                  onClick={() => {
+                    setMobile({ key: resultKey, limit: limit + MOBILE_STEP });
+                    if (limit >= results.length && state.page < pageCount) setState({ ...state, page: state.page + 1 });
+                  }}
                 >
                   {t('results.loadMore')}
                 </BlockButton>
               )}
               <p className="type-body-caption text-text-muted">
-                <span className="tablet:hidden">{t('results.count', { count: mobileShown })}</span>
-                <span className="hidden tablet:inline">{t('results.pageStatus', { count: pageCountShown, page })}</span>
+                <span className="tablet:hidden">{t('results.countLive', { count: mobileShown, total })}</span>
+                <span className="hidden tablet:inline">
+                  {t('results.pageStatusLive', { count: pageCountShown, page, total })}
+                </span>
               </p>
             </div>
           </>
@@ -194,7 +209,11 @@ export function MarketplaceResultsView({ state, setState, listings }: Props) {
         onOpenChange={(open) => setDrawer((d) => ({ ...d, open }))}
         side={drawer.side}
         title={t('filters.title')}
-        description={t('filters.summary', { applied: appliedCount(drawer.draft), results: draftCount })}
+        description={
+          draftCount === null
+            ? t('filters.summaryPending', { applied: appliedCount(drawer.draft) })
+            : t('filters.summaryLive', { applied: appliedCount(drawer.draft), results: draftCount })
+        }
         footer={
           <>
             <Button
@@ -213,7 +232,7 @@ export function MarketplaceResultsView({ state, setState, listings }: Props) {
                 setDrawer((d) => ({ ...d, open: false }));
               }}
             >
-              {t('filters.show', { count: draftCount })}
+              {draftCount === null ? t('filters.applyDraft') : t('filters.showLive', { count: draftCount })}
             </Button>
           </>
         }
@@ -330,12 +349,12 @@ function AppliedFilters({
 }
 
 /** Listings come from the server (repository), so the client never imports the data adapter. */
-export function MarketplaceResults({ listings }: { listings: MarketplaceListing[] }) {
+export function MarketplaceResults() {
   const [state, setState] = useMarketplaceState();
-  return <MarketplaceResultsView state={state} setState={setState} listings={listings} />;
+  return <MarketplaceResultsView state={state} setState={setState} />;
 }
 
 /** Prerendered default view (Suspense fallback until the URL params are read on the client). */
-export function MarketplaceResultsStatic({ listings }: { listings: MarketplaceListing[] }) {
-  return <MarketplaceResultsView state={defaultState} setState={() => {}} listings={listings} />;
+export function MarketplaceResultsStatic() {
+  return <MarketplaceResultsView state={defaultState} setState={() => {}} />;
 }

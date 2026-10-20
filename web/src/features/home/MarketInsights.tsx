@@ -14,11 +14,13 @@ const COLUMNS = ['governorate', 'sale', 'rent', 'listings'] as const;
 
 export function MarketInsights() {
   const t = useTranslations('home.insights');
+  const ts = useTranslations('home');
 
   return (
     <section id="market-insights" aria-labelledby="insights-title" className="scroll-mt-r-nav-height pt-r-section-gap">
       <Container className="flex flex-col gap-48">
         <SectionHeader eyebrow={t('eyebrow')} titleId="insights-title" title={t('title')} subtitle={t('subtitle')} />
+        <p className="type-body-caption text-text-muted">{ts('sampleContentNote')}</p>
         <div className="overflow-x-auto rounded-card border border-border-default bg-bg-surface">
           <table className="w-full min-w-760 border-collapse text-start">
             <caption className="sr-only">{t('caption')}</caption>

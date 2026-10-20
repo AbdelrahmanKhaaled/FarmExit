@@ -3,7 +3,8 @@ import { RequestType, RequestVisibility, SavedItemType } from '../../generated/p
 import { PrismaService } from '../../prisma/prisma.service';
 import { LISTING_PUBLISHED } from '../listing-requests/listing-requests.service';
 import type { PublicListingDto } from './dto/public-listing.dto';
-import { publicListingSelect, toPublicListing } from './marketplace-query';
+import { publicListingSelect, toPublicListing, type PublicListingSource } from './marketplace-query';
+import { loadPublishedFarmExitScores } from './public-farm-score';
 
 const missing = (): NotFoundException => new NotFoundException('Listing not found');
 
@@ -34,13 +35,11 @@ export class SavedListingsService {
       select: publicListingSelect,
     });
     const byId = new Map(rows.map((row) => [row.id, row]));
-    return {
-      items: ids.flatMap((id) => {
-        const row = byId.get(id);
-        const item = row ? toPublicListing(row) : null;
-        return item ? [item] : [];
-      }),
-    };
+    const ordered = ids.flatMap((id) => {
+      const row = byId.get(id);
+      return row ? [row] : [];
+    });
+    return { items: await this.publicItems(ordered) };
   }
 
   async save(userId: bigint, listingId: bigint): Promise<PublicListingDto> {
@@ -84,7 +83,19 @@ export class SavedListingsService {
       },
       select: publicListingSelect,
     });
-    return request ? toPublicListing(request) : null;
+    const items = request ? await this.publicItems([request]) : [];
+    return items[0] ?? null;
+  }
+
+  private async publicItems(rows: PublicListingSource[]) {
+    const farmIds = rows.flatMap((row) => (row.farm ? [row.farm.id] : []));
+    const scores = await loadPublishedFarmExitScores(this.prisma, farmIds);
+    return rows.flatMap((row) => {
+      const farmId = row.farm?.id.toString();
+      const score = farmId ? (scores.get(farmId) ?? null) : null;
+      const item = toPublicListing(row, score);
+      return item ? [item] : [];
+    });
   }
 }
 

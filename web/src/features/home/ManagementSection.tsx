@@ -63,6 +63,7 @@ function RoleCard({ role, href }: { role: 'owners' | 'managers'; href: string })
 
 export function ManagementSection() {
   const t = useTranslations('home.management');
+  const ts = useTranslations('home');
 
   return (
     <section aria-labelledby="management-title" className="border-y border-border-nav bg-bg-surface py-r-band-padding">
@@ -94,6 +95,7 @@ export function ManagementSection() {
           </Link>
         </div>
 
+        <p className="mt-16 type-body-caption text-text-muted">{ts('sampleContentNote')}</p>
         <ul className="mt-24 grid grid-cols-1 gap-16 tablet:grid-cols-2 tablet:gap-24 desktop:grid-cols-3">
           {managementRequests.map(({ key, services }) => (
             <li key={key}>
@@ -113,7 +115,7 @@ export function ManagementSection() {
                   ),
                   requirements: t(`requests.items.${key}.requirements`),
                   applicants: t(`requests.items.${key}.applicants`),
-                  href: homeLinks.managementApply(key),
+                  href: homeLinks.management,
                 }}
               />
             </li>

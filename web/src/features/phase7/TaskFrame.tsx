@@ -23,6 +23,8 @@ export function TaskFrame({
   complete = false,
   heading,
   intro,
+  aside,
+  privateNote,
 }: {
   title: string;
   context?: string;
@@ -38,6 +40,8 @@ export function TaskFrame({
   complete?: boolean;
   heading?: string;
   intro?: string;
+  aside?: ReactNode;
+  privateNote?: string;
 }) {
   const t = useTranslations('workspace.phase7');
   const nav = (
@@ -106,7 +110,7 @@ export function TaskFrame({
             {context && <p className="mb-20 mt-8 type-label-large wrap-anywhere">{context}</p>}
             {nav}
             <p className="mt-24 border-t border-border-subtle pt-20 type-label-caption text-text-muted">
-              {professional ? t('professionalPrivate') : t('private')}
+              {privateNote ?? (professional ? t('professionalPrivate') : t('private'))}
             </p>
           </Card>
         </aside>
@@ -153,18 +157,22 @@ export function TaskFrame({
               : 'hidden min-w-0 flex-col gap-24 tablet:col-start-2 tablet:row-start-1 tablet:flex desktop:col-start-3'
           }
         >
-          <Card surface="muted" className="border-overlay-gold-hairline">
-            <Icon name="verify-filled" size={28} className="mb-16 text-text-gold" />
-            <h2 className="type-label-large">{professional ? t('verificationTitle') : t('reviewTitle')}</h2>
-            <p className="mt-12 type-body-caption text-text-muted">
-              {professional ? t('verificationNote') : t('reviewNote')}
-            </p>
-          </Card>
-          <Card>
-            <Icon name="lock" size={20} className="mb-12 text-text-brand" />
-            <h2 className="type-overline-field text-text-brand">{t('communication')}</h2>
-            <p className="mt-12 type-body-caption text-text-muted">{t('communicationNote')}</p>
-          </Card>
+          {aside ?? (
+            <>
+              <Card surface="muted" className="border-overlay-gold-hairline">
+                <Icon name="verify-filled" size={28} className="mb-16 text-text-gold" />
+                <h2 className="type-label-large">{professional ? t('verificationTitle') : t('reviewTitle')}</h2>
+                <p className="mt-12 type-body-caption text-text-muted">
+                  {professional ? t('verificationNote') : t('reviewNote')}
+                </p>
+              </Card>
+              <Card>
+                <Icon name="lock" size={20} className="mb-12 text-text-brand" />
+                <h2 className="type-overline-field text-text-brand">{t('communication')}</h2>
+                <p className="mt-12 type-body-caption text-text-muted">{t('communicationNote')}</p>
+              </Card>
+            </>
+          )}
         </aside>
       </div>
     </div>

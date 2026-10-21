@@ -96,6 +96,12 @@ export class PartnershipApplicationResponseDto {
   @ApiProperty({ nullable: true, type: String }) applicationMessage!: string | null;
   @ApiProperty({ nullable: true, type: String }) whyGoodFit!: string | null;
   @ApiProperty({ nullable: true, type: String }) companyName!: string | null;
+  @ApiProperty({ nullable: true, type: String }) relevantExperience!: string | null;
+  @ApiProperty({ nullable: true, type: String }) approach!: string | null;
+  @ApiProperty({ nullable: true, type: String }) companyRegistrationNumber!: string | null;
+  @ApiProperty({ nullable: true, type: String }) companyContactName!: string | null;
+  @ApiProperty({ nullable: true, type: String }) companyContactRole!: string | null;
+  @ApiProperty({ nullable: true, type: String }) companySector!: string | null;
   @ApiProperty({ type: [PartnershipApplicationReviewFeedbackDto] }) reviews!: PartnershipApplicationReviewFeedbackDto[];
   @ApiProperty({ nullable: true, type: String }) createdAt!: string | null;
   @ApiProperty({ nullable: true, type: String }) updatedAt!: string | null;

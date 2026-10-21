@@ -13,6 +13,7 @@ export function RequestTracking({
   reviews,
   history = [],
   editHref,
+  privateNote,
 }: {
   id: string;
   requestNumber: string;
@@ -22,12 +23,13 @@ export function RequestTracking({
   reviews: { decision: string; comment: string | null; createdAt: string | null }[];
   history?: { toStatus: string; reason: string | null; createdAt: string | null }[];
   editHref?: string;
+  privateNote?: string;
 }) {
   const t = useTranslations('workspace.phase7');
   return (
     <div data-testid="phase7-tracking" className="flex flex-col gap-24">
       <PortalHeading title={title} description={requestNumber} action={<PortalStatus status={status} />} />
-      <p className="type-body-default text-text-muted">{t('private')}</p>
+      <p className="type-body-default text-text-muted">{privateNote ?? t('private')}</p>
       <div className="grid items-start gap-24 tablet:grid-cols-[minmax(0,1fr)_minmax(240px,0.65fr)]">
         <div className="flex min-w-0 flex-col gap-24">
           <Card>

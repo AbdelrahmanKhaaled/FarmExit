@@ -81,6 +81,11 @@ export class PartnershipRequestResponseDto {
   @ApiProperty() status!: string;
   @ApiProperty({ nullable: true, type: String }) description!: string | null;
   @ApiProperty({ type: [String], nullable: true }) objective!: string[] | null;
+  @ApiProperty({ nullable: true, type: [String] }) acceptedPartnerTypes!: string[] | null;
+  @ApiProperty({ nullable: true, type: String }) contributionDetails!: string | null;
+  @ApiProperty({ nullable: true, type: String }) operations!: string | null;
+  @ApiProperty({ nullable: true, type: String }) salesChannel!: string | null;
+  @ApiProperty({ nullable: true, type: String }) extraInformation!: string | null;
   @ApiProperty({ type: [PartnershipReviewFeedbackDto] }) reviews!: PartnershipReviewFeedbackDto[];
   @ApiProperty({ nullable: true, type: String }) createdAt!: string | null;
   @ApiProperty({ nullable: true, type: String }) updatedAt!: string | null;

@@ -1,8 +1,7 @@
 import { hasLocale } from 'next-intl';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { Link } from '@/i18n/navigation';
 import { requireCompletedProfile } from '@/lib/auth/require-session';
 import { apiFetchWebsite } from '@/lib/auth/session.server';
 import { PartnershipRequestDetail, type PartnershipRequest } from '@/features/my-partnerships/PartnershipRequestDetail';
@@ -13,7 +12,6 @@ export default async function PartnershipDetailPage({ params }: PageProps<'/[loc
   const { locale, id } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const t = await getTranslations('workspace.partnerships');
   const session = await requireCompletedProfile(locale, `/${locale}/my/partnerships/${id}`);
   let req: PartnershipRequest;
   try {
@@ -22,9 +20,8 @@ export default async function PartnershipDetailPage({ params }: PageProps<'/[loc
     notFound();
   }
   return (
-    <div className="flex flex-col gap-16">
-      <Link href="/my/partnerships" className="type-label-button text-text-brand">{t('back')}</Link>
+    <>
       <PartnershipRequestDetail initial={req} />
-    </div>
+    </>
   );
 }

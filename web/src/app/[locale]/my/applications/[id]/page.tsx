@@ -4,7 +4,10 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { requireCompletedProfile } from '@/lib/auth/require-session';
 import { apiFetchWebsite } from '@/lib/auth/session.server';
-import { PartnershipApplicationDetail, type PartnershipApplication } from '@/features/my-applications/PartnershipApplicationDetail';
+import {
+  PartnershipApplicationDetail,
+  type PartnershipApplication,
+} from '@/features/my-applications/PartnershipApplicationDetail';
 
 export const instant = false;
 
@@ -19,5 +22,5 @@ export default async function ApplicationDetailPage({ params }: PageProps<'/[loc
   } catch {
     notFound();
   }
-  return <PartnershipApplicationDetail initial={app} />;
+  return <PartnershipApplicationDetail initial={app} account={session.user} />;
 }

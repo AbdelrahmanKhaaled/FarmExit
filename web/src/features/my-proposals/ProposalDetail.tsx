@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
-import { TextInput } from '@/components/ui/Field';
+import { TextInput, Select } from '@/components/ui/Field';
 import { Surface } from '@/components/ui/Surface';
 import { OpenCommunicationCaseButton } from '@/features/my-messages/OpenCommunicationCaseButton';
 
@@ -34,6 +34,8 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
   const [proposal, setProposal] = useState(initial);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const lock = useRef(false);
   const [message, setMessage] = useState<string | null>(null);
   const canEdit = proposal.status === 'submitted';
 
@@ -44,11 +46,12 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!canEdit) return;
+    if (lock.current) return;
     setError(null);
     setMessage(null);
     const form = new FormData(e.currentTarget);
     const kind = proposal.proposalKind;
-    const notes = String(form.get('notes') ?? '').trim() || undefined;
+    const notes = String(form.get('notes') ?? '').trim();
     const components: Record<string, unknown>[] = [];
     let proposedTotalValue: number | undefined;
     let requestedSharePercent: number | undefined;
@@ -98,25 +101,34 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
       return;
     }
 
-    const res = await fetch(`/api/purchase-proposals/${proposal.id}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        proposalKind: kind,
-        proposedTotalValue,
-        requestedSharePercent,
-        proposalNotes: notes,
-        components,
-      }),
-    });
-    if (!res.ok) {
+    lock.current = true;
+    setPending(true);
+    try {
+      const res = await fetch(`/api/purchase-proposals/${proposal.id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          proposalKind: kind,
+          proposedTotalValue,
+          requestedSharePercent,
+          proposalNotes: notes,
+          components,
+        }),
+      });
+      if (!res.ok) {
+        setError(t('saveError'));
+        return;
+      }
+      const updated = (await res.json()) as PurchaseProposal;
+      setProposal(updated);
+      setEditing(false);
+      setMessage(t('saved'));
+    } catch {
       setError(t('saveError'));
-      return;
+    } finally {
+      lock.current = false;
+      setPending(false);
     }
-    const updated = (await res.json()) as PurchaseProposal;
-    setProposal(updated);
-    setEditing(false);
-    setMessage(t('saved'));
   }
 
   return (
@@ -130,80 +142,81 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
       )}
       {editing ? (
         <Surface className="p-24">
-          <form onSubmit={save} className="flex flex-col gap-12">
-            {proposal.proposalKind === 'coPurchase' && (
-              <>
+          <form onSubmit={save} className="flex flex-col gap-24">
+            <fieldset disabled={pending} className="contents">
+              {proposal.proposalKind === 'coPurchase' && (
+                <>
+                  <TextInput
+                    label={t('sharePercent')}
+                    name="sharePercent"
+                    type="number"
+                    min={0.01}
+                    max={100}
+                    step={0.01}
+                    required
+                    defaultValue={proposal.requestedSharePercent ?? ''}
+                    fieldStyle="form"
+                  />
+                  <p className="type-body-caption text-text-muted">{t('coPurchaseDisclaimer')}</p>
+                  <TextInput
+                    label={t('optionalCashPart')}
+                    name="cashPart"
+                    type="number"
+                    min={0}
+                    step={1}
+                    defaultValue={cash?.proposedValue ?? ''}
+                    fieldStyle="form"
+                  />
+                </>
+              )}
+              {(proposal.proposalKind === 'cash' || proposal.proposalKind === 'installment') && (
+                <>
+                  <TextInput
+                    label={t('amountEgp')}
+                    name="amount"
+                    type="number"
+                    min={1}
+                    required
+                    defaultValue={cash?.proposedValue ?? installments?.proposedValue ?? undefined}
+                    fieldStyle="form"
+                  />
+                  {proposal.proposalKind === 'installment' && (
+                    <>
+                      <TextInput
+                        label={t('installmentCount')}
+                        name="installmentCount"
+                        type="number"
+                        min={1}
+                        required
+                        defaultValue={installments?.installmentCount ?? undefined}
+                        fieldStyle="form"
+                      />
+                      <TextInput
+                        label={t('installmentInterval')}
+                        name="installmentInterval"
+                        defaultValue={installments?.installmentInterval ?? 'monthly'}
+                        fieldStyle="form"
+                      />
+                    </>
+                  )}
+                </>
+              )}
+              {proposal.proposalKind === 'mixed' && (
                 <TextInput
-                  label={t('sharePercent')}
-                  name="sharePercent"
-                  type="number"
-                  min={0.01}
-                  max={100}
-                  step={0.01}
-                  required
-                  defaultValue={proposal.requestedSharePercent ?? ''}
-                  fieldStyle="form"
-                />
-                <p className="type-body-caption text-text-muted">{t('coPurchaseDisclaimer')}</p>
-                <TextInput
-                  label={t('optionalCashPart')}
-                  name="cashPart"
-                  type="number"
-                  min={0}
-                  step={1}
-                  defaultValue={cash?.proposedValue ?? ''}
-                  fieldStyle="form"
-                />
-              </>
-            )}
-            {(proposal.proposalKind === 'cash' || proposal.proposalKind === 'installment') && (
-              <>
-                <TextInput
-                  label={t('amountEgp')}
-                  name="amount"
+                  label={t('cashPartAmount')}
+                  name="cashAmount"
                   type="number"
                   min={1}
                   required
-                  defaultValue={cash?.proposedValue ?? installments?.proposedValue ?? undefined}
+                  defaultValue={cash?.proposedValue ?? undefined}
                   fieldStyle="form"
                 />
-                {proposal.proposalKind === 'installment' && (
-                  <>
-                    <TextInput
-                      label={t('installmentCount')}
-                      name="installmentCount"
-                      type="number"
-                      min={1}
-                      required
-                      defaultValue={installments?.installmentCount ?? undefined}
-                      fieldStyle="form"
-                    />
-                    <TextInput
-                      label={t('installmentInterval')}
-                      name="installmentInterval"
-                      defaultValue={installments?.installmentInterval ?? 'monthly'}
-                      fieldStyle="form"
-                    />
-                  </>
-                )}
-              </>
-            )}
-            {proposal.proposalKind === 'mixed' && (
-              <TextInput
-                label={t('cashPartAmount')}
-                name="cashAmount"
-                type="number"
-                min={1}
-                required
-                defaultValue={cash?.proposedValue ?? undefined}
-                fieldStyle="form"
-              />
-            )}
-            {(proposal.proposalKind === 'exchange' || proposal.proposalKind === 'mixed') && (
-              <>
-                <label className="flex flex-col gap-8">
-                  <span className="type-label-form">{t('assetType')}</span>
-                  <select
+              )}
+              {(proposal.proposalKind === 'exchange' || proposal.proposalKind === 'mixed') && (
+                <>
+                  <Select
+                    label={t('assetType')}
+                    fieldStyle="form"
                     name="assetType"
                     required
                     defaultValue={asset?.assetType ?? EXCHANGE_ASSETS[0]}
@@ -214,35 +227,44 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
                         {(t as (k: string) => string)(`assetTypes.${a}`)}
                       </option>
                     ))}
-                  </select>
-                </label>
-                <TextInput
-                  label={t('assetValueEgp')}
-                  name="assetValue"
-                  type="number"
-                  min={1}
-                  required
-                  defaultValue={asset?.proposedValue ?? undefined}
-                  fieldStyle="form"
-                />
-                <TextInput
-                  label={t('assetDescription')}
-                  name="assetDescription"
-                  defaultValue={asset?.assetDescription ?? ''}
-                  fieldStyle="form"
-                />
-              </>
-            )}
-            <TextInput label={t('notes')} name="notes" defaultValue={proposal.proposalNotes ?? ''} fieldStyle="form" />
-            <div className="flex gap-12">
-              <Button type="submit" variant="primary">
-                {t('save')}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setEditing(false)}>
-                {t('cancel')}
-              </Button>
-            </div>
-            {error && <p className="type-body-caption text-status-error">{error}</p>}
+                  </Select>
+                  <TextInput
+                    label={t('assetValueEgp')}
+                    name="assetValue"
+                    type="number"
+                    min={1}
+                    required
+                    defaultValue={asset?.proposedValue ?? undefined}
+                    fieldStyle="form"
+                  />
+                  <TextInput
+                    label={t('assetDescription')}
+                    name="assetDescription"
+                    defaultValue={asset?.assetDescription ?? ''}
+                    fieldStyle="form"
+                  />
+                </>
+              )}
+              <TextInput
+                label={t('notes')}
+                name="notes"
+                defaultValue={proposal.proposalNotes ?? ''}
+                fieldStyle="form"
+              />
+              <div className="flex gap-12">
+                <Button type="submit" variant="primary">
+                  {t('save')}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setEditing(false)}>
+                  {t('cancel')}
+                </Button>
+              </div>
+              {error && (
+                <p role="alert" className="type-body-caption text-status-error">
+                  {error}
+                </p>
+              )}
+            </fieldset>
           </form>
         </Surface>
       ) : (

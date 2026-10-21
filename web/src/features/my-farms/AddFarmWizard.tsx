@@ -21,6 +21,7 @@ import { SubmissionProgress } from './SubmissionProgress';
 import { FarmLocationMap, type FarmPin } from './FarmLocationMap';
 import type { PrivateFarmLocation } from './types';
 import { FarmFacilitiesPanel, type Facility } from './FarmFacilitiesPanel';
+import { SaleTermsEditor, SaleTermsError, type SaleTermsHandle } from './SaleTermsEditor';
 import { FarmMediaPanel } from './FarmMediaPanel';
 import { RequestDocumentsPanel } from './RequestDocumentsPanel';
 import { editableListing, jsonRequest, type Farm, type ListingDraft, type FarmSpecification } from './types';
@@ -83,6 +84,7 @@ export function AddFarmWizard({
   const [submitting, setSubmitting] = useState(false);
   const [pending, setPending] = useState(false);
   const busy = useRef(false);
+  const saleTermsRef = useRef<SaleTermsHandle>(null);
   const [error, setError] = useState<string | null>(null);
   const [invalid, setInvalid] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -312,6 +314,7 @@ export function AddFarmWizard({
       setListingDirty(false);
       syncUrl(stored.id, request.id);
     }
+    if (includeListing && request?.listingType === 'sale') await saleTermsRef.current?.save(request.id);
     setDirty(false);
     setSaved(true);
     return { farm: stored, listing: request };
@@ -386,6 +389,11 @@ export function AddFarmWizard({
       go(Math.min(7, step + 1));
       syncUrl(stored.farm.id, stored.listing?.id, Math.min(7, step + 1));
     } catch (reason) {
+      if (reason instanceof SaleTermsError) {
+        setStep(4);
+        setError(reason.message);
+        return;
+      }
       setError(
         reason instanceof Error && reason.message === 'required'
           ? t('firstSave')
@@ -928,6 +936,16 @@ export function AddFarmWizard({
                         ))}
                       </div>
                     </WizardCard>
+                    <SaleTermsEditor
+                      ref={saleTermsRef}
+                      listingId={initialListing?.id}
+                      visible={data.listingType === 'sale'}
+                      disabled={pending || !canEdit}
+                      onDirty={() => {
+                        setDirty(true);
+                        setSaved(false);
+                      }}
+                    />
                     <WizardCard icon="document-text" title={t('pricing')}>
                       {data.listingType === 'sale' ? (
                         <>

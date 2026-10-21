@@ -17,6 +17,7 @@ import type { Egp, Localized } from '@/lib/domain/types';
  * Nothing is computed for display: price per feddan is shown only when the listing states it.
  */
 export interface MarketplaceListing {
+  saleEligibility?: import('@/lib/api/public-listing').PublicListingDto['saleEligibility'];
   slug: string;
   purpose: ListingPurpose;
   name: Localized;
@@ -79,6 +80,8 @@ export const FARM_SIZE_RANGE = { min: 10, max: 500, step: 5 } as const;
 export const PRICE_RANGE = { min: 5_000_000, max: 100_000_000, step: 500_000 } as const;
 
 export interface MarketplaceFilters {
+  saleMethods?: ('installment' | 'exchange')[];
+  exchangeAssetTypes?: ('factory' | 'villa' | 'apartment' | 'car')[];
   purpose: ListingPurpose;
   size: [number, number];
   farmTypes: FarmType[];
@@ -97,6 +100,8 @@ export interface MarketplaceQuery {
 }
 
 export const defaultFilters: MarketplaceFilters = {
+  saleMethods: [],
+  exchangeAssetTypes: [],
   purpose: 'sale',
   size: [FARM_SIZE_RANGE.min, FARM_SIZE_RANGE.max],
   farmTypes: [],

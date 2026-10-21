@@ -748,7 +748,7 @@ model RequestStaffAssignment {
 // =========================
 
 /// Sale listings only (never rent). Booleans are eligibility to PROPOSE, not acceptance or a guarantee of sale.
-/// quick_sale => installment and exchange proposals both accepted (enforced in the service layer).
+/// New quick_sale writes explicitly select installments and/or exchange without cash; legacy stored flags are preserved.
 model FarmSaleTerms {
   listingRequestId            BigInt                  @id @map("listing_request_id")
   saleMode                    SaleMode                @default(standardCash) @map("sale_mode")

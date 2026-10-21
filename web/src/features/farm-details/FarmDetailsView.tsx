@@ -115,14 +115,22 @@ export function FarmDetailsView({
       pathname: accountLinks.signIn,
       query: { returnTo: `/farms/${listing.slug}`, request: sale ? 'details' : 'rental' },
     } satisfies Href);
-  const offerHref =
-    offerHrefProp ??
-    (sale
-      ? ({
-          pathname: accountLinks.signIn,
-          query: { returnTo: `/my/proposals/new?slug=${encodeURIComponent(listing.slug)}` },
-        } satisfies Href)
-      : undefined);
+  const eligibility = listing.saleEligibility;
+  const canPropose =
+    sale &&
+    (!eligibility ||
+      eligibility.acceptsCashProposals ||
+      eligibility.acceptsInstallmentProposals ||
+      eligibility.acceptsExchangeProposals);
+  const offerHref = canPropose
+    ? (offerHrefProp ??
+      (sale
+        ? ({
+            pathname: accountLinks.signIn,
+            query: { returnTo: `/my/proposals/new?slug=${encodeURIComponent(listing.slug)}` },
+          } satisfies Href)
+        : undefined))
+    : undefined;
   const actionProps = { name, purpose: listing.purpose, price, score: listing.score, requestHref, offerHref };
 
   const listedDate = details.reference

@@ -146,6 +146,10 @@ export async function isolatePhase6(
       if (method === 'PATCH') specification = { ...specification, ...request.postDataJSON() };
       return route.fulfill({ json: specification });
     }
+    if (path.endsWith('/sale-terms')) {
+      if (options.saveError && method !== 'GET') return route.fulfill({status:503,json:{message:'Unavailable'}});
+      return method === 'GET' ? route.fulfill({status:404,json:{message:'Not configured'}}) : route.fulfill({json:{...request.postDataJSON(),configured:true}});
+    }
     if (path.includes('/listing-requests')) {
       if (options.saveError && method !== 'GET')
         return route.fulfill({ status: 503, json: { message: 'Unavailable' } });

@@ -4,13 +4,13 @@ Base URL: `FARMEXIT_API_URL` (default `http://127.0.0.1:4001/api/v1`). All websi
 
 ## Partnership requests (owner)
 
-| Action | Method | API | Auth | Status |
-|--------|--------|-----|------|--------|
-| Create | POST | `/farms/:farmId/partnership-requests` | Completed profile, farm **owner** | Implemented → `/api/farms/[id]/partnership-requests` |
-| List mine | GET | `/partnership-requests?page&pageSize` | Completed profile | `/api/partnership-requests` |
-| Get | GET | `/partnership-requests/:id` | Owner of request | `/api/partnership-requests/[id]` |
-| Update draft | PATCH | `/partnership-requests/:id` | Draft / changesRequested | same |
-| Submit | POST | `/partnership-requests/:id/submit` | Requires description or objective | `/api/partnership-requests/[id]/submit` |
+| Action       | Method | API                                   | Auth                              | Status                                               |
+| ------------ | ------ | ------------------------------------- | --------------------------------- | ---------------------------------------------------- |
+| Create       | POST   | `/farms/:farmId/partnership-requests` | Completed profile, farm **owner** | Implemented → `/api/farms/[id]/partnership-requests` |
+| List mine    | GET    | `/partnership-requests?page&pageSize` | Completed profile                 | `/api/partnership-requests`                          |
+| Get          | GET    | `/partnership-requests/:id`           | Owner of request                  | `/api/partnership-requests/[id]`                     |
+| Update draft | PATCH  | `/partnership-requests/:id`           | Draft / changesRequested          | same                                                 |
+| Submit       | POST   | `/partnership-requests/:id/submit`    | Requires description or objective | `/api/partnership-requests/[id]/submit`              |
 
 DTOs: `CreatePartnershipRequestDto`, `UpdatePartnershipRequestDto` (`api/src/modules/partnership-requests/dto/partnership-request.dto.ts`).
 
@@ -20,12 +20,12 @@ Submission stays **private** until staff publish (no auto public marketplace lis
 
 ## Partnership applications (applicant)
 
-| Action | Method | API | Auth | Status |
-|--------|--------|-----|------|--------|
-| Create | POST | `/partnership-applications` | Parent request **approved or published**; not farm owner | `/api/partnership-applications` |
-| List mine | GET | `/partnership-applications` | Applicant | same |
-| Get / update / submit | GET/PATCH/POST submit | `/partnership-applications/:id` | Owner of application | `/api/partnership-applications/[id]` (+ submit) |
-| Documents | POST | `/requests/:id/documents` | Owned request | existing BFF |
+| Action                | Method                | API                             | Auth                                                     | Status                                          |
+| --------------------- | --------------------- | ------------------------------- | -------------------------------------------------------- | ----------------------------------------------- |
+| Create                | POST                  | `/partnership-applications`     | Parent request **approved or published**; not farm owner | `/api/partnership-applications`                 |
+| List mine             | GET                   | `/partnership-applications`     | Applicant                                                | same                                            |
+| Get / update / submit | GET/PATCH/POST submit | `/partnership-applications/:id` | Owner of application                                     | `/api/partnership-applications/[id]` (+ submit) |
+| Documents             | POST                  | `/requests/:id/documents`       | Owned request                                            | existing BFF                                    |
 
 `CreatePartnershipApplicationDto`: `parentPartnershipRequestId`, `applicantKind` (`individual` | `company`).
 
@@ -35,25 +35,25 @@ Frontend: `/my/applications`, `/my/applications/[id]`, `/my/applications/new?par
 
 ## Purchase proposals (buyer)
 
-| Action | Method | API | Auth | Status |
-|--------|--------|-----|------|--------|
-| Sale terms (published) | GET | `/marketplace/farms/:slug/sale-terms` | Completed profile | `/api/marketplace/farms/[slug]/sale-terms` |
-| Create proposal | POST | `/marketplace/farms/:slug/purchase-proposals` | Buyer, not farm owner; one per listing | `/api/marketplace/farms/[slug]/purchase-proposals` |
-| List mine | GET | `/purchase-proposals` | Buyer | `/api/purchase-proposals` |
-| Get / update | GET/PATCH | `/purchase-proposals/:id` | While `submitted` and not in staff co-purchase group | `/api/purchase-proposals/[id]` |
+| Action                 | Method    | API                                           | Auth                                                 | Status                                             |
+| ---------------------- | --------- | --------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------- |
+| Sale terms (published) | GET       | `/marketplace/farms/:slug/sale-terms`         | Completed profile                                    | `/api/marketplace/farms/[slug]/sale-terms`         |
+| Create proposal        | POST      | `/marketplace/farms/:slug/purchase-proposals` | Buyer, not farm owner; one per listing               | `/api/marketplace/farms/[slug]/purchase-proposals` |
+| List mine              | GET       | `/purchase-proposals`                         | Buyer                                                | `/api/purchase-proposals`                          |
+| Get / update           | GET/PATCH | `/purchase-proposals/:id`                     | While `submitted` and not in staff co-purchase group | `/api/purchase-proposals/[id]`                     |
 
 DTO: `CreateProposalDto` — `proposalKind`, `components[]`, optional `proposedTotalValue`, `requestedSharePercent` (co-purchase only), `proposalNotes`.
 
-Eligibility from `FarmSaleTerms` via `SaleTermsService.effective` (standard cash = cash only; quick sale = cash/installment/exchange).
+Eligibility comes from stored `FarmSaleTerms` via `SaleTermsService.effective`. **Approved Stage 1E update:** new Quick Sale writes explicitly select installments, exchange, or both, without cash. Exchange requires selected accepted asset categories. Legacy stored cash/installment/exchange flags and `any` scope remain unchanged until explicit owner editing. Mixed still requires cash plus exchange; Co-purchase requires cash eligibility. See [Stage 1E contracts and verification](STAGE1E_IMPLEMENTATION_REPORT.md).
 
 Frontend: `/my/proposals`, `/my/proposals/[id]`, `/my/proposals/new?slug=`; Farm details CTA → sign-in → offer form.
 
 ## Co-purchase (staff-only)
 
-| Action | API | Website |
-|--------|-----|---------|
+| Action               | API                                        | Website                           |
+| -------------------- | ------------------------------------------ | --------------------------------- |
 | Create/manage groups | `POST/GET/PATCH /staff/co-purchase-groups` | **Not exposed** (staff dashboard) |
-| Add members | `POST .../members` | **Not exposed** |
+| Add members          | `POST .../members`                         | **Not exposed**                   |
 
 User-facing co-purchase interest is expressed only through `proposalKind: coPurchase` on purchase proposals (nonbinding share %). No user-scoped group read API.
 

@@ -170,7 +170,6 @@ export function NewPurchaseProposalForm({ slug, farmName }: { slug: string; farm
               name="proposalKind"
               value={kind}
               onChange={(e) => setKind(e.target.value as ProposalKind)}
-              className="rounded-lg border border-border-subtle px-12 py-8"
             >
               {kinds.map((k) => (
                 <option key={k} value={k}>
@@ -230,13 +229,7 @@ export function NewPurchaseProposalForm({ slug, farmName }: { slug: string; farm
             {(kind === 'exchange' || kind === 'mixed') && (
               <>
                 <p className="type-body-caption text-text-muted">{t('exchangeDisclaimer')}</p>
-                <Select
-                  label={t('assetType')}
-                  fieldStyle="form"
-                  name="assetType"
-                  required
-                  className="rounded-lg border border-border-subtle px-12 py-8"
-                >
+                <Select label={t('assetType')} fieldStyle="form" name="assetType" required>
                   {assets.map((a) => (
                     <option key={a} value={a}>
                       {(t as (k: string) => string)(`assetTypes.${a}`)}

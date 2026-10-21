@@ -1,6 +1,19 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength, registerDecorator } from 'class-validator';
+import {
+  IsArray,
+  ArrayMaxSize,
+  ArrayUnique,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+  registerDecorator,
+} from 'class-validator';
 import { ListingType } from '../../../generated/prisma/enums';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../../farms/dto/list-farms-query.dto';
 import { MAX_LISTING_POUNDS } from '../../listing-requests/listing-prices';
@@ -17,7 +30,8 @@ function IsAreaFeddan(): PropertyDecorator {
       validator: {
         validate(value: unknown): boolean {
           if (value === undefined) return true;
-          if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 9_999_999_999.99) return false;
+          if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 9_999_999_999.99)
+            return false;
           return Math.abs(value * 100 - Math.round(value * 100)) < 1e-8;
         },
         defaultMessage: () => 'Area must be a number of feddans with at most two decimal places',
@@ -27,9 +41,30 @@ function IsAreaFeddan(): PropertyDecorator {
 }
 
 export class MarketplaceQueryDto {
+  @ApiPropertyOptional({ description: 'Comma-separated installment,exchange. OR within group; AND with asset group.' })
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.split(',') : value))
+  @IsArray()
+  @ArrayMaxSize(2)
+  @ArrayUnique()
+  @IsIn(['installment', 'exchange'], { each: true })
+  saleMethods?: ('installment' | 'exchange')[];
+
+  @ApiPropertyOptional({
+    description: 'Comma-separated factory,villa,apartment,car. Requires explicit exchange eligibility.',
+  })
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.split(',') : value))
+  @IsArray()
+  @ArrayMaxSize(4)
+  @ArrayUnique()
+  @IsIn(['factory', 'villa', 'apartment', 'car'], { each: true })
+  exchangeAssetTypes?: ('factory' | 'villa' | 'apartment' | 'car')[];
+
   @ApiPropertyOptional({
     maxLength: 100,
-    description: 'Matches farm name, governorate, general area, or listing description. No default price band is applied.',
+    description:
+      'Matches farm name, governorate, general area, or listing description. No default price band is applied.',
   })
   @IsOptional()
   @Transform(trim)

@@ -7,7 +7,11 @@ import {
   RequestVisibility,
 } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
-import { LISTING_CHANGES_REQUESTED, LISTING_DRAFT, LISTING_PUBLISHED } from '../listing-requests/listing-requests.service';
+import {
+  LISTING_CHANGES_REQUESTED,
+  LISTING_DRAFT,
+  LISTING_PUBLISHED,
+} from '../listing-requests/listing-requests.service';
 import type { SaleTermsResponseDto, UpsertSaleTermsDto } from './dto/offers.dto';
 import { resolveSaleTerms, type ResolvedSaleTerms } from './offer-values';
 
@@ -34,6 +38,15 @@ export class SaleTermsService {
     }
     const resolved = resolveSaleTerms(dto);
     await this.prisma.$transaction(async (tx) => {
+      // Acquire the listing write lock and recheck status against concurrent submission/publication.
+      const locked = await tx.request.updateMany({
+        where: { id: listing.id, createdBy: userId, status: { in: [...EDITABLE] } },
+        data: { updatedAt: new Date() },
+      });
+      if (locked.count !== 1)
+        throw new ConflictException(
+          'Sale terms can change only while the listing is a draft or changes were requested',
+        );
       await tx.farmSaleTerms.upsert({
         where: { listingRequestId: listing.id },
         create: {
@@ -64,6 +77,7 @@ export class SaleTermsService {
           action: 'sale_terms_saved',
           changes: {
             saleMode: resolved.saleMode,
+            acceptsCashProposals: resolved.acceptsCashProposals,
             acceptsInstallmentProposals: resolved.acceptsInstallmentProposals,
             acceptsExchangeProposals: resolved.acceptsExchangeProposals,
             exchangePreferenceScope: resolved.exchangePreferenceScope,
@@ -77,7 +91,10 @@ export class SaleTermsService {
 
   /** Published sale only. Missing stored terms use the schema defaults and are not written. */
   async getPublished(slug: string): Promise<SaleTermsResponseDto> {
-    const detail = await this.prisma.farmListingDetail.findUnique({ where: { slug }, select: { requestId: true, listingType: true } });
+    const detail = await this.prisma.farmListingDetail.findUnique({
+      where: { slug },
+      select: { requestId: true, listingType: true },
+    });
     if (!detail || detail.listingType !== ListingType.sale) throw notFound();
     const request = await this.prisma.request.findFirst({
       where: {

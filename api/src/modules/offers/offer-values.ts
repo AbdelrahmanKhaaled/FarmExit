@@ -56,7 +56,7 @@ export type ResolvedSaleTerms = {
 };
 
 /**
- * standard_cash is cash offers only. quick_sale accepts cash, installment and exchange proposals.
+ * standard_cash is cash offers only. new quick_sale terms explicitly select installments and/or exchange without cash.
  * Those booleans are eligibility to propose, not acceptance of an offer.
  */
 export function resolveSaleTerms(input: SaleTermsInput): ResolvedSaleTerms {
@@ -64,28 +64,23 @@ export function resolveSaleTerms(input: SaleTermsInput): ResolvedSaleTerms {
   if (new Set(assets).size !== assets.length) throw bad('Each exchange asset type can be selected once');
   const scope = input.exchangePreferenceScope ?? ExchangePreferenceScope.any;
   if (input.saleMode === SaleMode.quickSale) {
-    if (
-      input.acceptsCashProposals === false ||
-      input.acceptsInstallmentProposals === false ||
-      input.acceptsExchangeProposals === false
-    ) {
-      throw bad('A quick sale accepts cash, installment and exchange proposals');
-    }
-    if (scope === ExchangePreferenceScope.selected && assets.length === 0) {
-      throw bad('Select at least one exchange asset type');
-    }
-    if (scope === ExchangePreferenceScope.any && assets.length > 0) {
-      throw bad('A quick sale that accepts any exchange asset does not list individual types');
-    }
+    if (input.acceptsCashProposals === true) throw bad('New quick sale terms do not accept cash');
+    const installment = input.acceptsInstallmentProposals === true;
+    const exchange = input.acceptsExchangeProposals === true;
+    if (!installment && !exchange) throw bad('Select installments, exchange, or both');
+    if (exchange && (scope !== ExchangePreferenceScope.selected || assets.length === 0))
+      throw bad('Select at least one accepted exchange asset type');
+    if (!exchange && assets.length > 0) throw bad('Installments-only terms cannot contain active exchange assets');
     return {
       saleMode: SaleMode.quickSale,
-      acceptsCashProposals: true,
-      acceptsInstallmentProposals: true,
-      acceptsExchangeProposals: true,
-      exchangePreferenceScope: scope,
-      exchangeAssetTypes: scope === ExchangePreferenceScope.selected ? assets : [],
+      acceptsCashProposals: false,
+      acceptsInstallmentProposals: installment,
+      acceptsExchangeProposals: exchange,
+      exchangePreferenceScope: exchange ? ExchangePreferenceScope.selected : ExchangePreferenceScope.any,
+      exchangeAssetTypes: exchange ? assets : [],
     };
   }
+
   if (
     input.acceptsCashProposals === false ||
     input.acceptsInstallmentProposals === true ||
@@ -123,6 +118,7 @@ export function assertProposalShape(
   declaredTotal: Prisma.Decimal | null,
 ): void {
   if (kind === ProposalKind.coPurchase) {
+    if (!terms.acceptsCashProposals) throw bad('Co-purchase requires cash eligibility');
     if (!share) throw bad('A co-purchase interest needs a share percent');
   } else if (share) {
     throw bad('Only a co-purchase interest has a share percent');
@@ -130,7 +126,8 @@ export function assertProposalShape(
   const cash = components.filter((row) => row.componentType === ProposalComponentType.cash);
   const installments = components.filter((row) => row.componentType === ProposalComponentType.installments);
   const assets = components.filter((row) => row.componentType === ProposalComponentType.exchangeAsset);
-  if (cash.length > 1 || installments.length > 1) throw bad('A proposal has at most one cash part and one installment part');
+  if (cash.length > 1 || installments.length > 1)
+    throw bad('A proposal has at most one cash part and one installment part');
   if (kind === ProposalKind.cash && (cash.length !== 1 || installments.length > 0 || assets.length > 0)) {
     throw bad('A cash proposal has one cash part');
   }
@@ -166,7 +163,8 @@ export function assertProposalShape(
       throw bad('This listing is not open to that exchange asset type');
     }
   }
-  if (new Set(assetTypes).size !== assetTypes.length) throw bad('Each exchange asset type can appear once in a proposal');
+  if (new Set(assetTypes).size !== assetTypes.length)
+    throw bad('Each exchange asset type can appear once in a proposal');
   for (const part of installments) {
     if (part.installmentCount === undefined || !Number.isInteger(part.installmentCount) || part.installmentCount < 1) {
       throw bad('An installment part needs a count of at least 1');

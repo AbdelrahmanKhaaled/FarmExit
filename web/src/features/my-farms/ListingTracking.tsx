@@ -5,6 +5,7 @@ import { ButtonLink } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Surface';
 import { Icon } from '@/components/icons/Icon';
 import { PortalStatus } from '@/features/my-farmexit/PortalUI';
+import { SaleTermsEditor } from './SaleTermsEditor';
 import { RequestDocumentsPanel } from './RequestDocumentsPanel';
 import { editableListing, type ListingDraft } from './types';
 export type ListingRequestHistory = {
@@ -62,6 +63,7 @@ export function ListingTracking({
           </ButtonLink>
         )}
       </Card>
+      {listing?.listingType === 'sale' && <SaleTermsEditor listingId={listing.id} disabled onDirty={() => {}} />}
       <div className="grid grid-cols-1 items-start gap-24 desktop:grid-cols-2">
         <div className="flex flex-col gap-24">
           <Card>

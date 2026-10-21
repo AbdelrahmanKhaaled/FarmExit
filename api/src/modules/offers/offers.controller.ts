@@ -59,7 +59,7 @@ export class SaleTermsController {
     summary: 'Create or replace sale terms',
     description:
       'Draft or changes-requested sale listings only. standardCash accepts cash proposals. ' +
-      'quickSale accepts cash, installment and exchange proposals. Eligibility is not acceptance, ' +
+      'New quickSale terms explicitly accept installments and/or selected exchange assets, without cash. Eligibility is not acceptance, ' +
       'and a published listing is not changed.',
   })
   @ApiParam({ name: 'id', example: '4' })
@@ -135,7 +135,8 @@ export class PurchaseProposalsController {
   @Patch('purchase-proposals/:id')
   @ApiOperation({
     summary: 'Replace your submitted proposal',
-    description: 'Allowed while it is still submitted, the listing is published, and staff have not added it to a group.',
+    description:
+      'Allowed while it is still submitted, the listing is published, and staff have not added it to a group.',
   })
   @ApiParam({ name: 'id', example: '9' })
   @ApiOkResponse({ type: ProposalResponseDto })
@@ -179,7 +180,8 @@ export class StaffPurchaseProposalsController {
   @StaffRoles(StaffRole.admin)
   @ApiOperation({
     summary: 'Assign the case agent for this proposal',
-    description: 'Active admin only. The assignee must be an active case agent. No conversation or communication case is opened.',
+    description:
+      'Active admin only. The assignee must be an active case agent. No conversation or communication case is opened.',
   })
   @ApiParam({ name: 'id', example: '9' })
   @ApiOkResponse({ type: ProposalResponseDto })
@@ -224,7 +226,10 @@ export class StaffCoPurchaseController {
   @Get(':id')
   @ApiParam({ name: 'id', example: '3' })
   @ApiOkResponse({ type: CoPurchaseGroupResponseDto })
-  get(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint): Promise<CoPurchaseGroupResponseDto> {
+  get(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id', ParseBigIntIdPipe) id: bigint,
+  ): Promise<CoPurchaseGroupResponseDto> {
     return this.groups.get(auth.userId, id);
   }
 

@@ -50,6 +50,8 @@ export function parseState(params: Params): MarketplaceState {
 
   return {
     filters: {
+      saleMethods: list(params.get('saleMethods'), ['installment', 'exchange'] as const),
+      exchangeAssetTypes: list(params.get('exchangeAssetTypes'), ['factory', 'villa', 'apartment', 'car'] as const),
       purpose: params.get('listing') === 'rent' ? 'rent' : 'sale',
       size: range(params.get('sizeMin'), params.get('sizeMax'), FARM_SIZE_RANGE),
       farmTypes: farmTypeList,
@@ -68,6 +70,8 @@ export function parseState(params: Params): MarketplaceState {
 
 export function toSearchParams({ filters: f, sort, page }: MarketplaceState): Record<string, string> {
   const q: Record<string, string> = {};
+  if (f.saleMethods?.length) q.saleMethods = f.saleMethods.join(',');
+  if (f.exchangeAssetTypes?.length) q.exchangeAssetTypes = f.exchangeAssetTypes.join(',');
   if (f.purpose === 'rent') q.listing = 'rent';
   if (f.size[0] !== FARM_SIZE_RANGE.min) q.sizeMin = String(f.size[0]);
   if (f.size[1] !== FARM_SIZE_RANGE.max) q.sizeMax = String(f.size[1]);

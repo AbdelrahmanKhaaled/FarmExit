@@ -6,6 +6,8 @@ import { LISTING_PUBLISHED } from '../listing-requests/listing-requests.service'
 import type { PublicListingDto } from './dto/public-listing.dto';
 
 export type MarketplaceFilters = {
+  saleMethods?: ('installment' | 'exchange')[];
+  exchangeAssetTypes?: ('factory' | 'villa' | 'apartment' | 'car')[];
   q?: string;
   listingType?: 'sale' | 'rent';
   governorate?: string;
@@ -36,6 +38,14 @@ export type PublicListingSource = {
     areaFeddan: { toString(): string } | number | string;
   } | null;
   listingDetail: {
+    saleTerms?: {
+      saleMode: string;
+      acceptsCashProposals: boolean;
+      acceptsInstallmentProposals: boolean;
+      acceptsExchangeProposals: boolean;
+      exchangePreferenceScope: string;
+      exchangePreferences: { assetType: string }[];
+    } | null;
     slug: string;
     listingType: string;
     askingPrice: unknown;
@@ -55,6 +65,16 @@ export const publicListingSelect = {
   farm: { select: { id: true, name: true, governorate: true, areaName: true, areaFeddan: true } },
   listingDetail: {
     select: {
+      saleTerms: {
+        select: {
+          saleMode: true,
+          acceptsCashProposals: true,
+          acceptsInstallmentProposals: true,
+          acceptsExchangeProposals: true,
+          exchangePreferenceScope: true,
+          exchangePreferences: { select: { assetType: true } },
+        },
+      },
       slug: true,
       listingType: true,
       askingPrice: true,
@@ -122,6 +142,41 @@ export function buildMarketplaceWhere(query: MarketplaceFilters): Prisma.Request
     }
   }
 
+  if (query.saleMethods?.length)
+    and.push({
+      listingDetail: {
+        is: {
+          listingType: ListingType.sale,
+          saleTerms: {
+            is: {
+              OR: query.saleMethods.map((method) =>
+                method === 'installment' ? { acceptsInstallmentProposals: true } : { acceptsExchangeProposals: true },
+              ),
+            },
+          },
+        },
+      },
+    });
+  if (query.exchangeAssetTypes?.length)
+    and.push({
+      listingDetail: {
+        is: {
+          listingType: ListingType.sale,
+          saleTerms: {
+            is: {
+              acceptsExchangeProposals: true,
+              OR: [
+                { exchangePreferenceScope: 'any' },
+                {
+                  exchangePreferenceScope: 'selected',
+                  exchangePreferences: { some: { assetType: { in: query.exchangeAssetTypes } } },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
   if (query.q !== undefined) {
     const contains = { contains: query.q };
     and.push({
@@ -172,7 +227,11 @@ function priceText(raw: unknown): string | null {
   return null;
 }
 
-export function compareListedPrice(left: ListedPriceSource, right: ListedPriceSource, direction: 'asc' | 'desc'): number {
+export function compareListedPrice(
+  left: ListedPriceSource,
+  right: ListedPriceSource,
+  direction: 'asc' | 'desc',
+): number {
   const a = listedPriceCents(left);
   const b = listedPriceCents(right);
   if (a === null && b === null) return 0;
@@ -182,7 +241,10 @@ export function compareListedPrice(left: ListedPriceSource, right: ListedPriceSo
   return direction === 'asc' ? order : -order;
 }
 
-export function toPublicListing(source: PublicListingSource, farmExitScore: number | null = null): PublicListingDto | null {
+export function toPublicListing(
+  source: PublicListingSource,
+  farmExitScore: number | null = null,
+): PublicListingDto | null {
   const farm = source.farm;
   const detail = source.listingDetail;
   if (!farm || !detail || !hasPublicPrice(detail)) return null;
@@ -203,6 +265,20 @@ export function toPublicListing(source: PublicListingSource, farmExitScore: numb
     highlights: highlightsOut(detail.highlights),
     publishedAt: source.publishedAt?.toISOString() ?? null,
     farmExitScore,
+    saleEligibility:
+      detail.listingType === 'sale' && detail.saleTerms
+        ? {
+            saleMode: detail.saleTerms.saleMode,
+            acceptsCashProposals: detail.saleTerms.acceptsCashProposals,
+            acceptsInstallmentProposals: detail.saleTerms.acceptsInstallmentProposals,
+            acceptsExchangeProposals: detail.saleTerms.acceptsExchangeProposals,
+            exchangePreferenceScope: detail.saleTerms.exchangePreferenceScope,
+            exchangeAssetTypes:
+              detail.saleTerms.acceptsExchangeProposals && detail.saleTerms.exchangePreferenceScope === 'selected'
+                ? detail.saleTerms.exchangePreferences.map((p) => p.assetType)
+                : [],
+          }
+        : null,
   };
 }
 

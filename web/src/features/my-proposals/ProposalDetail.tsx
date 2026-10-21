@@ -1,13 +1,15 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import type { SaleTerms } from '@/features/my-farms/SaleTermsEditor';
 import { Button } from '@/components/ui/Button';
 import { TextInput, Select } from '@/components/ui/Field';
 import { Surface } from '@/components/ui/Surface';
 import { OpenCommunicationCaseButton } from '@/features/my-messages/OpenCommunicationCaseButton';
 
 export type PurchaseProposal = {
+  saleEligibility?: SaleTerms | null;
   id: string;
   requestNumber: string;
   listingId: string;
@@ -31,13 +33,32 @@ const EXCHANGE_ASSETS = ['factory', 'villa', 'apartment', 'car'];
 
 export function ProposalDetail({ proposal: initial }: { proposal: PurchaseProposal }) {
   const t = useTranslations('workspace.proposals');
+  const locale = useLocale();
   const [proposal, setProposal] = useState(initial);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const lock = useRef(false);
   const [message, setMessage] = useState<string | null>(null);
-  const canEdit = proposal.status === 'submitted';
+  const eligibility = proposal.saleEligibility;
+  const eligible =
+    eligibility === undefined ||
+    Boolean(
+      eligibility &&
+      (proposal.proposalKind === 'cash' || proposal.proposalKind === 'coPurchase'
+        ? eligibility.acceptsCashProposals
+        : proposal.proposalKind === 'installment'
+          ? eligibility.acceptsInstallmentProposals
+          : proposal.proposalKind === 'mixed'
+            ? eligibility.acceptsCashProposals && eligibility.acceptsExchangeProposals
+            : eligibility.acceptsExchangeProposals),
+    );
+  const canEdit = proposal.status === 'submitted' && eligible;
+  const acceptedAssets =
+    proposal.saleEligibility?.acceptsExchangeProposals &&
+    proposal.saleEligibility.exchangePreferenceScope === 'selected'
+      ? proposal.saleEligibility.exchangeAssetTypes
+      : EXCHANGE_ASSETS;
 
   const cash = proposal.components.find((c) => c.componentType === 'cash');
   const installments = proposal.components.find((c) => c.componentType === 'installments');
@@ -120,7 +141,7 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
         return;
       }
       const updated = (await res.json()) as PurchaseProposal;
-      setProposal(updated);
+      setProposal({ ...updated, saleEligibility: proposal.saleEligibility });
       setEditing(false);
       setMessage(t('saved'));
     } catch {
@@ -135,6 +156,13 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
     <div className="flex flex-col gap-16" data-testid="proposal-detail">
       <h2 className="type-display-h4">{proposal.requestNumber}</h2>
       <p className="type-body-caption text-text-muted">{t('nonbindingNote')}</p>
+      {!eligible && (
+        <p className="type-body-caption text-text-muted">
+          {locale === 'ar'
+            ? 'التعديل غير متاح وفق شروط الإعلان المنشور حاليًا. يظل مقترحك محفوظًا في حسابك.'
+            : 'Editing is unavailable under the current published listing terms. Your submitted proposal remains in your account.'}
+        </p>
+      )}
       {canEdit && !editing && (
         <Button type="button" variant="outline" onClick={() => setEditing(true)}>
           {t('edit')}
@@ -220,9 +248,8 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
                     name="assetType"
                     required
                     defaultValue={asset?.assetType ?? EXCHANGE_ASSETS[0]}
-                    className="rounded-lg border border-border-subtle px-12 py-8"
                   >
-                    {EXCHANGE_ASSETS.map((a) => (
+                    {acceptedAssets.map((a) => (
                       <option key={a} value={a}>
                         {(t as (k: string) => string)(`assetTypes.${a}`)}
                       </option>
@@ -305,10 +332,14 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
           <ul className="mt-12 flex flex-col gap-8">
             {proposal.components.map((c, i) => (
               <li key={i} className="type-body-caption text-text-secondary">
-                {c.componentType}
+                {c.componentType === 'exchangeAsset'
+                  ? t('kinds.exchange')
+                  : c.componentType === 'installments'
+                    ? t('kinds.installment')
+                    : t('kinds.cash')}
                 {c.assetType ? ` (${(t as (k: string) => string)(`assetTypes.${c.assetType}`)})` : ''}:{' '}
                 {c.proposedValue != null ? `EGP ${c.proposedValue.toLocaleString()}` : '—'}
-                {c.installmentCount != null ? ` · ${c.installmentCount} installments` : ''}
+                {c.installmentCount != null ? ` · ${t('installmentCount')}: ${c.installmentCount}` : ''}
                 {c.assetDescription ? ` · ${c.assetDescription}` : ''}
               </li>
             ))}

@@ -1,7 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /** A published listing a visitor may see. Same fields for a card and a detail page. */
+export class PublicSaleEligibilityDto {
+  @ApiProperty() saleMode: string;
+  @ApiProperty() acceptsCashProposals: boolean;
+  @ApiProperty() acceptsInstallmentProposals: boolean;
+  @ApiProperty() acceptsExchangeProposals: boolean;
+  @ApiProperty() exchangePreferenceScope: string;
+  @ApiProperty({ type: [String] }) exchangeAssetTypes: string[];
+}
 export class PublicListingDto {
+  @ApiProperty({ type: PublicSaleEligibilityDto, nullable: true }) saleEligibility: PublicSaleEligibilityDto | null;
   @ApiProperty({ example: '4' }) id: string;
   @ApiProperty() slug: string;
   @ApiProperty() farmName: string;

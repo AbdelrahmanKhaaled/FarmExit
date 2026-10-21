@@ -21,6 +21,8 @@ describe('sale terms and proposal values', () => {
     expect(
       resolveSaleTerms({
         saleMode: SaleMode.quickSale,
+        acceptsInstallmentProposals: true,
+        acceptsExchangeProposals: true,
         exchangePreferenceScope: ExchangePreferenceScope.selected,
         exchangeAssetTypes: [ExchangeAssetType.car, ExchangeAssetType.villa],
       }),
@@ -35,17 +37,25 @@ describe('sale terms and proposal values', () => {
   });
 
   it('rejects a mixed total that is not the Decimal sum of its parts', () => {
-    const terms = resolveSaleTerms({
+    const terms = {
       saleMode: SaleMode.quickSale,
+      acceptsCashProposals: true,
+      acceptsInstallmentProposals: true,
+      acceptsExchangeProposals: true,
       exchangePreferenceScope: ExchangePreferenceScope.any,
-    });
+      exchangeAssetTypes: [],
+    }; // Legacy stored terms, not a new owner write.
     expect(() =>
       assertProposalShape(
         ProposalKind.mixed,
         terms,
         [
           { componentType: ProposalComponentType.cash, proposedValue: 5_000_000 },
-          { componentType: ProposalComponentType.exchangeAsset, proposedValue: 5_000_000, assetType: ExchangeAssetType.car },
+          {
+            componentType: ProposalComponentType.exchangeAsset,
+            proposedValue: 5_000_000,
+            assetType: ExchangeAssetType.car,
+          },
         ],
         null,
         poundsDecimal(9_000_000, 'proposedTotalValue'),
@@ -57,7 +67,11 @@ describe('sale terms and proposal values', () => {
         terms,
         [
           { componentType: ProposalComponentType.cash, proposedValue: 5_000_000 },
-          { componentType: ProposalComponentType.exchangeAsset, proposedValue: 5_000_000, assetType: ExchangeAssetType.car },
+          {
+            componentType: ProposalComponentType.exchangeAsset,
+            proposedValue: 5_000_000,
+            assetType: ExchangeAssetType.car,
+          },
         ],
         null,
         poundsDecimal(10_000_000, 'proposedTotalValue'),
@@ -72,7 +86,13 @@ describe('sale terms and proposal values', () => {
     expect(() => shareDecimal(100.01, 'requestedSharePercent')).toThrow(BadRequestException);
     const cashOnly = resolveSaleTerms({ saleMode: SaleMode.standardCash });
     expect(() =>
-      assertProposalShape(ProposalKind.installment, cashOnly, [{ componentType: ProposalComponentType.installments, proposedValue: 1000, installmentCount: 2 }], null, null),
+      assertProposalShape(
+        ProposalKind.installment,
+        cashOnly,
+        [{ componentType: ProposalComponentType.installments, proposedValue: 1000, installmentCount: 2 }],
+        null,
+        null,
+      ),
     ).toThrow(BadRequestException);
     expect(() =>
       assertProposalShape(ProposalKind.coPurchase, cashOnly, [], shareDecimal(25, 'requestedSharePercent'), null),

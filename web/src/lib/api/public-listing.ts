@@ -1,5 +1,13 @@
 /** Mirrors `api` PublicListingDto (marketplace card fields only). */
 export type PublicListingDto = {
+  saleEligibility?: {
+    saleMode: string;
+    acceptsCashProposals: boolean;
+    acceptsInstallmentProposals: boolean;
+    acceptsExchangeProposals: boolean;
+    exchangePreferenceScope: string;
+    exchangeAssetTypes: string[];
+  } | null;
   id: string;
   slug: string;
   farmName: string;

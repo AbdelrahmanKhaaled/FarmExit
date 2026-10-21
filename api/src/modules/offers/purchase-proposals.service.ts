@@ -42,8 +42,10 @@ export class PurchaseProposalsService {
     if (listing.createdBy === userId || (await isActiveOwner(this.prisma, userId, listing.farmId))) {
       throw new ConflictException('An owner of this farm cannot propose on its listing');
     }
-    const share = dto.requestedSharePercent === undefined ? null : shareDecimal(dto.requestedSharePercent, 'requestedSharePercent');
-    const total = dto.proposedTotalValue === undefined ? null : poundsDecimal(dto.proposedTotalValue, 'proposedTotalValue');
+    const share =
+      dto.requestedSharePercent === undefined ? null : shareDecimal(dto.requestedSharePercent, 'requestedSharePercent');
+    const total =
+      dto.proposedTotalValue === undefined ? null : poundsDecimal(dto.proposedTotalValue, 'proposedTotalValue');
     const effective = await this.terms.effective(listing.id);
     assertProposalShape(dto.proposalKind, effective, dto.components, share, total);
     const submittedAt = new Date();
@@ -109,16 +111,20 @@ export class PurchaseProposalsService {
   async update(userId: bigint, proposalId: bigint, dto: UpdateProposalDto): Promise<ProposalResponseDto> {
     const current = await this.load(proposalId);
     if (current.request.createdBy !== userId) throw notFound();
-    if (current.request.status !== PROPOSAL_SUBMITTED) throw new ConflictException('This proposal can no longer be changed');
+    if (current.request.status !== PROPOSAL_SUBMITTED)
+      throw new ConflictException('This proposal can no longer be changed');
     const grouped = await this.prisma.coPurchaseGroupMember.findFirst({
       where: { buyerProposalRequestId: proposalId },
       select: { id: true },
     });
-    if (grouped) throw new ConflictException('This proposal is in a staff coordination group and can no longer be changed');
+    if (grouped)
+      throw new ConflictException('This proposal is in a staff coordination group and can no longer be changed');
     const listing = current.request.parentRequestId;
     if (!listing) throw notFound();
-    const share = dto.requestedSharePercent === undefined ? null : shareDecimal(dto.requestedSharePercent, 'requestedSharePercent');
-    const total = dto.proposedTotalValue === undefined ? null : poundsDecimal(dto.proposedTotalValue, 'proposedTotalValue');
+    const share =
+      dto.requestedSharePercent === undefined ? null : shareDecimal(dto.requestedSharePercent, 'requestedSharePercent');
+    const total =
+      dto.proposedTotalValue === undefined ? null : poundsDecimal(dto.proposedTotalValue, 'proposedTotalValue');
     assertProposalShape(dto.proposalKind, await this.terms.effective(listing), dto.components, share, total);
     await this.prisma.$transaction(async (tx) => {
       const parent = await tx.request.findFirst({
@@ -162,7 +168,24 @@ export class PurchaseProposalsService {
   async getMine(userId: bigint, proposalId: bigint): Promise<ProposalResponseDto> {
     const row = await this.load(proposalId);
     if (row.request.createdBy !== userId) throw notFound();
-    return this.present(row);
+    const parent = await this.prisma.request.findFirst({
+      where: {
+        id: row.request.parentRequestId!,
+        status: 'published',
+        visibility: 'public',
+        requestType: RequestType.farmListing,
+        farm: { is: { deletedAt: null } },
+      },
+      select: { listingDetail: { select: { slug: true, listingType: true } } },
+    });
+    const saleEligibility =
+      parent?.listingDetail?.listingType === 'sale'
+        ? await this.terms.getPublished(parent.listingDetail.slug).catch((error: unknown) => {
+            if (error instanceof NotFoundException) return null;
+            throw error;
+          })
+        : null;
+    return { ...this.present(row), saleEligibility };
   }
 
   async listStaff(userId: bigint, query: ListFarmsQueryDto): Promise<ProposalListResponseDto> {
@@ -175,7 +198,8 @@ export class PurchaseProposalsService {
       select: { requestId: true },
     });
     const ids = assigned.map((row) => row.requestId);
-    if (ids.length === 0) return { items: [], page: query.page ?? 1, pageSize: query.pageSize ?? DEFAULT_PAGE_SIZE, total: 0 };
+    if (ids.length === 0)
+      return { items: [], page: query.page ?? 1, pageSize: query.pageSize ?? DEFAULT_PAGE_SIZE, total: 0 };
     return this.list(
       { id: { in: ids }, requestType: RequestType.farmPurchaseProposal, status: PROPOSAL_SUBMITTED },
       query,
@@ -196,7 +220,11 @@ export class PurchaseProposalsService {
     return this.present(row);
   }
 
-  async assignCaseAgent(actorId: bigint, proposalId: bigint, dto: AssignProposalCaseAgentDto): Promise<ProposalResponseDto> {
+  async assignCaseAgent(
+    actorId: bigint,
+    proposalId: bigint,
+    dto: AssignProposalCaseAgentDto,
+  ): Promise<ProposalResponseDto> {
     const assignedStaffId = BigInt(dto.assignedStaffId);
     await this.prisma.$transaction(async (tx) => {
       const admin = await tx.staffMembership.findFirst({
@@ -289,7 +317,11 @@ export class PurchaseProposalsService {
     return { id: request.id, farmId: request.farmId, createdBy: request.createdBy };
   }
 
-  private async writeComponents(tx: Prisma.TransactionClient, proposalId: bigint, dto: CreateProposalDto): Promise<void> {
+  private async writeComponents(
+    tx: Prisma.TransactionClient,
+    proposalId: bigint,
+    dto: CreateProposalDto,
+  ): Promise<void> {
     for (const component of dto.components) {
       await tx.farmPurchaseProposalComponent.create({
         data: {
@@ -347,7 +379,14 @@ export class PurchaseProposalsService {
 }
 
 type LoadedProposal = {
-  request: { id: bigint; requestNumber: string; createdBy: bigint; parentRequestId: bigint | null; status: string; requestType: string };
+  request: {
+    id: bigint;
+    requestNumber: string;
+    createdBy: bigint;
+    parentRequestId: bigint | null;
+    status: string;
+    requestType: string;
+  };
   detail: {
     proposalKind: ProposalKind;
     proposedTotalValue: { toFixed(digits: number): string } | null;

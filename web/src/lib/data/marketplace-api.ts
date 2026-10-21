@@ -43,6 +43,7 @@ export function publicListingToMarketplaceListing(dto: PublicListingDto): Market
   const name = dto.farmName;
   return {
     slug: dto.slug,
+    saleEligibility: dto.saleEligibility,
     purpose,
     name: { en: name, ar: name },
     governorate: governorateKey(dto.governorate),
@@ -99,6 +100,8 @@ export function marketplaceStateToApiQuery(state: MarketplaceState, pageSize: nu
   else q.listingType = 'sale';
   if (f.governorate) q.governorate = GOVERNORATE_API_LABEL[f.governorate as GovernorateKey];
   if (f.area) q.area = f.area;
+  if (f.saleMethods?.length) q.saleMethods = f.saleMethods.join(',');
+  if (f.exchangeAssetTypes?.length) q.exchangeAssetTypes = f.exchangeAssetTypes.join(',');
   if (f.size[0] !== FARM_SIZE_RANGE.min) q.minArea = String(f.size[0]);
   if (f.size[1] !== FARM_SIZE_RANGE.max) q.maxArea = String(f.size[1]);
   if (f.price[0] !== PRICE_RANGE.min) q.minPrice = String(f.price[0]);
@@ -106,9 +109,7 @@ export function marketplaceStateToApiQuery(state: MarketplaceState, pageSize: nu
   return q;
 }
 
-export async function fetchPublicMarketplace(
-  query: Record<string, string>,
-): Promise<PublicListingListDto | null> {
+export async function fetchPublicMarketplace(query: Record<string, string>): Promise<PublicListingListDto | null> {
   const params = new URLSearchParams(query);
   const res = await fetch(`/api/marketplace/farms?${params}`, { headers: { accept: 'application/json' } });
   if (!res.ok) return null;

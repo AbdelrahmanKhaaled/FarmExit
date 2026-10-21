@@ -174,6 +174,7 @@ export class ProposalComponentResponseDto {
 }
 
 export class ProposalResponseDto {
+  @ApiPropertyOptional({ type: SaleTermsResponseDto, nullable: true }) saleEligibility?: SaleTermsResponseDto | null;
   @ApiProperty() id: string;
   @ApiProperty() requestNumber: string;
   @ApiProperty() listingId: string;
@@ -268,7 +269,9 @@ export class UpdateCoPurchaseMemberDto {
 }
 
 export class UpdateCoPurchaseGroupDto {
-  @ApiPropertyOptional({ enum: ['collectingInterest', 'underStaffFollowup', 'closed', 'collecting_interest', 'under_staff_followup'] })
+  @ApiPropertyOptional({
+    enum: ['collectingInterest', 'underStaffFollowup', 'closed', 'collecting_interest', 'under_staff_followup'],
+  })
   @IsOptional()
   @Transform(({ value }: { value: unknown }) =>
     value === 'collecting_interest'

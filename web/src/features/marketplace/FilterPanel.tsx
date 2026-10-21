@@ -24,6 +24,7 @@ import {
   type GovernorateKey,
   type MarketplaceFilters,
 } from '@/lib/data/marketplace';
+import { saleLabels, assets } from '@/features/my-farms/SaleTermsEditor';
 import { formatEgp } from '@/lib/format';
 
 /*
@@ -75,6 +76,7 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
   const t = useTranslations('marketplace');
   const locale = useLocale() as 'en' | 'ar';
   const set = (patch: Partial<MarketplaceFilters>) => onChange({ ...f, ...patch });
+  const sc = saleLabels[locale];
   const areas = areaOptions(source, f.governorate);
 
   const checkboxes = <K extends string>(
@@ -156,6 +158,34 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
         </Select>
       </Section>
 
+      <Section title={sc.title} gap="none">
+        {(['installment', 'exchange'] as const).map((value) => (
+          <ChoiceOption
+            key={value}
+            type="checkbox"
+            checked={(f.saleMethods ?? []).includes(value)}
+            onChange={() => set({ saleMethods: toggle(f.saleMethods ?? [], value) })}
+          >
+            {value === 'installment'
+              ? locale === 'ar'
+                ? 'تقسيط'
+                : 'Installments'
+              : locale === 'ar'
+                ? 'استبدال'
+                : 'Exchange'}
+          </ChoiceOption>
+        ))}
+        {assets.map((value, i) => (
+          <ChoiceOption
+            key={value}
+            type="checkbox"
+            checked={(f.exchangeAssetTypes ?? []).includes(value)}
+            onChange={() => set({ exchangeAssetTypes: toggle(f.exchangeAssetTypes ?? [], value) })}
+          >
+            {sc.assets[i]}
+          </ChoiceOption>
+        ))}
+      </Section>
       <Section title={t('filters.sections.water')} gap="none">
         {checkboxes(waterSources, f.waterSources, 'waterSources', 'waterSources')}
       </Section>

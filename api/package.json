@@ -33,6 +33,9 @@
     "seed:public-farms-demo": "node scripts/seed-public-farms-demo.cjs",
     "seed:public-farms-demo:production": "node scripts/seed-public-farms-demo.cjs --production-server",
     "seed:public-farms-demo:deploy": "node scripts/seed-public-farms-demo-deploy.cjs",
+    "seed:public-opportunities-demo": "node scripts/seed-public-opportunities-demo.cjs",
+    "seed:public-opportunities-demo:production": "node scripts/seed-public-opportunities-demo.cjs --production-server",
+    "seed:public-marketplace-demo:deploy": "node scripts/seed-public-marketplace-demo-deploy.cjs",
     "test:client-demo-safety": "node --test --test-isolation=none scripts/client-demo-safety.test.cjs",
     "verify:client-demo-browser": "node scripts/verify-client-demo-browser.cjs"
   },

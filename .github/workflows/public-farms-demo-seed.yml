@@ -27,14 +27,14 @@ jobs:
         run: npm ci && npm run build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      - name: Apply demo marketplace seed
+      - name: Apply demo marketplace seeds (farms, management, partnerships)
         working-directory: api
-        run: npm run seed:public-farms-demo:deploy
+        run: npm run seed:public-marketplace-demo:deploy
         env:
           NODE_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET }}
           OTP_HASH_SECRET: ${{ secrets.OTP_HASH_SECRET }}
-          PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY: ${{ vars.PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY || secrets.PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY || 'true' }}
+          PUBLIC_MARKETPLACE_DEMO_SEED_ON_DEPLOY: ${{ vars.PUBLIC_MARKETPLACE_DEMO_SEED_ON_DEPLOY || secrets.PUBLIC_MARKETPLACE_DEMO_SEED_ON_DEPLOY || vars.PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY || secrets.PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY || 'true' }}
           PUBLIC_FARMS_DEMO_SEED_ENABLED: ${{ github.ref == 'refs/heads/main' && (vars.PUBLIC_FARMS_DEMO_SEED_ENABLED || secrets.PUBLIC_FARMS_DEMO_SEED_ENABLED || 'true') || 'false' }}
           PUBLIC_FARMS_DEMO_SEED_DB_HOSTS: ${{ vars.PUBLIC_FARMS_DEMO_SEED_DB_HOSTS || secrets.PUBLIC_FARMS_DEMO_SEED_DB_HOSTS || '127.0.0.1,localhost' }}

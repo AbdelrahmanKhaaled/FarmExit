@@ -4,7 +4,11 @@
  * Build API first: npm run build
  */
 const path = require('node:path');
-const { assertLocalDevelopment } = require('./client-demo-safety.cjs');
+const {
+  assertPublicFarmsDemoTarget,
+  assertApplyOptIn,
+  assertDatabaseServer,
+} = require('./public-farms-demo-safety.cjs');
 
 const root = path.resolve(__dirname, '..');
 const load = (module) => require(path.join(root, 'dist', module));
@@ -343,20 +347,13 @@ async function verifyMarketplace(services) {
 }
 
 async function prepare(app, args, tokens) {
-  assertLocalDevelopment(process.env, args);
-  if (!args.includes('--apply') || !args.includes('--confirm-local-development')) {
-    throw new Error('Explicit local apply opt-in required.');
-  }
+  const target = assertPublicFarmsDemoTarget(process.env, args);
+  assertApplyOptIn(args, target);
 
   const resolved = resolveServices(app, tokens);
   const prisma = resolved.prisma;
-  const [database] = await prisma.$queryRaw`SELECT DATABASE() AS databaseName, @@hostname AS serverHostname`;
-  if (
-    database.databaseName !== 'farmexit' ||
-    database.serverHostname.toLowerCase() !== require('node:os').hostname().toLowerCase()
-  ) {
-    throw new Error('Refusing unidentified database server: must match this development machine and database farmexit.');
-  }
+  const database = await assertDatabaseServer(prisma, target);
+  console.log('Resolved database:', database, 'target:', target.mode);
 
   const stats = {
     usersCreated: 0,
@@ -391,7 +388,13 @@ async function prepare(app, args, tokens) {
 async function main() {
   require('dotenv').config({ path: path.join(root, '.env'), quiet: true });
   const args = process.argv.slice(2);
-  console.log('Database target:', assertLocalDevelopment(process.env, args));
+  const target = assertPublicFarmsDemoTarget(process.env, args);
+  console.log('Database target:', target);
+  if (target.mode === 'production') {
+    console.warn(
+      'PRODUCTION DEMO SEED: only [DEMO] PFM synthetic farms/listings. Label clearly in client demos; not real customer inventory.',
+    );
+  }
   console.log(
     'Plan:',
     PLAN.map((spec) => ({
@@ -404,7 +407,9 @@ async function main() {
   console.log(`Totals: ${FARM_COUNT} farms, ${SALE_COUNT} sale listings, ${RENT_COUNT} rent listings.`);
 
   if (!args.includes('--apply') || args.includes('--dry-run')) {
-    console.log('DRY RUN: zero writes. Pass --apply --confirm-local-development to insert demo farms.');
+    console.log(
+      'DRY RUN: zero writes. Local: --apply --confirm-local-development. Production server: --production-server --apply --confirm-production-demo-seed (and PUBLIC_FARMS_DEMO_SEED_ENABLED=true).',
+    );
     return;
   }
 

@@ -31,6 +31,7 @@
     "seed:dashboard-demo": "npx -y tsx prisma/seed-dashboard-demo.ts",
     "seed:client-demo": "node scripts/seed-client-demo.cjs",
     "seed:public-farms-demo": "node scripts/seed-public-farms-demo.cjs",
+    "seed:public-farms-demo:production": "node scripts/seed-public-farms-demo.cjs --production-server",
     "test:client-demo-safety": "node --test --test-isolation=none scripts/client-demo-safety.test.cjs",
     "verify:client-demo-browser": "node scripts/verify-client-demo-browser.cjs"
   },

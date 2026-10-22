@@ -58,9 +58,9 @@ export function assertDevFixedOtpEnvironment(env: EnvironmentVariablesForFixedOt
   if (env.NODE_ENV === NodeEnv.Production) {
     throw new Error('Invalid environment configuration:\n  - DEV_FIXED_OTP_ENABLED: not allowed when NODE_ENV=production');
   }
-  if (env.NODE_ENV !== NodeEnv.Development) {
+  if (env.NODE_ENV !== NodeEnv.Development && env.NODE_ENV !== NodeEnv.Test) {
     throw new Error(
-      'Invalid environment configuration:\n  - DEV_FIXED_OTP_ENABLED: only allowed when NODE_ENV=development',
+      'Invalid environment configuration:\n  - DEV_FIXED_OTP_ENABLED: only allowed when NODE_ENV=development or test',
     );
   }
   if (!/^\d{6}$/.test(env.DEV_FIXED_OTP_CODE ?? '')) {

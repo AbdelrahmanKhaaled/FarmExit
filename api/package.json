@@ -4,6 +4,7 @@
   "description": "FarmExit backend: NestJS REST API (MySQL via Prisma)",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "scripts": {
     "postinstall": "prisma generate",
     "build": "nest build",
@@ -29,6 +30,7 @@
     "dev:fix-mobiles": "npx -y tsx prisma/fix-mobiles.ts",
     "seed:dashboard-demo": "npx -y tsx prisma/seed-dashboard-demo.ts",
     "seed:client-demo": "node scripts/seed-client-demo.cjs",
+    "seed:public-farms-demo": "node scripts/seed-public-farms-demo.cjs",
     "test:client-demo-safety": "node --test --test-isolation=none scripts/client-demo-safety.test.cjs",
     "verify:client-demo-browser": "node scripts/verify-client-demo-browser.cjs"
   },

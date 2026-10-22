@@ -2,6 +2,7 @@ import { type INestApplication, ValidationPipe, VersioningType } from '@nestjs/c
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import type { Env } from '../config/env.validation';
+import { registerHttpRequestLogger } from './http-request-logger';
 
 export const API_PREFIX = 'api';
 export const DEFAULT_API_VERSION = '1';
@@ -16,6 +17,7 @@ export function configureApp(app: INestApplication): void {
 
   const express = app.getHttpAdapter().getInstance() as { set?: (key: string, value: unknown) => void };
   express.set?.('trust proxy', 1);
+  registerHttpRequestLogger(app);
 
   app.enableShutdownHooks();
   app.setGlobalPrefix(API_PREFIX);

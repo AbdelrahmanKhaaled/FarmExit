@@ -14,7 +14,6 @@ import {
   publicOpportunityOrderBy,
 } from '../marketplace/public-opportunity-query';
 import { DEFAULT_PAGE_SIZE, type ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
-import { RequestType } from '../../generated/prisma/enums';
 import { newRequestNumber } from '../requests/request-number';
 import {
   ACTIVE_PARTNERSHIP_REQUEST_STATUSES,

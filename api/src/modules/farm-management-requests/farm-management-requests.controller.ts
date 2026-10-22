@@ -5,6 +5,7 @@ import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
 import { RequireCompletedProfile } from '../auth/auth-guards.decorators';
 import { CurrentAuth } from '../auth/auth.decorators';
 import type { AuthContext } from '../auth/auth.types';
+import { ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
 import { PublicOpportunityQueryDto } from '../marketplace/dto/public-opportunity-query.dto';
 import { PublicOpportunityDto } from '../marketplace/dto/public-opportunity.dto';
 import {

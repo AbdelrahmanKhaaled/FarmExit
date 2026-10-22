@@ -12,6 +12,8 @@ import { fetchPublicOpportunity, OPPORTUNITY_PLACEHOLDER_IMAGE } from '@/lib/opp
 import { getWebsiteSession } from '@/lib/auth/session.server';
 import '@/features/opportunity-marketplace/opportunity-marketplace.css';
 
+export const instant = false;
+
 export default async function PartnershipOpportunityPage({
   params,
 }: PageProps<'/[locale]/partnerships/opportunities/[id]'>) {

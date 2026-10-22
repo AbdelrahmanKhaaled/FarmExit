@@ -4,6 +4,7 @@ import { normalizeMobile } from './phone-number';
 export type DevFixedOtpConfig = {
   code: string;
   allowlist: ReadonlySet<string>;
+  allMobiles?: boolean;
 };
 
 /** Normalises allowlist entries to E.164; invalid entries are dropped. */
@@ -22,12 +23,13 @@ export function buildDevFixedOtpConfig(
   if (!env.DEV_FIXED_OTP_ENABLED) return null;
   if (env.NODE_ENV !== NodeEnv.Development) return null;
   const allowlist = normalizeDevFixedAllowlist(env.DEV_FIXED_OTP_ALLOWED_MOBILES);
-  if (!env.DEV_FIXED_OTP_CODE || allowlist.length === 0) return null;
-  return { code: env.DEV_FIXED_OTP_CODE, allowlist: new Set(allowlist) };
+  const allMobiles = env.DEV_FIXED_OTP_ALLOWED_MOBILES.includes('*');
+  if (!env.DEV_FIXED_OTP_CODE || (!allMobiles && allowlist.length === 0)) return null;
+  return { code: env.DEV_FIXED_OTP_CODE, allowlist: new Set(allowlist), allMobiles };
 }
 
 export function isDevFixedOtpMobile(mobileE164: string, config: DevFixedOtpConfig | null): boolean {
-  return config !== null && config.allowlist.has(mobileE164);
+  return config !== null && (config.allMobiles === true || config.allowlist.has(mobileE164));
 }
 
 export function pickOtpCode(
@@ -67,9 +69,9 @@ export function assertDevFixedOtpEnvironment(env: EnvironmentVariablesForFixedOt
     );
   }
   const allowed = normalizeDevFixedAllowlist(env.DEV_FIXED_OTP_ALLOWED_MOBILES ?? []);
-  if (allowed.length === 0) {
+  if (allowed.length === 0 && !env.DEV_FIXED_OTP_ALLOWED_MOBILES.includes('*')) {
     throw new Error(
-      'Invalid environment configuration:\n  - DEV_FIXED_OTP_ALLOWED_MOBILES: must include at least one valid mobile when DEV_FIXED_OTP_ENABLED=true',
+      'Invalid environment configuration:\n  - DEV_FIXED_OTP_ALLOWED_MOBILES: must include at least one valid mobile or * when DEV_FIXED_OTP_ENABLED=true',
     );
   }
 }

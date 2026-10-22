@@ -26,6 +26,25 @@ describe('OtpService dev fixed OTP', () => {
   const allowlisted = '+201012345678';
   const other = '+201099999999';
 
+  it('issues and verifies the fixed code for any mobile when development wildcard is enabled', async () => {
+    const { otp, sms } = service(
+      envWith({
+        DEV_FIXED_OTP_ENABLED: true,
+        DEV_FIXED_OTP_CODE: '123456',
+        DEV_FIXED_OTP_ALLOWED_MOBILES: '*',
+      }),
+      createFakePrisma(),
+    );
+    for (const mobile of [allowlisted, other]) {
+      await otp.issue(mobile);
+      expect(sms.lastCodeFor(mobile)).toBe('123456');
+      await expect(otp.check(mobile, '000000')).rejects.toThrow();
+      const { otpId } = await otp.check(mobile, '123456');
+      expect(await otp.consume(otpId)).toBe(true);
+      await expect(otp.check(mobile, '123456')).rejects.toThrow();
+    }
+  });
+
   it('issues the fixed code for an allowlisted mobile in development', async () => {
     const prisma = createFakePrisma();
     const { otp, sms } = service(

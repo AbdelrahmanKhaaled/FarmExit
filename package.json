@@ -13,6 +13,8 @@
     "build:web": "npm --prefix web run build",
     "build:dashboard": "npm --prefix dashboard run build",
     "build:api": "npm --prefix api run build",
+    "deploy:api": "npm run build:api && npm --prefix api run seed:public-farms-demo:deploy",
+    "deploy:seed-public-farms": "npm --prefix api run seed:public-farms-demo:deploy",
     "start:web": "npm --prefix web run start",
     "start:dashboard": "npm --prefix dashboard run start",
     "start:api": "npm --prefix api run start:prod",

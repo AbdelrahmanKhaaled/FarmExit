@@ -90,9 +90,33 @@ async function assertDatabaseServer(prisma, target) {
   return database;
 }
 
+/**
+ * When PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY=true, returns argv for apply (dev loopback or production server).
+ * Otherwise null (deploy step should no-op).
+ */
+function resolveDeploySeedArgv(env) {
+  if (env.PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY !== 'true') return null;
+  const target = parseDatabaseUrl(env);
+  const local = LOCAL_HOSTS.has(target.host);
+  const verify = ['--verify'];
+
+  if (local && env.NODE_ENV === 'development') {
+    return ['--apply', '--confirm-local-development', ...verify];
+  }
+  if (env.PUBLIC_FARMS_DEMO_SEED_ENABLED === 'true') {
+    return ['--production-server', '--apply', '--confirm-production-demo-seed', ...verify];
+  }
+  throw new Error(
+    'PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY=true but target is not allowed: use NODE_ENV=development on loopback farmexit, or PUBLIC_FARMS_DEMO_SEED_ENABLED=true on the server.',
+  );
+}
+
 module.exports = {
   assertPublicFarmsDemoTarget,
   assertApplyOptIn,
   assertDatabaseServer,
   assertLocalDevelopment,
+  resolveDeploySeedArgv,
+  parseDatabaseUrl,
+  LOCAL_HOSTS,
 };

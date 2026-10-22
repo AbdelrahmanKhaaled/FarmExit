@@ -8,6 +8,7 @@ const {
   assertPublicFarmsDemoTarget,
   assertApplyOptIn,
   assertDatabaseServer,
+  resolveDeploySeedArgv,
 } = require('./public-farms-demo-safety.cjs');
 
 const root = path.resolve(__dirname, '..');
@@ -126,8 +127,7 @@ function buildSpec(kind, index) {
   if (kind === 'sale') {
     const mode = i % 4;
     if (mode === 0) saleTermsDto = { saleMode: 'standardCash' };
-    else if (mode === 1)
-      saleTermsDto = { saleMode: 'standardCash', acceptsInstallmentProposals: true, acceptsCashProposals: true };
+    else if (mode === 1) saleTermsDto = { saleMode: 'quickSale', acceptsInstallmentProposals: true };
     else if (mode === 2)
       saleTermsDto = {
         saleMode: 'quickSale',
@@ -135,7 +135,14 @@ function buildSpec(kind, index) {
         exchangePreferenceScope: 'selected',
         exchangeAssetTypes: ['apartment', 'villa'].slice(0, 1 + (i % 2)),
       };
-    else saleTermsDto = { saleMode: 'quickSale', acceptsInstallmentProposals: true, acceptsExchangeProposals: true };
+    else
+      saleTermsDto = {
+        saleMode: 'quickSale',
+        acceptsInstallmentProposals: true,
+        acceptsExchangeProposals: true,
+        exchangePreferenceScope: 'selected',
+        exchangeAssetTypes: ['apartment'],
+      };
   }
 
   return {
@@ -385,9 +392,19 @@ async function prepare(app, args, tokens) {
   return { stats, slugs, marketplace, farmCount: FARM_COUNT, saleCount: SALE_COUNT, rentCount: RENT_COUNT };
 }
 
+function normalizeArgs(argv) {
+  if (!argv.includes('--deploy')) return argv;
+  const deployArgv = resolveDeploySeedArgv(process.env);
+  if (!deployArgv) {
+    console.log('PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY is not true; deploy seed skipped.');
+    return ['--dry-run'];
+  }
+  return argv.filter((flag) => flag !== '--deploy').concat(deployArgv);
+}
+
 async function main() {
   require('dotenv').config({ path: path.join(root, '.env'), quiet: true });
-  const args = process.argv.slice(2);
+  const args = normalizeArgs(process.argv.slice(2));
   const target = assertPublicFarmsDemoTarget(process.env, args);
   console.log('Database target:', target);
   if (target.mode === 'production') {
@@ -408,7 +425,7 @@ async function main() {
 
   if (!args.includes('--apply') || args.includes('--dry-run')) {
     console.log(
-      'DRY RUN: zero writes. Local: --apply --confirm-local-development. Production server: --production-server --apply --confirm-production-demo-seed (and PUBLIC_FARMS_DEMO_SEED_ENABLED=true).',
+      'DRY RUN: zero writes. Deploy: PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY=true then npm run seed:public-farms-demo:deploy. Manual local: --apply --confirm-local-development. Manual server: --production-server --apply --confirm-production-demo-seed.',
     );
     return;
   }

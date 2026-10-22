@@ -1,0 +1,40 @@
+# Applies idempotent [DEMO] PFM marketplace listings after API build on push.
+# Requires repository secrets (Settings → Secrets): DATABASE_URL, JWT_ACCESS_SECRET, OTP_HASH_SECRET.
+# Requires variables or secrets: PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY=true, and on production PUBLIC_FARMS_DEMO_SEED_ENABLED=true.
+name: Public farms demo seed
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'api/**'
+      - '.github/workflows/public-farms-demo-seed.yml'
+      - 'package.json'
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+      - name: Install and build API
+        working-directory: api
+        run: npm ci && npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Apply demo marketplace seed
+        working-directory: api
+        run: npm run seed:public-farms-demo:deploy
+        env:
+          NODE_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET }}
+          OTP_HASH_SECRET: ${{ secrets.OTP_HASH_SECRET }}
+          PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY: ${{ vars.PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY || secrets.PUBLIC_FARMS_DEMO_SEED_ON_DEPLOY || 'true' }}
+          PUBLIC_FARMS_DEMO_SEED_ENABLED: ${{ github.ref == 'refs/heads/main' && (vars.PUBLIC_FARMS_DEMO_SEED_ENABLED || secrets.PUBLIC_FARMS_DEMO_SEED_ENABLED || 'true') || 'false' }}
+          PUBLIC_FARMS_DEMO_SEED_DB_HOSTS: ${{ vars.PUBLIC_FARMS_DEMO_SEED_DB_HOSTS || secrets.PUBLIC_FARMS_DEMO_SEED_DB_HOSTS || '127.0.0.1,localhost' }}

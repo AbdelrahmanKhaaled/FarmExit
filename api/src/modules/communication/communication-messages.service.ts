@@ -3,6 +3,7 @@ import { CommunicationCaseStatus } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DEFAULT_PAGE_SIZE, type ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
 import { CommunicationAccessService } from './communication-access.service';
+import { CommunicationRealtimePublisher } from './communication-realtime.publisher';
 import type { MessageListResponseDto, MessageResponseDto, RelayMessageDto, SendMessageDto } from './dto/communication.dto';
 
 const notFound = (): NotFoundException => new NotFoundException('Communication case not found');
@@ -12,6 +13,7 @@ export class CommunicationMessagesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly access: CommunicationAccessService,
+    private readonly realtime: CommunicationRealtimePublisher,
   ) {}
 
   async sendUser(userId: bigint, caseId: bigint, dto: SendMessageDto): Promise<MessageResponseDto> {
@@ -41,7 +43,13 @@ export class CommunicationMessagesService {
       });
       return row;
     });
-    return toMessage(message.id, message.senderId, message.body, message.sentAt, false);
+    const out = toMessage(message.id, message.senderId, message.body, message.sentAt, false);
+    this.realtime.messageCreated({
+      caseId: caseId.toString(),
+      conversationId: conversation.id.toString(),
+      message: out,
+    });
+    return out;
   }
 
   async sendStaff(userId: bigint, caseId: bigint, externalUserId: bigint, dto: SendMessageDto): Promise<MessageResponseDto> {
@@ -65,7 +73,13 @@ export class CommunicationMessagesService {
         changes: { caseId: caseId.toString(), externalUserId: externalUserId.toString() },
       },
     });
-    return toMessage(message.id, message.senderId, message.body, message.sentAt, false);
+    const out = toMessage(message.id, message.senderId, message.body, message.sentAt, false);
+    this.realtime.messageCreated({
+      caseId: caseId.toString(),
+      conversationId: conversation.id.toString(),
+      message: out,
+    });
+    return out;
   }
 
   async relayStaff(userId: bigint, caseId: bigint, dto: RelayMessageDto): Promise<MessageResponseDto> {
@@ -119,7 +133,13 @@ export class CommunicationMessagesService {
       });
       return relayedMessage;
     });
-    return toMessage(relayed.id, relayed.senderId, relayed.body, relayed.sentAt, true);
+    const out = toMessage(relayed.id, relayed.senderId, relayed.body, relayed.sentAt, true);
+    this.realtime.messageCreated({
+      caseId: caseId.toString(),
+      conversationId: targetConv.id.toString(),
+      message: out,
+    });
+    return out;
   }
 
   async listUser(userId: bigint, caseId: bigint, query: ListFarmsQueryDto): Promise<MessageListResponseDto> {

@@ -10,9 +10,9 @@
   "description": "Farm owners publish partnership opportunities. FarmExit reviews each opportunity before it appears here. Applications are non-binding expressions of interest.",
   "notLiveTitle": "Public discovery not available yet",
   "notLiveBody": "Partnership requests and applications are supported for signed-in farm owners and applicants, but there is no approved public API to list published partnership opportunities on this website.",
-  "nonBindingNote": "When public discovery launches, applications will remain non-binding expressions of interest coordinated by FarmExit.",
+  "nonBindingNote": "Applications are non-binding expressions of interest coordinated by FarmExit.",
   "trustNote": "Sample opportunities shown for layout review until public partnership discovery APIs are available.",
-  "ctaOwner": "Publish a partnership opportunity",
+  "ctaOwner": "Submit a partnership request",
   "items": {
     "vegetable": {
       "title": "Vegetable production partnership",

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthorizationModule } from '../authorization/authorization.module';
+import { RequestsModule } from '../requests/requests.module';
 import {
+  PublicPartnershipMarketplaceController,
   FarmPartnershipRequestsController,
   PartnershipRequestsController,
 } from './partnership-requests.controller';
@@ -9,8 +11,13 @@ import { StaffPartnershipReviewsController } from './staff-partnership-reviews.c
 import { StaffPartnershipReviewsService } from './staff-partnership-reviews.service';
 
 @Module({
-  imports: [AuthorizationModule],
-  controllers: [FarmPartnershipRequestsController, PartnershipRequestsController, StaffPartnershipReviewsController],
+  imports: [AuthorizationModule, RequestsModule],
+  controllers: [
+    PublicPartnershipMarketplaceController,
+    FarmPartnershipRequestsController,
+    PartnershipRequestsController,
+    StaffPartnershipReviewsController,
+  ],
   providers: [PartnershipRequestsService, StaffPartnershipReviewsService],
   exports: [PartnershipRequestsService],
 })

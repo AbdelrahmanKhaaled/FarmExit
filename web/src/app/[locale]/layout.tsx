@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { localeDirection, routing } from '@/i18n/routing';
+import { SiteChrome } from '@/components/contact/SiteChrome';
 import { fontVariables } from '../fonts';
 import '../globals.css';
 
@@ -25,6 +26,7 @@ export default async function LocaleLayout({ children, auth, params }: LayoutPro
         <NextIntlClientProvider>
           {children}
           {auth}
+          <SiteChrome />
         </NextIntlClientProvider>
       </body>
     </html>

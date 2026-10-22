@@ -44,6 +44,21 @@ type Props = {
   className?: string;
 };
 
+function UnavailableSection({ title, children, gap }: { title: string; children: ReactNode; gap: 'none' | 'sm' | 'md' }) {
+  const t = useTranslations('marketplace.filters');
+  return (
+    <section className="border-t border-border-subtle py-20 opacity-70">
+      <div className="flex flex-col gap-4 pb-4">
+        <span className="type-label-medium text-text-primary">{title}</span>
+        <p className="type-body-caption text-text-muted">{t('unavailableSection')}</p>
+      </div>
+      <div className={cn('pointer-events-none flex flex-col select-none', gap === 'sm' && 'mt-12', gap === 'md' && 'mt-14 gap-14')}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
 function Section({ title, children, gap }: { title: string; children: ReactNode; gap: 'none' | 'sm' | 'md' }) {
   const t = useTranslations('marketplace.filters');
   const [open, setOpen] = useState(true);
@@ -125,9 +140,9 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
         />
       </Section>
 
-      <Section title={t('filters.sections.farmType')} gap="none">
+      <UnavailableSection title={t('filters.sections.farmType')} gap="none">
         {checkboxes(farmTypes, f.farmTypes, 'farmTypes', 'farmTypes')}
-      </Section>
+      </UnavailableSection>
 
       <Section title={t('filters.sections.location')} gap="md">
         <Select
@@ -186,21 +201,21 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
           </ChoiceOption>
         ))}
       </Section>
-      <Section title={t('filters.sections.water')} gap="none">
+      <UnavailableSection title={t('filters.sections.water')} gap="none">
         {checkboxes(waterSources, f.waterSources, 'waterSources', 'waterSources')}
-      </Section>
+      </UnavailableSection>
 
-      <Section title={t('filters.sections.irrigation')} gap="none">
+      <UnavailableSection title={t('filters.sections.irrigation')} gap="none">
         {checkboxes(irrigationMethods, f.irrigationMethods, 'irrigationMethods', 'irrigationMethods')}
-      </Section>
+      </UnavailableSection>
 
-      <Section title={t('filters.sections.energy')} gap="none">
+      <UnavailableSection title={t('filters.sections.energy')} gap="none">
         {checkboxes(energySources, f.energySources, 'energySources', 'energySources')}
-      </Section>
+      </UnavailableSection>
 
-      <Section title={t('filters.sections.crop')} gap="none">
+      <UnavailableSection title={t('filters.sections.crop')} gap="none">
         {checkboxes(cropTypes, f.cropTypes, 'cropTypes', 'cropTypes')}
-      </Section>
+      </UnavailableSection>
 
       <Section title={t('filters.sections.price')} gap="sm">
         <RangeSlider

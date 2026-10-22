@@ -1,0 +1,882 @@
+{
+  "date": "2026-10-22T09:35:19.212Z",
+  "evidence": [
+    {
+      "workflow": "Protected farm form and return URL",
+      "status": "LIVE VERIFIED",
+      "route": "http://localhost:3000/en/sign-in?returnTo=%2Fen%2Fmy"
+    },
+    {
+      "workflow": "Existing isolated user OTP via real BFF",
+      "status": "LIVE VERIFIED",
+      "userId": "1114",
+      "http": 200
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('select[name=governorate]')\u001b[22m\n\u001b[2m    - locator resolved to <select required=\"\" name=\"governorate\" id=\"_R_56a955esnebn9er9etb_\" class=\"min-w-0 flex-1 bg-transparent text-inherit outline-none placeholder:text-text-subtle disabled:cursor-not-allowed cursor-pointer appearance-none self-stretch pe-28\">…</select>\u001b[22m\n\u001b[2m  - attempting select option action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying select option action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+    },
+    {
+      "workflow": "Browser runtime diagnostics",
+      "status": "FAILED",
+      "url": "http://localhost:3000/en/my/farms/new",
+      "body": "List your farm\nUnsaved changes\nHelp\nSave & exit\n\nLIST YOUR FARM\n\n[DEMO] Final UAT Orchard\n\n1\nFarm basics\nIn progress\n2\nLocation & land\nNot started\n3\nAgriculture & facilities\nNot started\n4\nListing details\nNot started\n5\nPhotos\nNot started\n6\nDocuments\nNot started\n7\nReview & submit\nNot started\n\n1 of 7 steps visited\n\nPrivate draft. Nothing is published until FarmExit reviews and authorizes publication.\n\nSTEP 1 OF 7\n\nTell us about your farm\n\nStart with the essentials. Add more detail in the next steps.\n\nAbout your farm\n\nThe name and activity buyers will see first.\n\nFarm name\nFarm type\nVegetable\nFruit\nLivestock\nMixed\nMain crops or activity\nSize & irrigation\n\nThe area stated in your farm documents.\n\nTotal farm area (feddans)\nIrrigation type\nSelect an option\nDrip irrigation\nSprinkler irrigation\nGravity irrigation\nBack\n\nSave and continue confirms the current details with FarmExit. There is no automatic save.\n\nContinue\nReviewed by FarmExit\n\nFarmExit reviews your farm information, documents and submitted price before anything is published.\n\nLISTING AS\n\n[C\n\n[DEMO] Client Demo Other Applicant\n\nFrom your verified FarmExit account.\n\nWHY WE ASK\n\nAdd what you know. FarmExit uses this information to review your farm."
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('textarea[name=farmDescription]')\u001b[22m\n\u001b[2m    - locator resolved to <textarea rows=\"4\" maxlength=\"5000\" name=\"farmDescription\" id=\"_R_aq955esnebn9er9etb_\" class=\"min-w-0 flex-1 bg-transparent text-inherit outline-none placeholder:text-text-subtle disabled:cursor-not-allowed resize-y\"></textarea>\u001b[22m\n\u001b[2m    - fill(\"[DEMO] Isolated UAT farm, no real location.\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+    },
+    {
+      "workflow": "Create farm and save draft",
+      "status": "LIVE VERIFIED",
+      "http": 201,
+      "id": "552",
+      "persisted": true
+    },
+    {
+      "workflow": "Hero query mapping",
+      "status": "FAILED",
+      "bug": "Expected values to be strictly equal:\n\nundefined !== '20'\n"
+    },
+    {
+      "workflow": "Hero ranges and governorate to real API",
+      "status": "LIVE VERIFIED",
+      "url": "http://localhost:3000/en/farms?location=ismailia&activity=vegetables&sizeMin=20&sizeMax=100&priceMin=6000000&priceMax=15000000",
+      "apiQuery": {
+        "page": "1",
+        "pageSize": "9",
+        "sort": "newest",
+        "listingType": "sale",
+        "governorate": "Ismailia",
+        "minArea": "20",
+        "maxArea": "100",
+        "minPrice": "6000000",
+        "maxPrice": "15000000"
+      },
+      "http": 200
+    },
+    {
+      "workflow": "Activity selector has no real API filter",
+      "status": "FAILED",
+      "bug": "Enabled Activity selection is accepted in the Hero but the Backend has no activity filter.",
+      "url": "http://localhost:3000/en/farms?location=ismailia&activity=vegetables&sizeMin=20&sizeMax=100&priceMin=6000000&priceMax=15000000"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').filter({ has: getByRole('button', { name: 'Save changes', exact: true }) }).locator('[name=description]')\u001b[22m\n"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.check: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').filter({ has: getByRole('button', { name: 'Add facility', exact: true }) }).locator('input[type=radio]').first()\u001b[22m\n"
+    },
+    {
+      "workflow": "Current session",
+      "status": "ISOLATED DB VERIFIED",
+      "me": "1114"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.waitFor: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[name=description]').first() to be visible\u001b[22m\n\u001b[2m    43 × locator resolved to hidden <input value=\"\" name=\"description\" id=\"_R_9cslritpet59er9etb_\" class=\"min-w-0 flex-1 bg-transparent text-inherit outline-none placeholder:text-text-subtle disabled:cursor-not-allowed\"/>\u001b[22m\n"
+    },
+    {
+      "workflow": "Edit farm details",
+      "status": "LIVE VERIFIED",
+      "farmId": "552",
+      "http": 200,
+      "persisted": "[DEMO] UAT edited description. Synthetic farm only."
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.check: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').filter({ has: getByRole('button', { name: 'Add facility', exact: true }) }).locator('input[type=radio]').first()\u001b[22m\n"
+    },
+    {
+      "workflow": "Supported facility create",
+      "status": "LIVE VERIFIED",
+      "http": 201,
+      "id": "118"
+    },
+    {
+      "workflow": "Permitted image upload",
+      "status": "LIVE VERIFIED",
+      "http": 201,
+      "persistedCount": 1
+    },
+    {
+      "workflow": "Sale listing draft saved through wizard",
+      "status": "LIVE VERIFIED",
+      "id": "769",
+      "http": 201,
+      "statusInDatabase": "draft",
+      "visibility": "private"
+    },
+    {
+      "workflow": "Sale submit and confirmation",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "id": "769",
+      "databaseStatus": "underFarmExitReview",
+      "visibility": "private"
+    },
+    {
+      "workflow": "Sale status history and tracking",
+      "status": "LIVE VERIFIED",
+      "route": "http://localhost:3000/en/my/requests/769",
+      "historyCount": 2
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.check: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('checkbox', { name: 'Ismailia', exact: true })\u001b[22m\n"
+    },
+    {
+      "workflow": "Professional profile and verification draft",
+      "status": "LIVE VERIFIED",
+      "http": 201,
+      "id": "770"
+    },
+    {
+      "workflow": "Private supporting document upload",
+      "status": "LIVE VERIFIED",
+      "http": 201,
+      "requestId": "770",
+      "documentId": "37",
+      "persistedCount": 1
+    },
+    {
+      "workflow": "Professional verification submit and track",
+      "status": "LIVE VERIFIED",
+      "http": 201,
+      "id": "770",
+      "persistedStatus": "underFarmExitReview"
+    },
+    {
+      "workflow": "Rent listing create/submit through owner form",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "id": "771",
+      "visibility": "private"
+    },
+    {
+      "workflow": "Marketplace sale",
+      "status": "LIVE VERIFIED",
+      "route": "/en/farms",
+      "http": 200,
+      "query": {
+        "page": "1",
+        "pageSize": "9",
+        "sort": "newest",
+        "listingType": "sale"
+      },
+      "total": 16,
+      "items": 9
+    },
+    {
+      "workflow": "Marketplace rent",
+      "status": "LIVE VERIFIED",
+      "route": "/en/farms?listing=rent",
+      "http": 200,
+      "query": {
+        "page": "1",
+        "pageSize": "9",
+        "sort": "newest",
+        "listingType": "rent"
+      },
+      "total": 8,
+      "items": 8
+    },
+    {
+      "workflow": "Marketplace governorate-area",
+      "status": "LIVE VERIFIED",
+      "route": "/en/farms?gov=ismailia&area=Ismailia%20demo%20area",
+      "http": 200,
+      "query": {
+        "page": "1",
+        "pageSize": "9",
+        "sort": "newest",
+        "listingType": "sale",
+        "governorate": "Ismailia",
+        "area": "Ismailia demo area"
+      },
+      "total": 1,
+      "items": 1
+    },
+    {
+      "workflow": "Marketplace range",
+      "status": "LIVE VERIFIED",
+      "route": "/en/farms?sizeMin=20&sizeMax=100&priceMin=6000000&priceMax=15000000",
+      "http": 200,
+      "query": {
+        "page": "1",
+        "pageSize": "9",
+        "sort": "newest",
+        "listingType": "sale",
+        "minArea": "20",
+        "maxArea": "100",
+        "minPrice": "6000000",
+        "maxPrice": "15000000"
+      },
+      "total": 0,
+      "items": 0
+    },
+    {
+      "workflow": "Marketplace quick-sale",
+      "status": "LIVE VERIFIED",
+      "route": "/en/farms?saleMethods=installment,exchange&exchangeAssetTypes=car",
+      "http": 200,
+      "query": {
+        "page": "1",
+        "pageSize": "9",
+        "sort": "newest",
+        "listingType": "sale",
+        "saleMethods": "installment,exchange",
+        "exchangeAssetTypes": "car"
+      },
+      "total": 0,
+      "items": 0
+    },
+    {
+      "workflow": "Marketplace sort",
+      "status": "LIVE VERIFIED",
+      "route": "/en/farms?sort=priceAsc",
+      "http": 200,
+      "query": {
+        "page": "1",
+        "pageSize": "9",
+        "sort": "priceAsc",
+        "listingType": "sale"
+      },
+      "total": 16,
+      "items": 9
+    },
+    {
+      "workflow": "Marketplace pagination",
+      "status": "LIVE VERIFIED",
+      "route": "/en/farms?page=2",
+      "http": 200,
+      "query": {
+        "page": "2",
+        "pageSize": "9",
+        "sort": "newest",
+        "listingType": "sale"
+      },
+      "total": 16,
+      "items": 7
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "Expected values to be strictly equal:\n+ actual - expected\n\n+ '/en/my'\n- '/en/my/farms/new?step=2'\n         ^\n"
+    },
+    {
+      "workflow": "Protected deep link",
+      "status": "FAILED",
+      "url": "http://localhost:3000/en/sign-in?returnTo=%2Fen%2Fmy"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "Expected values to be strictly equal:\n\n200 !== 201\n"
+    },
+    {
+      "workflow": "Save public farm",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "persistence": {
+        "items": [
+          {
+            "id": "499",
+            "slug": "demo-dash-10-sale",
+            "farmName": "[DEMO-DASH] Ismailia Farm 10",
+            "governorate": "Ismailia",
+            "areaName": "Ismailia demo area",
+            "areaFeddan": 15,
+            "listingType": "sale",
+            "askingPrice": 2500000,
+            "annualRentPerFeddan": null,
+            "statedSalePricePerFeddan": null,
+            "currency": "EGP",
+            "availability": "available",
+            "listingDescription": "[DEMO-DASH] Synthetic listing scenario 10 — not a verified sale.",
+            "highlights": [],
+            "publishedAt": "2026-10-08T12:00:00.000Z",
+            "farmExitScore": null,
+            "saleEligibility": {
+              "saleMode": "quickSale",
+              "acceptsCashProposals": true,
+              "acceptsInstallmentProposals": true,
+              "acceptsExchangeProposals": false,
+              "exchangePreferenceScope": "any",
+              "exchangeAssetTypes": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "Expected values to be strictly equal:\n\n200 !== 201\n"
+    },
+    {
+      "workflow": "Farm details inquiry",
+      "status": "LIVE VERIFIED",
+      "id": "772",
+      "route": "http://localhost:3000/en/my/farm-details-requests/772",
+      "endpoint": "POST /farm-details-requests; POST /farm-details-requests/:id/submit",
+      "http": [
+        201,
+        200
+      ],
+      "persistedStatus": "underFarmExitReview",
+      "visibility": "private"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "Expected values to be strictly equal:\n+ actual - expected\n\n+ '/en/my'\n- '/en/my/farms/new?step=2'\n         ^\n"
+    },
+    {
+      "workflow": "Communication sale eligibility",
+      "status": "LIVE VERIFIED",
+      "requestId": "769",
+      "caseId": "27",
+      "unassignedHTTP": 400,
+      "assignedHTTP": 201
+    },
+    {
+      "workflow": "Communication rent eligibility",
+      "status": "LIVE VERIFIED",
+      "requestId": "771",
+      "caseId": "28",
+      "unassignedHTTP": 400,
+      "assignedHTTP": 201
+    },
+    {
+      "workflow": "Communication professional eligibility",
+      "status": "LIVE VERIFIED",
+      "requestId": "770",
+      "caseId": "29",
+      "unassignedHTTP": 400,
+      "assignedHTTP": 201
+    },
+    {
+      "workflow": "Communication inquiry eligibility",
+      "status": "LIVE VERIFIED",
+      "requestId": "772",
+      "caseId": "30",
+      "unassignedHTTP": 400,
+      "assignedHTTP": 201
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "GET /api/communication/cases/27/messages?page=1&pageSize=1 -> 500: null\n\n500 !== 200\n"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "/en/my/farms/new HTTP 500"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "/en/my/farms/new HTTP 500"
+    },
+    {
+      "workflow": "Listing review feedback persisted",
+      "status": "ISOLATED DB VERIFIED",
+      "requestId": "769",
+      "http": 200,
+      "persistedStatus": "changesRequested"
+    },
+    {
+      "workflow": "Protected deep link en",
+      "status": "LIVE VERIFIED",
+      "url": "http://localhost:3000/en/sign-in?returnTo=%2Fen%2Fmy%2Ffarms%2Fnew"
+    },
+    {
+      "workflow": "Protected deep link ar",
+      "status": "LIVE VERIFIED",
+      "url": "http://localhost:3000/ar/sign-in?returnTo=%2Far%2Fmy%2Ffarms%2Fnew"
+    },
+    {
+      "workflow": "Communication sale persisted pagination",
+      "status": "LIVE VERIFIED",
+      "caseId": "27",
+      "page1Id": "26",
+      "page2Id": "27",
+      "total": 2
+    },
+    {
+      "workflow": "Communication rent persisted pagination",
+      "status": "LIVE VERIFIED",
+      "caseId": "28",
+      "page1Id": "28",
+      "page2Id": "29",
+      "total": 2
+    },
+    {
+      "workflow": "Communication professional persisted pagination",
+      "status": "LIVE VERIFIED",
+      "caseId": "29",
+      "page1Id": "30",
+      "page2Id": "31",
+      "total": 2
+    },
+    {
+      "workflow": "Communication inquiry persisted pagination",
+      "status": "LIVE VERIFIED",
+      "caseId": "30",
+      "page1Id": "32",
+      "page2Id": "33",
+      "total": 2
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('[DEMO] UAT sale staff reply', { exact: true }).first() to be visible\u001b[22m\n"
+    },
+    {
+      "workflow": "Conversation browser load diagnosis",
+      "status": "FAILED",
+      "http": 400,
+      "body": {
+        "message": [
+          "pageSize must not be greater than 50"
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "workflow": "Browser OTP login and return URL",
+      "status": "LIVE VERIFIED",
+      "role": "existing demo agent as website user",
+      "http": [
+        200,
+        200
+      ],
+      "route": "http://localhost:3000/en/my/farms/new"
+    },
+    {
+      "workflow": "Refresh retains session",
+      "status": "LIVE VERIFIED",
+      "route": "http://localhost:3000/en/my/farms/new"
+    },
+    {
+      "workflow": "Navbar cross-tab logout diagnosis",
+      "status": "FAILED",
+      "sessionHTTP": 401,
+      "staleAccountVisible": true
+    },
+    {
+      "workflow": "Logout invalidates protected session",
+      "status": "LIVE VERIFIED",
+      "route": "http://localhost:3000/ar/sign-in?returnTo=%2Far%2Fmy"
+    },
+    {
+      "workflow": "Private farm location",
+      "status": "LIVE VERIFIED",
+      "farmId": "552",
+      "ownerHTTP": [
+        200,
+        200
+      ],
+      "guestHTTP": 401,
+      "publicCoordinatesOmitted": true
+    },
+    {
+      "workflow": "Portal route /en/my",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my"
+    },
+    {
+      "workflow": "Portal route /en/my/farms",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/farms"
+    },
+    {
+      "workflow": "Portal route /en/my/requests",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/requests"
+    },
+    {
+      "workflow": "Portal route /en/my/applications",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/applications"
+    },
+    {
+      "workflow": "Portal route /en/my/saved",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/saved"
+    },
+    {
+      "workflow": "Portal route /en/my/documents",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/documents"
+    },
+    {
+      "workflow": "Portal route /en/my/notifications",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/notifications"
+    },
+    {
+      "workflow": "Portal route /en/my/profile",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/profile"
+    },
+    {
+      "workflow": "Portal route /en/my/proposals",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/proposals"
+    },
+    {
+      "workflow": "Portal route /en/my/professional/verification/770",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/professional/verification/770"
+    },
+    {
+      "workflow": "Portal route /en/my/requests/769",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "role": "demo outsider as owner/applicant",
+      "route": "/en/my/requests/769"
+    },
+    {
+      "workflow": "Listing feedback in browser",
+      "status": "LIVE VERIFIED",
+      "requestId": "769"
+    },
+    {
+      "workflow": "Changes-requested listing editable",
+      "status": "LIVE VERIFIED",
+      "requestId": "769"
+    },
+    {
+      "workflow": "Conversation browser corrected",
+      "status": "LIVE VERIFIED",
+      "route": "http://localhost:3000/en/my/messages/27",
+      "messagesHTTP": 200,
+      "historyAfterRefresh": true
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('[DEMO] UAT live socket reply', { exact: true }) to be visible\u001b[22m\n"
+    },
+    {
+      "workflow": "Socket delivery sale",
+      "status": "LIVE VERIFIED",
+      "caseId": "27",
+      "messageId": "36",
+      "joinAuthorized": true,
+      "ticketHTTP": 201
+    },
+    {
+      "workflow": "Socket delivery rent",
+      "status": "LIVE VERIFIED",
+      "caseId": "28",
+      "messageId": "37",
+      "joinAuthorized": true,
+      "ticketHTTP": 201
+    },
+    {
+      "workflow": "Socket delivery professional",
+      "status": "LIVE VERIFIED",
+      "caseId": "29",
+      "messageId": "38",
+      "joinAuthorized": true,
+      "ticketHTTP": 201
+    },
+    {
+      "workflow": "Socket delivery inquiry",
+      "status": "LIVE VERIFIED",
+      "caseId": "30",
+      "messageId": "39",
+      "joinAuthorized": true,
+      "ticketHTTP": 201
+    },
+    {
+      "workflow": "Whole UAT mutation timestamp audit",
+      "status": "ISOLATED DB VERIFIED",
+      "since": "2026-10-22T09:02:53.799Z",
+      "preExistingRequestsTouched": 0,
+      "nonFixtureFarmsTouched": 0
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Save', exact: true })\u001b[22m\n"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "page.waitForURL: Timeout 30000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**step=5\" until \"load\"\n  navigated to \"http://localhost:3000/en/my/farms/552/list?step=4&listingId=769\"\n  navigated to \"http://localhost:3000/en/my/farms/552/list?step=4&listingId=769\"\n  navigated to \"http://localhost:3000/en/my/farms/552/list?step=4&listingId=769\"\n  navigated to \"http://localhost:3000/en/my/farms/552/list?step=5&listingId=769\"\n  navigated to \"http://localhost:3000/en/my/farms/552/list?step=5&listingId=769\"\n============================================================"
+    },
+    {
+      "workflow": "Browser realtime and refresh sale",
+      "status": "LIVE VERIFIED",
+      "caseId": "27",
+      "http": 201
+    },
+    {
+      "workflow": "Browser realtime and refresh rent",
+      "status": "LIVE VERIFIED",
+      "caseId": "28",
+      "http": 201
+    },
+    {
+      "workflow": "Browser realtime and refresh professional",
+      "status": "LIVE VERIFIED",
+      "caseId": "29",
+      "http": 201
+    },
+    {
+      "workflow": "Browser realtime and refresh inquiry",
+      "status": "LIVE VERIFIED",
+      "caseId": "30",
+      "http": 201
+    },
+    {
+      "workflow": "Arabic desktop /ar/farms",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "dir": "rtl"
+    },
+    {
+      "workflow": "Arabic desktop /ar/farms/demo-dash-10-sale",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "dir": "rtl"
+    },
+    {
+      "workflow": "Arabic desktop /ar/my",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "dir": "rtl"
+    },
+    {
+      "workflow": "Arabic desktop /ar/my/requests",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "dir": "rtl"
+    },
+    {
+      "workflow": "Arabic desktop /ar/my/professional/verification/770",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "dir": "rtl"
+    },
+    {
+      "workflow": "Mobile /ar/my/messages/30",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "width": 390,
+      "layout": {
+        "scroll": 390,
+        "viewport": 390
+      }
+    },
+    {
+      "workflow": "Mobile /ar/my/farms/552",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "width": 390,
+      "layout": {
+        "scroll": 390,
+        "viewport": 390
+      }
+    },
+    {
+      "workflow": "Mobile /en/farms",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "width": 390,
+      "layout": {
+        "scroll": 390,
+        "viewport": 390
+      }
+    },
+    {
+      "workflow": "Unsupported hero fields disabled",
+      "status": "LIVE VERIFIED",
+      "activity": true,
+      "managementRanges": true
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Submit for FarmExit review', exact: true })\u001b[22m\n"
+    },
+    {
+      "workflow": "Listing correction and resubmission",
+      "status": "LIVE VERIFIED",
+      "requestId": "769",
+      "http": [
+        200,
+        200
+      ],
+      "persistedStatus": "underFarmExitReview",
+      "description": "[DEMO] UAT corrected listing description.",
+      "visibility": "private"
+    },
+    {
+      "workflow": "Submitted listing readonly",
+      "status": "LIVE VERIFIED",
+      "requestId": "769"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "GET /api/requests/762 -> 404: {\"message\":\"Request not found\",\"error\":\"Not Found\",\"statusCode\":404}\n\n404 !== 403\n"
+    },
+    {
+      "workflow": "Cross-user privacy and no direct messaging",
+      "status": "LIVE VERIFIED",
+      "foreignCases": [
+        25,
+        26
+      ],
+      "foreignRequest": 762,
+      "http": [
+        403,
+        403,
+        404,
+        401,
+        400
+      ]
+    },
+    {
+      "workflow": "Proposal and co-purchase form inspection only",
+      "status": "NOT TESTED",
+      "route": "http://localhost:3000/en/my/proposals/new?slug=demo-dash-10-sale",
+      "reason": "Form rendered; no safe published fixture for submitting. Existing parent request would be updated."
+    },
+    {
+      "workflow": "Remove saved farm persisted",
+      "status": "LIVE VERIFIED",
+      "http": [
+        204,
+        200
+      ]
+    },
+    {
+      "workflow": "Authorized document download",
+      "status": "LIVE VERIFIED",
+      "http": 200,
+      "documentId": 37
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('[DEMO] Client Demo Other Applicant', { exact: true }).first() to be visible\u001b[22m\n\u001b[2m    - waiting for \"http://localhost:3000/en/sign-in?returnTo=%2Fen%2Fmy%2Fprofile\" navigation to finish...\u001b[22m\n\u001b[2m    - navigated to \"http://localhost:3000/en/sign-in?returnTo=%2Fen%2Fmy%2Fprofile\"\u001b[22m\n"
+    },
+    {
+      "workflow": "Missing access cookie refresh",
+      "status": "FAILED",
+      "route": "http://localhost:3000/en/sign-in?returnTo=%2Fen%2Fmy%2Fprofile",
+      "reason": "Expected refresh session; protected page redirected to sign-in. Investigating existing proxy execution."
+    },
+    {
+      "workflow": "Access cookie refresh corrected",
+      "status": "LIVE VERIFIED",
+      "route": "http://localhost:3000/en/my/profile",
+      "accessCookieRotated": true
+    },
+    {
+      "workflow": "Navbar logout state corrected",
+      "status": "LIVE VERIFIED",
+      "route": "http://localhost:3000/en/my/profile",
+      "signInVisible": true
+    },
+    {
+      "workflow": "Revoked tokens denied and protected redirect",
+      "status": "LIVE VERIFIED",
+      "http": 401,
+      "route": "http://localhost:3000/ar/sign-in?returnTo=%2Far%2Fmy%2Frequests"
+    },
+    {
+      "workflow": "Unsupported quick range placeholders disabled",
+      "status": "LIVE VERIFIED",
+      "route": "http://localhost:3000/en/farms"
+    },
+    {
+      "workflow": "UAT stage",
+      "status": "FAILED",
+      "bug": "GET /api/farms/552/private-location -> 404: {\"message\":\"Farm not found\",\"error\":\"Not Found\",\"statusCode\":404}\n\n404 !== 403\n"
+    },
+    {
+      "workflow": "Cross-user private location and document",
+      "status": "LIVE VERIFIED",
+      "http": [
+        404,
+        404
+      ]
+    },
+    {
+      "workflow": "Expired isolated session denied",
+      "status": "ISOLATED DB VERIFIED",
+      "http": 401,
+      "route": "http://localhost:3000/en/sign-in?returnTo=%2Fen%2Fmy%2Frequests",
+      "method": "Only approved demo owner session expiresAt moved into past; no forged tokens."
+    },
+    {
+      "workflow": "Existing Management Partnership baselines reused",
+      "status": "ISOLATED DB VERIFIED",
+      "cases": [
+        {
+          "id": "25",
+          "requestId": "762",
+          "assignedStaffId": "1113"
+        },
+        {
+          "id": "26",
+          "requestId": "768",
+          "assignedStaffId": "1113"
+        }
+      ],
+      "note": "Read only; previous live evidence retained."
+    },
+    {
+      "workflow": "Final whole-run mutation audit",
+      "status": "ISOLATED DB VERIFIED",
+      "preExistingRequestsTouched": 0,
+      "nonFixtureFarmsTouched": 0
+    },
+    {
+      "workflow": "Safety: pre-existing requests and non-fixture farms",
+      "status": "ISOLATED DB VERIFIED",
+      "originalRequestCount": 324,
+      "requestsUnchanged": true,
+      "nonFixtureFarmsUnchanged": true,
+      "request753Untouched": true
+    }
+  ],
+  "errors": []
+}

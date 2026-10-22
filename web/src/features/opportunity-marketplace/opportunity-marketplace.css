@@ -1,0 +1,123 @@
+.om-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (width >= 1024px) {
+  .om-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+}
+
+.om-card-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+}
+
+@media (width >= 768px) {
+  .om-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width >= 1200px) {
+  .om-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.om-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border-hairline);
+  background: var(--color-bg-surface);
+  box-shadow: 0 8px 28px rgb(15 23 42 / 0.06);
+}
+
+.om-card-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--color-bg-muted);
+}
+
+.om-card-badge {
+  position: absolute;
+  top: 12px;
+  inset-inline-start: 12px;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: rgb(255 255 255 / 0.94);
+  color: var(--color-text-brand);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.08);
+}
+
+.om-highlight-box {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgb(201 162 77 / 0.35);
+  background: rgb(250 244 230 / 0.9);
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.om-mediation-banner {
+  border-radius: var(--radius-card);
+  border: 1px solid rgb(37 99 59 / 0.2);
+  background: linear-gradient(135deg, rgb(236 253 245 / 0.95), rgb(255 255 255 / 0.98));
+  padding: 1rem 1.25rem;
+}
+
+.om-owner-cta {
+  border-radius: var(--radius-card);
+  background: linear-gradient(135deg, #1f6b45 0%, #2d8a5c 48%, #3da06d 100%);
+  color: white;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 16px 40px rgb(31 107 69 / 0.28);
+}
+
+.om-hero-search {
+  margin-top: 1.5rem;
+  border-radius: var(--radius-card);
+  background: rgb(255 255 255 / 0.12);
+  border: 1px solid rgb(255 255 255 / 0.22);
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.om-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgb(15 23 42 / 0.45);
+}
+
+.om-drawer-panel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  inset-inline-end: 0;
+  z-index: 51;
+  width: min(100%, 480px);
+  background: var(--color-bg-surface);
+  box-shadow: -12px 0 40px rgb(0 0 0 / 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (width < 768px) {
+  .om-drawer-panel {
+    inset-inline: 0;
+    width: 100%;
+  }
+}

@@ -28,5 +28,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts"],
-  "exclude": ["node_modules", "playwright-report", "test-results"]
+  "exclude": ["node_modules", "playwright-report", "test-results", "**/*.test.ts"]
 }

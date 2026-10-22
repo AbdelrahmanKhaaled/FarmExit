@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
 import { Icon, type IconName } from '@/components/icons/Icon';
-import { PORTAL_PHASE, portalNav } from './portal-nav';
+import { PORTAL_PHASE, isPortalNavActive, mobileBottomNav, portalNav } from './portal-nav';
 
 const icons: Record<string, IconName> = {
   overview: 'layer',
@@ -15,27 +15,16 @@ const icons: Record<string, IconName> = {
   documents: 'folder',
   notifications: 'notification',
   profile: 'user',
-  management: 'building',
-  professional: 'shield-tick',
-  partnerships: 'category',
-  proposals: 'document-text',
 };
 
 export function PortalNavigation({ bottom = false }: { bottom?: boolean }) {
   const t = useTranslations('workspace');
   const pathname = usePathname();
-  const items = bottom
-    ? ([
-        { key: 'overview', href: '/my', phase: 5 },
-        { key: 'requests', href: '/my/requests', phase: 5 },
-        { key: 'saved', href: '/my/saved', phase: 5 },
-        { key: 'messages', href: '/my/messages', phase: 9 },
-        { key: 'profile', href: '/my/profile', phase: 5 },
-      ] as const)
-    : portalNav;
+  const items = bottom ? mobileBottomNav : portalNav;
   return (
     <nav
       aria-label={t('nav.label')}
+      data-mobile-nav={bottom ? true : undefined}
       className={
         bottom
           ? 'fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border-nav bg-bg-surface px-8 pt-8 pb-[max(12px,env(safe-area-inset-bottom))] tablet:hidden'
@@ -43,13 +32,13 @@ export function PortalNavigation({ bottom = false }: { bottom?: boolean }) {
       }
     >
       {items.map((item) => {
-        const active = pathname === item.href || (item.href !== '/my' && pathname.startsWith(item.href));
+        const active = isPortalNavActive(pathname, item.href, item.key);
         const disabled = item.phase > PORTAL_PHASE;
         const label =
           bottom && item.key === 'requests'
-            ? t('visual.activity')
+            ? t('nav.requests')
             : bottom && item.key === 'profile'
-              ? t('visual.accountTab')
+              ? t('nav.profile')
               : t(`nav.${item.key}`);
         return (
           <Link

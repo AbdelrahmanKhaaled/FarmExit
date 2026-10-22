@@ -79,6 +79,9 @@ export class PartnershipRequestResponseDto {
   @ApiProperty() farmId!: string;
   @ApiProperty() farmName!: string;
   @ApiProperty() status!: string;
+  @ApiProperty() visibility!: string;
+  @ApiProperty({ nullable: true, type: String }) publishedAt!: string | null;
+  @ApiProperty({ nullable: true, type: String }) submittedAt!: string | null;
   @ApiProperty({ nullable: true, type: String }) description!: string | null;
   @ApiProperty({ type: [String], nullable: true }) objective!: string[] | null;
   @ApiProperty({ nullable: true, type: [String] }) acceptedPartnerTypes!: string[] | null;

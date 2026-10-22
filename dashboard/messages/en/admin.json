@@ -20,14 +20,15 @@
       "passwordRequired": "Enter your password.",
       "invalidCredentials": "Invalid email or password.",
       "notAdmin": "This account is not authorized for the admin dashboard.",
-      "network": "Could not reach the FarmExit API. Check that the API is running on port 4000.",
+      "network": "Could not reach the FarmExit API. Check that the API is running on port 4001.",
       "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
       "rateLimitedGeneric": "Too many attempts. Please wait and try again.",
       "cooldown": "Wait {seconds} seconds before requesting another code.",
       "cooldownGeneric": "Please wait before requesting another code."
     },
     "panelTagline": "Luxury AgriTech operations",
-    "panelBody": "Mediated farm transactions, verified listings, and coordinated owner communication — managed from one place."
+    "panelBody": "Mediated farm transactions, verified listings, and coordinated owner communication — managed from one place.",
+    "panelFooter": "FarmExit · Staff operations"
   },
   "nav": {
     "workspaceSubtitle": "Operations workspace",
@@ -75,6 +76,8 @@
     "language": "Language",
     "roleSuperAdmin": "Super Admin",
     "roleAdmin": "Administrator",
+    "roleCaseAgent": "Case agent",
+    "roleReviewer": "Reviewer",
     "roleStaff": "Staff"
   },
   "overview": {
@@ -122,6 +125,7 @@
     "quick": {
       "reviewRequests": "Review requests",
       "reviewListings": "Review listings",
+      "communications": "Communications inbox",
       "analytics": "View analytics"
     },
     "loadError": "Could not load dashboard metrics.",
@@ -247,8 +251,18 @@
     "created": "Created",
     "relationships": "Relationships",
     "recentRequests": "Recent requests",
+    "privateLocation": "Private location (confidential)",
+    "createEvaluation": "Create FarmExit evaluation",
     "none": "None",
     "col": { "role": "Role", "user": "User", "request": "Request", "type": "Type", "status": "Status", "created": "Created" }
+  },
+  "privateLocation": {
+    "confidential": "Exact coordinates are confidential operational data.",
+    "staffReadOnly": "Staff may view coordinates only. Updates are performed by the farm owner via the website.",
+    "denied": "Private location is not available for your staff role.",
+    "unavailable": "Could not load private location.",
+    "noCoordinates": "No private pin saved yet.",
+    "road": "Nearest main road"
   },
   "requestsPage": {
     "eyebrow": "Request management",
@@ -314,6 +328,7 @@
     "back": "← Users",
     "refresh": "Refresh",
     "farmRolesHint": "Access is farm-specific via relationships — not a global buyer/owner role.",
+    "profile": "Profile",
     "mobile": "Mobile",
     "email": "Email",
     "status": "Account status",
@@ -350,7 +365,27 @@
     "emptyTitle": "No evaluations",
     "emptyDesc": "Recorded FarmExit evaluations appear here.",
     "col": { "farm": "Farm", "status": "Status", "score": "Score", "reviewer": "Reviewer", "created": "Created" },
+    "create": "Create evaluation",
     "pagination": { "showing": "Showing {from}–{to} of {total}", "prev": "Previous", "next": "Next", "page": "Page {page} of {pages}" }
+  },
+  "evaluationCreate": {
+    "back": "← Evaluations",
+    "title": "Create FarmExit evaluation",
+    "desc": "Creates a draft or in-review assessment. Publishing requires a separate admin approval step.",
+    "internalOnly": "Internal staff assessment — not a public rating.",
+    "farmId": "Farm ID",
+    "listingRequestId": "Listing request ID (optional)",
+    "scoreValue": "Score value",
+    "scoreMax": "Score maximum",
+    "methodologyName": "Methodology name",
+    "methodologyVersion": "Methodology version",
+    "reviewScopeEn": "Review scope (English)",
+    "internalNotes": "Internal notes",
+    "status": "Initial status",
+    "confirm": "I confirm this evaluation is based on documented checks, not invented scores.",
+    "submit": "Create evaluation",
+    "submitting": "Creating…",
+    "error": "Could not create evaluation."
   },
   "evaluationDetail": {
     "back": "← Evaluations",
@@ -370,7 +405,23 @@
     "save": "Save changes",
     "saved": "Saved.",
     "error": "Could not save.",
+    "editCheck": "Edit",
+    "addOrUpdateCheck": "Add or update check",
+    "checkKeyHint": "Use an approved criterion key (examples: {examples}).",
+    "evidenceDocumentId": "Evidence document ID (optional)",
+    "saveCheck": "Save check",
+    "checkSaved": "Check saved.",
     "col": { "check": "Check", "checkStatus": "Status", "notes": "Notes" }
+  },
+  "requestStatus": {
+    "title": "Status transition",
+    "hint": "Only for generic unified requests. Does not replace specialized module workflows.",
+    "reason": "Reason (required for closure)",
+    "reasonRequired": "A reason is required.",
+    "confirm": "I confirm moving this request to “{status}”. This does not complete a sale or payment.",
+    "submit": "Apply status",
+    "success": "Status updated.",
+    "error": "Could not update status."
   },
   "communicationsPage": {
     "eyebrow": "Mediated messaging",
@@ -382,6 +433,7 @@
     "filter": "Apply filters",
     "emptyTitle": "No cases",
     "emptyDesc": "Communication cases appear when mediation is opened for a request.",
+    "caseLabel": "Case #{id}",
     "col": { "case": "Case", "request": "Request", "status": "Status", "agent": "Case agent" },
     "pagination": { "showing": "Showing {from}–{to} of {total}", "prev": "Previous", "next": "Next", "page": "Page {page} of {pages}" }
   },
@@ -391,6 +443,8 @@
     "title": "Case {id}",
     "openRequest": "Open related request",
     "requestContext": "Request",
+    "assignedStaff": "Case agent",
+    "caseContext": "Case context",
     "caseStatus": "Case status",
     "saveStatus": "Update status",
     "statusSaved": "Status updated.",
@@ -399,6 +453,7 @@
     "selectConversation": "Select a participant to view messages.",
     "noMessages": "No messages in this conversation yet.",
     "relayedCopy": "relayed copy",
+    "staffMessage": "staff",
     "sendTo": "Message to {name}",
     "send": "Send staff message",
     "sent": "Message sent.",
@@ -415,7 +470,9 @@
     "relayConfirmButton": "Confirm relay",
     "cancel": "Cancel",
     "relayDone": "Relay sent.",
-    "error": "Action failed."
+    "error": "Action failed.",
+    "realtimeReconnecting": "Reconnecting for live updates…",
+    "loadOlder": "Load older messages"
   },
   "requestDocuments": {
     "title": "Document review",
@@ -427,6 +484,7 @@
     "error": "Review failed."
   },
   "requestForwarding": {
+    "openOnRequestHub": "Open full forwarding panel on request hub",
     "title": "Request forwarding",
     "nonbinding": "Forwarding is nonbinding and does not complete a sale or create farm relationships.",
     "empty": "No forwarding records yet.",
@@ -436,7 +494,29 @@
     "submit": "Create forwarding",
     "success": "Forwarding created.",
     "error": "Forwarding failed.",
-    "col": { "recipient": "Recipient", "status": "Status", "ownerDecision": "Recipient decision", "created": "Created" }
+    "col": {
+      "id": "Forwarding ID",
+      "recipient": "Recipient user ID",
+      "status": "Status",
+      "ownerDecision": "Owner response",
+      "created": "Sent",
+      "decided": "Recorded"
+    },
+    "recordTitle": "Record owner response",
+    "recordMediatedNote": "Record a response the owner gave to FarmExit staff. This does not complete a sale, rental, or contract.",
+    "decisionLabel": "Owner response",
+    "decisionPlaceholder": "Select response",
+    "decisionReason": "Notes (optional, max 1000 characters)",
+    "confirmCheckbox": "I confirm this reflects the owner’s response received through FarmExit mediation.",
+    "decisionSubmit": "Record owner response",
+    "decisionSubmitting": "Recording…",
+    "decisionSuccess": "Owner response recorded.",
+    "decisionError": "Could not record owner response.",
+    "ownerDecisionValues": {
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "pending": "Pending"
+    }
   },
   "auditPage": {
     "eyebrow": "Security",
@@ -587,9 +667,25 @@
     "proposalId": "Proposal request ID",
     "sharePercent": "Interest share %",
     "addMemberBtn": "Add member",
+    "updateMember": "Update member",
+    "memberCandidate": "Candidate",
+    "memberShortlisted": "Shortlisted",
+    "memberWithdrawn": "Withdrawn",
+    "memberArchived": "Archived",
+    "saveMember": "Save member",
     "success": "Saved.",
     "error": "Action failed.",
     "col": { "proposal": "Proposal", "share": "Interest %", "status": "Status" }
+  },
+  "opportunityPublish": {
+    "title": "Public marketplace",
+    "statePublished": "Published on the public website.",
+    "stateApprovedPrivate": "Approved — private (not on the public marketplace yet).",
+    "stateNotEligible": "Not eligible for publication in the current state.",
+    "confirmHint": "Publishing makes a safe summary of this opportunity publicly discoverable on FarmExit. It does not share private contact details or documents.",
+    "publish": "Publish opportunity",
+    "success": "Opportunity published.",
+    "error": "Could not publish this opportunity."
   },
   "farmManagementPage": {
     "eyebrow": "Professional services",
@@ -606,6 +702,10 @@
     "refresh": "Refresh",
     "noAutoManager": "Approval does not appoint a farm manager or create farm relationships.",
     "need": "Professional need",
+    "farm": "Farm",
+    "managementTypes": "Management types",
+    "goals": "Goals",
+    "situation": "Current situation",
     "unifiedRequest": "Unified request",
     "col": { "decision": "Decision", "comment": "Comment" }
   },
@@ -647,7 +747,8 @@
     "nonBinding": "Partnership outcomes are mediated and nonbinding.",
     "unifiedRequest": "Unified request",
     "applications": "Linked applications",
-    "col": { "id": "Application", "status": "Status", "decision": "Decision", "comment": "Comment" }
+    "noApplications": "No linked applications yet.",
+    "col": { "id": "Application", "farm": "Farm", "status": "Status", "decision": "Decision", "comment": "Comment" }
   },
   "partnershipApplicationDetail": {
     "back": "← Applications",
@@ -677,6 +778,81 @@
     "farm": "Farm",
     "unifiedRequest": "Unified request",
     "col": { "decision": "Decision", "comment": "Comment" }
+  },
+  "workflowCommon": {
+    "summary": "Summary",
+    "reviewHistory": "Review history",
+    "noReviews": "No review history yet.",
+    "relatedLinks": "Related"
+  },
+  "pagination": {
+    "showing": "Showing {from}–{to} of {total}",
+    "showingEmpty": "No results",
+    "prev": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}"
+  },
+  "enums": {
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "underFarmExitReview": "Under FarmExit review",
+      "changesRequested": "Changes requested",
+      "approved": "Approved",
+      "published": "Published",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn",
+      "closed": "Closed",
+      "pending": "Pending",
+      "uploaded": "Uploaded",
+      "inReview": "In review",
+      "underReview": "Under review",
+      "verified": "Verified",
+      "notApproved": "Not approved",
+      "collectingInterest": "Collecting interest",
+      "underStaffFollowup": "Under staff follow-up",
+      "superseded": "Superseded"
+    },
+    "requestType": {
+      "farmListing": "Farm listing",
+      "farmManagement": "Farm management",
+      "partnership": "Partnership",
+      "partnershipApplication": "Partnership application",
+      "professionalVerification": "Professional verification",
+      "professionalApplication": "Professional application",
+      "farmDetails": "Farm details inquiry",
+      "farmPurchaseProposal": "Purchase proposal"
+    },
+    "professionalType": {
+      "farmManager": "Farm manager",
+      "agriculturalEngineer": "Agricultural engineer"
+    },
+    "listingType": {
+      "sale": "Sale",
+      "rent": "Rent"
+    },
+    "adminRole": {
+      "superAdmin": "Super admin",
+      "admin": "Admin"
+    },
+    "accountStatus": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended"
+    },
+    "caseStatus": {
+      "open": "Open",
+      "waitingCustomer": "Waiting on customer",
+      "waitingOwner": "Waiting on owner",
+      "closed": "Closed"
+    },
+    "proposalKind": {
+      "installment": "Installment",
+      "exchange": "Exchange",
+      "mixed": "Mixed",
+      "cash": "Cash"
+    }
   },
   "forbidden": {
     "title": "Access denied",

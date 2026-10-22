@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-22T08:33:57.879Z",
+  "database": {
+    "host": "127.0.0.1",
+    "name": "farmexit"
+  },
+  "fixtures": [
+    {
+      "id": "762",
+      "reference": "DEMO-MP-MGT-01",
+      "status": "approved",
+      "visibility": "private"
+    },
+    {
+      "id": "763",
+      "reference": "DEMO-MP-MGT-02",
+      "status": "approved",
+      "visibility": "private"
+    },
+    {
+      "id": "764",
+      "reference": "DEMO-MP-MGT-03",
+      "status": "approved",
+      "visibility": "private"
+    },
+    {
+      "id": "765",
+      "reference": "DEMO-MP-PART-01",
+      "status": "approved",
+      "visibility": "private"
+    },
+    {
+      "id": "766",
+      "reference": "DEMO-MP-PART-02",
+      "status": "approved",
+      "visibility": "private"
+    },
+    {
+      "id": "767",
+      "reference": "DEMO-MP-PART-03",
+      "status": "approved",
+      "visibility": "private"
+    }
+  ],
+  "evidence": [
+    {
+      "scenario": "management: approved-private fixtures excluded from public API",
+      "status": "LIVE VERIFIED",
+      "total": 0,
+      "fixtureCount": 3
+    },
+    {
+      "scenario": "management: public detail/navigation",
+      "status": "BLOCKED",
+      "cause": "No public detail API or Website detail route exists; no approved publication workflow."
+    },
+    {
+      "scenario": "partnerships: approved-private fixtures excluded from public API",
+      "status": "LIVE VERIFIED",
+      "total": 0,
+      "fixtureCount": 3
+    },
+    {
+      "scenario": "partnerships: public detail/navigation",
+      "status": "BLOCKED",
+      "cause": "No public detail API or Website detail route exists; no approved publication workflow."
+    },
+    {
+      "scenario": "OTP Website login and Dashboard password login",
+      "status": "LIVE VERIFIED",
+      "websiteAccounts": 4,
+      "dashboardAccounts": 2
+    },
+    {
+      "scenario": "Dashboard identity and realtime ticket reject Website audience",
+      "status": "LIVE VERIFIED"
+    },
+    {
+      "scenario": "Management owner tracking, refresh and approved staff detail",
+      "status": "LIVE VERIFIED",
+      "requestId": "762"
+    },
+    {
+      "scenario": "Management opportunity apply",
+      "status": "BLOCKED",
+      "cause": "No management application/proposal API or corresponding Website application form."
+    },
+    {
+      "scenario": "Partnership create/validate/upload/submit/persist/track and IDOR",
+      "status": "LIVE VERIFIED",
+      "applicationId": "768",
+      "parentId": "765",
+      "ownerCannotApply": true
+    },
+    {
+      "scenario": "Partnership staff review reflected in applicant tracking",
+      "status": "LIVE VERIFIED",
+      "applicationId": "768"
+    },
+    {
+      "scenario": "Management owner request: assigned case, user message, staff reply, Socket.IO, refresh, pagination and privacy",
+      "status": "LIVE VERIFIED",
+      "requestId": "762",
+      "caseId": "25",
+      "messageCount": 3
+    },
+    {
+      "scenario": "Partnership application: assigned case, user message, staff reply, Socket.IO, refresh, pagination and privacy",
+      "status": "LIVE VERIFIED",
+      "requestId": "768",
+      "caseId": "26",
+      "messageCount": 2
+    }
+  ]
+}

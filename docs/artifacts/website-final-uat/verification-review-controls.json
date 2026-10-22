@@ -1,0 +1,242 @@
+[
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Open menu",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Sign out",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Sign out",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Save & exit",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "1Professional type",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "2Profile & experience",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "3Expertise & service areas",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "4Professional documents",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "5Review & submit",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "1Professional type",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "2Profile & experience",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "3Expertise & service areas",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "4Professional documents",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "5Review & submit",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Edit details",
+    "disabled": false
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": null,
+    "name": "verificationSummary",
+    "id": "_r_1_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Save",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Back to professional profile",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Back",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Submit for review",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "next-logo",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "Cache disabled",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Collapse Cache disabled badge",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  }
+]

@@ -1,3 +1,5 @@
+import { ManagementMarketplace } from '@/features/opportunity-marketplace/ManagementMarketplace';
+import { fetchPublicOpportunities, parseOpportunityFilters } from '@/lib/opportunities/public-opportunity';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
@@ -7,8 +9,8 @@ import { routing } from '@/i18n/routing';
 import { Container } from '@/components/layout/Container';
 import { Footer } from '@/components/layout/Footer';
 import { PublicNavbar } from '@/components/layout/PublicNavbar';
-import { ButtonLink } from '@/components/ui/Button';
-import { Surface } from '@/components/ui/Surface';
+
+export const instant = false;
 
 export async function generateMetadata({ params }: PageProps<'/[locale]/management'>): Promise<Metadata> {
   const { locale } = await params;
@@ -17,12 +19,15 @@ export async function generateMetadata({ params }: PageProps<'/[locale]/manageme
   return { title: t('metaTitle'), description: t('metaDescription') };
 }
 
-export default async function ManagementMarketplacePage({ params }: PageProps<'/[locale]/management'>) {
+export default async function ManagementMarketplacePage({ params, searchParams }: PageProps<'/[locale]/management'>) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
+  const query = await searchParams;
+  const filters = parseOpportunityFilters(query as Record<string, string | string[] | undefined>);
+  const data =
+    (await fetchPublicOpportunities('management', filters)) ?? { items: [], page: 1, pageSize: 20, total: 0 };
   const t = await getTranslations('managementPage');
-  const th = await getTranslations('home.management');
 
   return (
     <>
@@ -54,19 +59,7 @@ export default async function ManagementMarketplacePage({ params }: PageProps<'/
         </section>
 
         <Container size="app" className="flex flex-col gap-24 pt-24 pb-72 tablet:gap-32 tablet:pt-40 tablet:pb-96">
-          <Surface className="flex flex-col gap-16 p-28">
-            <p className="type-heading-h4 text-text-primary">{t('notLiveTitle')}</p>
-            <p className="type-body-default text-text-secondary">{t('notLiveBody')}</p>
-            <p className="type-body-caption text-text-muted">{th('subtitle')}</p>
-            <div className="flex flex-wrap gap-12 pt-8">
-              <ButtonLink href="/my/management/new" variant="primary" size="md">
-                {t('submitRequest')}
-              </ButtonLink>
-              <ButtonLink href="/my/management" variant="outline" size="md">
-                {t('trackRequests')}
-              </ButtonLink>
-            </div>
-          </Surface>
+          <ManagementMarketplace locale={locale} initial={data} filters={filters} />
         </Container>
       </main>
       <Footer />

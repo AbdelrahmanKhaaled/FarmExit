@@ -1,44 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
+import { openCommunicationCase, type OpenCommunicationCaseErrorCode } from './open-communication-case';
+
+function errorMessage(
+  t: ReturnType<typeof useTranslations<'workspace.messages'>>,
+  code: OpenCommunicationCaseErrorCode,
+): string {
+  const key = {
+    unauthorized: 'errors.unauthorized',
+    forbidden: 'errors.forbidden',
+    notFound: 'errors.notFound',
+    noAgent: 'noAgent',
+    conflict: 'errors.conflict',
+    network: 'errors.network',
+    unknown: 'openError',
+  }[code] as Parameters<typeof t>[0];
+  return t(key);
+}
 
 export function OpenCommunicationCaseButton({ requestId }: { requestId: string }) {
   const t = useTranslations('workspace.messages');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
+  const openingRef = useRef(false);
   async function open() {
+    if (busy || openingRef.current) return;
+    openingRef.current = true;
     setBusy(true);
     setError(null);
-    const res = await fetch('/api/communication/cases', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ requestId }),
-    });
+    const result = await openCommunicationCase(requestId);
     setBusy(false);
-    if (!res.ok) {
-      const data = (await res.json().catch(() => null)) as { message?: string } | null;
-      if (res.status === 400 && data?.message?.includes('case agent')) {
-        setError(t('noAgent'));
-        return;
-      }
-      setError(t('openError'));
+    openingRef.current = false;
+    if (!result.ok) {
+      setError(errorMessage(t, result.code));
       return;
     }
-    const caseRow = (await res.json()) as { id: string };
-    router.push(`/my/messages/${caseRow.id}`);
+    router.push(`/my/messages/${result.caseId}`);
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8" data-testid="open-communication-case">
       <Button type="button" variant="outline" disabled={busy} onClick={() => void open()}>
         {busy ? t('opening') : t('openCase')}
       </Button>
-      {error && <p className="type-body-caption text-text-muted">{error}</p>}
+      {error && (
+        <p className="type-body-caption text-status-error" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

@@ -1,12 +1,13 @@
-import { MessagesInbox } from './MessagesInbox';
-import { ConversationView } from './ConversationView';
-export function MessageThread({ caseId, userId }: { caseId: string; userId: string }) {
-  return (
-    <div className="grid items-start gap-24 desktop:grid-cols-[240px_minmax(0,1fr)]">
-      <aside className="hidden desktop:block">
-        <MessagesInbox />
-      </aside>
-      <ConversationView caseId={caseId} userId={userId} />
-    </div>
-  );
+import { MessagesWorkspace, type MessagesPreviewData } from './MessagesWorkspace';
+
+export function MessageThread({
+  caseId,
+  userId,
+  preview,
+}: {
+  caseId: string;
+  userId: string;
+  preview?: MessagesPreviewData;
+}) {
+  return <MessagesWorkspace caseId={caseId} userId={userId} preview={preview} />;
 }

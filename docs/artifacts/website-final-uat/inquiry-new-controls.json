@@ -1,0 +1,52 @@
+[
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Open menu",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Sign out",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Sign out",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Submit details request",
+    "disabled": false
+  }
+]

@@ -30,13 +30,16 @@ export type NavbarUser = {
 
 export function Navbar({
   user: initialUser,
+  sessionResolved = false,
   className,
 }: {
   user?: NavbarUser;
+  /** Server already checked cookies and found no session (skip guest loading flash). */
+  sessionResolved?: boolean;
   className?: string;
 }) {
   const t = useTranslations('nav');
-  const { user, pending: sessionPending } = useNavbarSession(initialUser);
+  const { user, pending: sessionPending } = useNavbarSession(initialUser, sessionResolved);
 
   return (
     <header className={cn('sticky top-0 z-40 border-b border-border-nav bg-overlay-nav effect-nav-glass', className)}>

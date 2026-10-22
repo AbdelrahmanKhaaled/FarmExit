@@ -6,7 +6,7 @@ import { unauthorized } from '../auth/auth.errors';
 import { forbidden } from './authorization.errors';
 import { PERMISSIONS_KEY, ROLES_KEY } from './staff.metadata';
 import { StaffAuthorizationService } from './staff-authorization.service';
-import type { StaffPermission } from './staff-permissions';
+import { staffSatisfiesDeclaredRole, type StaffPermission } from './staff-permissions';
 import type { StaffContext } from './staff.types';
 
 export type StaffRequest = AuthenticatedRequest & { staff?: StaffContext };
@@ -35,7 +35,7 @@ export class StaffGuard implements CanActivate {
     // but never loosen it. A declared-but-empty list is a mistake and denies (deny by default).
     for (const target of [context.getClass(), context.getHandler()]) {
       const roles = this.reflector.get<StaffRole[] | undefined>(ROLES_KEY, target);
-      if (roles && !roles.some((role) => staff.roles.includes(role))) throw forbidden();
+      if (roles && !roles.some((role) => staffSatisfiesDeclaredRole(staff.roles, role))) throw forbidden();
 
       const permissions = this.reflector.get<StaffPermission[] | undefined>(PERMISSIONS_KEY, target);
       if (permissions && (permissions.length === 0 || !permissions.every((p) => staff.permissions.includes(p)))) {

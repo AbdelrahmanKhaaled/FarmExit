@@ -1,10 +1,12 @@
+import { PublicOpportunityListDto } from '../marketplace/dto/public-opportunity.dto';
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
 import { RequireCompletedProfile } from '../auth/auth-guards.decorators';
 import { CurrentAuth } from '../auth/auth.decorators';
 import type { AuthContext } from '../auth/auth.types';
-import { ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
+import { PublicOpportunityQueryDto } from '../marketplace/dto/public-opportunity-query.dto';
+import { PublicOpportunityDto } from '../marketplace/dto/public-opportunity.dto';
 import {
   CreateFarmManagementRequestDto,
   FarmManagementRequestListResponseDto,
@@ -41,13 +43,19 @@ export class FarmManagementRequestsController {
   @Get()
   @ApiOperation({ summary: 'List own farm management requests' })
   @ApiOkResponse({ type: FarmManagementRequestListResponseDto })
-  list(@CurrentAuth() auth: AuthContext, @Query() query: ListFarmsQueryDto): Promise<FarmManagementRequestListResponseDto> {
+  list(
+    @CurrentAuth() auth: AuthContext,
+    @Query() query: ListFarmsQueryDto,
+  ): Promise<FarmManagementRequestListResponseDto> {
     return this.management.listMine(auth.userId, query);
   }
 
   @Get(':id')
   @ApiOkResponse({ type: FarmManagementRequestResponseDto })
-  get(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint): Promise<FarmManagementRequestResponseDto> {
+  get(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id', ParseBigIntIdPipe) id: bigint,
+  ): Promise<FarmManagementRequestResponseDto> {
     return this.management.get(auth.userId, id);
   }
 
@@ -63,7 +71,27 @@ export class FarmManagementRequestsController {
 
   @Post(':id/submit')
   @ApiOkResponse({ type: FarmManagementRequestResponseDto })
-  submit(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint): Promise<FarmManagementRequestResponseDto> {
+  submit(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id', ParseBigIntIdPipe) id: bigint,
+  ): Promise<FarmManagementRequestResponseDto> {
     return this.management.submit(auth.userId, id);
+  }
+}
+
+@Controller('public/management')
+export class PublicManagementMarketplaceController {
+  constructor(private readonly opportunities: FarmManagementRequestsService) {}
+
+  @Get()
+  @ApiOkResponse({ type: PublicOpportunityListDto })
+  list(@Query() query: PublicOpportunityQueryDto): Promise<PublicOpportunityListDto> {
+    return this.opportunities.listPublic(query);
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: PublicOpportunityDto })
+  get(@Param('id', ParseBigIntIdPipe) id: bigint): Promise<PublicOpportunityDto> {
+    return this.opportunities.getPublic(id);
   }
 }

@@ -9,6 +9,7 @@ import { normalizeMobile } from '@/lib/auth/phone';
 import { sanitizeReturnTo } from '@/lib/auth/return-to';
 import { intentStore } from '@/lib/intent/store';
 import { MobileInput } from './MobileInput';
+import { isClientDemoHintMobile } from '@/lib/auth/client-demo-hint';
 import { OtpInput } from './OtpInput';
 
 type Step = 'mobile' | 'otp';
@@ -168,6 +169,9 @@ export function SignInForm({ returnTo, farmName }: Props) {
           </>
         ) : (
           <>
+            {isClientDemoHintMobile(e164) ? (
+              <p className="type-body-caption text-text-muted" data-testid="otp-demo-hint">{t('otp.demoHint')}</p>
+            ) : null}
             <OtpInput value={code} onChange={setCode} error={error ?? undefined} disabled={loading} />
             <Button
               type="submit"

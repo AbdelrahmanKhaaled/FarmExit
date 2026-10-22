@@ -3,12 +3,14 @@ import type { Locale } from './routing';
 /** Message namespaces. Each namespace is one JSON file per locale in /messages/<locale>/. */
 export const namespaces = [
   'common',
+  'contact',
   'nav',
   'home',
   'marketplace',
   'farm',
   'management',
   'managementPage',
+  'opportunityMarketplace',
   'partnership',
   'auth',
   'workspace',
@@ -31,12 +33,14 @@ export async function loadMessages(locale: Locale) {
 /** English is the reference shape; Arabic must provide the same keys (checked by `npm run lint`). */
 export type Messages = {
   common: typeof import('../../messages/en/common.json');
+  contact: typeof import('../../messages/en/contact.json');
   nav: typeof import('../../messages/en/nav.json');
   home: typeof import('../../messages/en/home.json');
   marketplace: typeof import('../../messages/en/marketplace.json');
   farm: typeof import('../../messages/en/farm.json');
   management: typeof import('../../messages/en/management.json');
   managementPage: typeof import('../../messages/en/managementPage.json');
+  opportunityMarketplace: typeof import('../../messages/en/opportunityMarketplace.json');
   partnership: typeof import('../../messages/en/partnership.json');
   auth: typeof import('../../messages/en/auth.json');
   workspace: typeof import('../../messages/en/workspace.json');

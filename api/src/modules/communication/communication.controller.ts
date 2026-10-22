@@ -1,12 +1,17 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AuthSessionAudience } from '../../generated/prisma/enums';
 import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
+import { WebsiteAudienceGuard } from '../admin-auth/website-audience.guard';
 import { RequireCompletedProfile } from '../auth/auth-guards.decorators';
 import { CurrentAuth } from '../auth/auth.decorators';
 import type { AuthContext } from '../auth/auth.types';
+import { RateLimit, RateLimitGuard } from '../auth/rate-limit';
 import { ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
 import { CommunicationCasesService } from './communication-cases.service';
 import { CommunicationMessagesService } from './communication-messages.service';
+import { CommunicationRealtimeTicketService } from './communication-realtime-ticket.service';
+import { RealtimeTicketResponseDto } from './dto/realtime-ticket.dto';
 import {
   CommunicationCaseListResponseDto,
   CommunicationCaseResponseDto,
@@ -23,6 +28,7 @@ export class CommunicationController {
   constructor(
     private readonly cases: CommunicationCasesService,
     private readonly messages: CommunicationMessagesService,
+    private readonly realtimeTickets: CommunicationRealtimeTicketService,
   ) {}
 
   @Post('cases')
@@ -57,6 +63,14 @@ export class CommunicationController {
     @Body() dto: SendMessageDto,
   ): Promise<MessageResponseDto> {
     return this.messages.sendUser(auth.userId, id, dto);
+  }
+
+  @Post('realtime-ticket')
+  @UseGuards(WebsiteAudienceGuard, RateLimitGuard)
+  @RateLimit({ limit: 30, windowSeconds: 60 })
+  @ApiCreatedResponse({ type: RealtimeTicketResponseDto })
+  mintRealtimeTicket(@CurrentAuth() auth: AuthContext): RealtimeTicketResponseDto {
+    return this.realtimeTickets.mint(auth.userId, auth.sessionId, AuthSessionAudience.website);
   }
 
   @Get('cases/:id/messages')

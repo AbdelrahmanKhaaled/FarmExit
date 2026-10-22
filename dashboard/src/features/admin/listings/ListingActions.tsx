@@ -37,7 +37,7 @@ export function ListingActions({ listingId, status, canPublish, reviewerOptions,
   const staffOptions = assignmentType === 'reviewer' ? reviewerOptions : caseAgentOptions;
 
   return (
-    <div className="space-y-6 rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] p-4">
+    <div className="admin-action-panel space-y-6">
       <h2 className="text-sm font-semibold">{t('actionsTitle')}</h2>
       {message ? <p className="text-sm text-[var(--admin-text-secondary)]">{message}</p> : null}
 

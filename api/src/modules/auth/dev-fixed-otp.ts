@@ -39,6 +39,18 @@ export function pickOtpCode(
   return randomCode();
 }
 
+/** @deprecated Prefer pickOtpCodeWithFixedConfigs from client-demo-otp for multiple configs. */
+export function pickOtpCodeFromConfigs(
+  mobileE164: string,
+  configs: readonly (DevFixedOtpConfig | null)[],
+  randomCode: () => string,
+): string {
+  for (const config of configs) {
+    if (isDevFixedOtpMobile(mobileE164, config)) return config!.code;
+  }
+  return randomCode();
+}
+
 export function assertDevFixedOtpEnvironment(env: EnvironmentVariablesForFixedOtp): void {
   if (!env.DEV_FIXED_OTP_ENABLED) return;
   if (env.NODE_ENV === NodeEnv.Production) {

@@ -21,5 +21,10 @@ export default defineConfig(
       '@typescript-eslint/no-floating-promises': 'error',
     },
   },
+  {
+    files: ['scripts/*client-demo*.cjs'],
+    extends: [tseslint.configs.disableTypeChecked],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
   prettier,
 );

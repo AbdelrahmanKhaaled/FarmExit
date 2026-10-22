@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-22T08:42:22.857Z",
+  "evidence": [
+    {
+      "scenario": "Dashboard BFF email/password login with Dashboard JWT cookie",
+      "status": "LIVE VERIFIED"
+    },
+    {
+      "scenario": "/en/admin/farm-management/762",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/ar/admin/farm-management/762",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/admin/partnerships/765",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/admin/partnerships/applications/768",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/admin/communications/25",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/admin/communications/26",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    }
+  ]
+}

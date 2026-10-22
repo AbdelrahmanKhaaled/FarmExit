@@ -28,3 +28,63 @@
     font-size: 26px;
   }
 }
+
+.fx-workspace:has(.fx-messages-host) {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.fx-messages-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100dvh - 152px);
+}
+
+@media (width >= 768px) {
+  .fx-messages-host {
+    max-height: calc(100dvh - 200px);
+  }
+}
+
+@keyframes fx-wa-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes fx-wa-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+.fx-whatsapp-fab {
+  animation: fx-wa-breathe 3.6s ease-in-out infinite;
+}
+
+.fx-whatsapp-fab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid rgb(37 211 102 / 0.55);
+  animation: fx-wa-ring 2.8s ease-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-whatsapp-fab,
+  .fx-whatsapp-fab::before {
+    animation: none;
+  }
+}

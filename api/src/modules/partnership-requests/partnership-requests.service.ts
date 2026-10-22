@@ -1,10 +1,20 @@
+import type { PublicOpportunityListDto } from '../marketplace/dto/public-opportunity.dto';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Farm, type PartnershipDetail, type Request } from '../../generated/prisma/client';
 import { FarmRelationshipRole, RequestType, RequestVisibility } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { forbidden } from '../authorization/authorization.errors';
 import { FarmAccessService } from '../authorization/farm-access.service';
+import type { PublicOpportunityQueryDto } from '../marketplace/dto/public-opportunity-query.dto';
+import { toPublicOpportunityDto } from '../marketplace/public-opportunity-map';
+import {
+  assertPublicOpportunityRanges,
+  buildPublicOpportunityWhere,
+  publicOpportunityListSelect,
+  publicOpportunityOrderBy,
+} from '../marketplace/public-opportunity-query';
 import { DEFAULT_PAGE_SIZE, type ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
+import { RequestType } from '../../generated/prisma/enums';
 import { newRequestNumber } from '../requests/request-number';
 import {
   ACTIVE_PARTNERSHIP_REQUEST_STATUSES,
@@ -29,7 +39,39 @@ export class PartnershipRequestsService {
     private readonly farmAccess: FarmAccessService,
   ) {}
 
-  async create(userId: bigint, farmId: bigint, dto: CreatePartnershipRequestDto): Promise<PartnershipRequestResponseDto> {
+  /** Read-only projection. Approval never grants public visibility or a publication timestamp. */
+  async listPublic(query: PublicOpportunityQueryDto): Promise<PublicOpportunityListDto> {
+    assertPublicOpportunityRanges(query);
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? DEFAULT_PAGE_SIZE;
+    const where = buildPublicOpportunityWhere(RequestType.partnership, query);
+    const [total, rows] = await Promise.all([
+      this.prisma.request.count({ where }),
+      this.prisma.request.findMany({
+        where,
+        orderBy: publicOpportunityOrderBy(query.sort),
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: publicOpportunityListSelect,
+      }),
+    ]);
+    return { items: rows.map(toPublicOpportunityDto), page, pageSize, total };
+  }
+
+  async getPublic(id: bigint) {
+    const row = await this.prisma.request.findFirst({
+      where: { AND: [buildPublicOpportunityWhere(RequestType.partnership, {}), { id }] },
+      select: publicOpportunityListSelect,
+    });
+    if (!row) throw notFound();
+    return toPublicOpportunityDto(row);
+  }
+
+  async create(
+    userId: bigint,
+    farmId: bigint,
+    dto: CreatePartnershipRequestDto,
+  ): Promise<PartnershipRequestResponseDto> {
     const farm = await this.ownedFarm(userId, farmId);
     await this.assertNoConflictingActive(userId, farmId);
     const created = await this.insert(userId, farm, dto);
@@ -51,7 +93,9 @@ export class PartnershipRequestsService {
       this.prisma.request.count({ where }),
       this.prisma.request.findMany({ where, orderBy: { id: 'desc' }, skip: (page - 1) * pageSize, take: pageSize }),
     ]);
-    const details = await this.prisma.partnershipDetail.findMany({ where: { requestId: { in: rows.map((r) => r.id) } } });
+    const details = await this.prisma.partnershipDetail.findMany({
+      where: { requestId: { in: rows.map((r) => r.id) } },
+    });
     const farms = await this.prisma.farm.findMany({
       where: { id: { in: rows.map((r) => r.farmId!).filter(Boolean) }, deletedAt: null },
     });
@@ -84,7 +128,11 @@ export class PartnershipRequestsService {
     return toResponse(request, detail, farm, reviews.get(requestId) ?? []);
   }
 
-  async update(userId: bigint, requestId: bigint, dto: UpdatePartnershipRequestDto): Promise<PartnershipRequestResponseDto> {
+  async update(
+    userId: bigint,
+    requestId: bigint,
+    dto: UpdatePartnershipRequestDto,
+  ): Promise<PartnershipRequestResponseDto> {
     const { request, farm } = await this.owned(userId, requestId);
     if (!OWNER_EDITABLE_STATUSES.has(request.status)) {
       throw new ConflictException('Only a draft or a request with requested changes can be updated');
@@ -174,7 +222,10 @@ export class PartnershipRequestsService {
       .filter(([, roles]) => roles.includes(FarmRelationshipRole.owner))
       .map(([id]) => id);
     if (owned.length === 0) return [];
-    const farms = await this.prisma.farm.findMany({ where: { id: { in: owned }, deletedAt: null }, select: { id: true } });
+    const farms = await this.prisma.farm.findMany({
+      where: { id: { in: owned }, deletedAt: null },
+      select: { id: true },
+    });
     return farms.map((f) => f.id);
   }
 
@@ -272,6 +323,9 @@ function toResponse(
     farmId: farm.id.toString(),
     farmName: farm.name,
     status: request.status,
+    visibility: request.visibility,
+    publishedAt: request.publishedAt?.toISOString() ?? null,
+    submittedAt: request.submittedAt?.toISOString() ?? null,
     description: detail.description,
     objective: jsonStrings(detail.objective),
     acceptedPartnerTypes: jsonStrings(detail.acceptedPartnerTypes),

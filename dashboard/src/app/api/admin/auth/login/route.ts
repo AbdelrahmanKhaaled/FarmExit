@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fetchFarmExitApi } from '@/lib/api/forward-api';
 import { clearAdminSessionCookies, setAdminTokenCookies } from '@/lib/admin/session-cookies.server';
-import { staffHasDashboardConsoleAccess } from '@/lib/admin/session.server';
+import { staffHasSharedConsoleAccess } from '@/lib/admin/session.server';
 
 export async function POST(request: Request) {
   const body = (await request.json()) as { email?: string; password?: string };
@@ -26,9 +26,9 @@ export async function POST(request: Request) {
     refreshTokenExpiresAt: string;
     staff: { roles: string[]; fullName: string | null; userId: string };
   };
-  if (!staffHasDashboardConsoleAccess(pair.staff?.roles ?? [])) {
+  if (!staffHasSharedConsoleAccess(pair.staff?.roles ?? [])) {
     await clearAdminSessionCookies();
-    return NextResponse.json({ code: 'NOT_ADMIN' }, { status: 403 });
+    return NextResponse.json({ code: 'NOT_STAFF' }, { status: 403 });
   }
   await setAdminTokenCookies(pair);
   return NextResponse.json({

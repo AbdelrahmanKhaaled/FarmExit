@@ -2,19 +2,33 @@ import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageContainer } from '@/design-system';
-import { DataTable, Td, Th } from '@/design-system/workspace/DataTable';
-import { RefreshButton } from '@/features/admin/RefreshButton';
+import { DetailWorkspace } from '@/design-system/workspace/DetailWorkspace';
 import { decideFarmManagementAction } from '@/features/admin/actions/workflows';
+import { OpportunityPublishPanel } from '@/features/admin/workflows/OpportunityPublishPanel';
 import { SpecializedWorkflowPanel } from '@/features/admin/workflows/SpecializedWorkflowPanel';
-import { StatusBadge } from '@/features/admin/workspace/StatusBadge';
+import { AdminDetailHeader } from '@/features/admin/workspace/AdminDetailHeader';
+import { AdminDetailSection } from '@/features/admin/workspace/AdminDetailSection';
+import { UnifiedRequestLink } from '@/features/admin/workspace/UnifiedRequestLink';
+import { WorkflowReviewsTable } from '@/features/admin/workspace/WorkflowReviewsTable';
 import { Link } from '@/i18n/navigation';
 import { loadStaffOptionSets } from '@/lib/admin/assignable-staff.server';
-import { apiFetchAdminResult, getAdminSession } from '@/lib/admin/session.server';
+import { apiFetchAdminResult } from '@/lib/admin/session.server';
+import { requireConsolePage } from '@/lib/admin/console-page';
 import { routing } from '@/i18n/routing';
 
 type Item = {
-  id: string; requestNumber: string; farmId: string; farmName: string; professionalNeed: string; status: string;
-  managementTypes: string[] | null; currentSituation: string | null; goals: string[] | null;
+  id: string;
+  requestNumber: string;
+  farmId: string;
+  farmName: string;
+  professionalNeed: string;
+  status: string;
+  visibility: string;
+  publishedAt: string | null;
+  submittedAt: string | null;
+  managementTypes: string[] | null;
+  currentSituation: string | null;
+  goals: string[] | null;
   reviews: { decision: string; comment: string | null }[];
 };
 
@@ -22,9 +36,9 @@ export default async function FarmManagementDetailPage({ params }: PageProps<'/[
   const { locale, id } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const session = await getAdminSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireConsolePage(locale, 'farmManagementDetail');
   const t = await getTranslations('admin.farmManagementDetail');
+  const tc = await getTranslations('admin.workflowCommon');
   const res = await apiFetchAdminResult<Item>(`/staff/farm-management-requests/${id}`, session.accessToken);
   if (!res.ok) notFound();
   const item = res.data;
@@ -32,20 +46,92 @@ export default async function FarmManagementDetailPage({ params }: PageProps<'/[
 
   return (
     <PageContainer>
-      <Link href="/admin/farm-management" className="text-xs text-[var(--admin-brand-primary)] hover:underline">{t('back')}</Link>
-      <div className="mb-6 mt-1 flex justify-between"><h1 className="text-2xl font-semibold">{item.requestNumber}</h1><RefreshButton label={t('refresh')} /></div>
-      <p className="mb-4 text-xs text-[var(--admin-text-muted)]">{t('noAutoManager')}</p>
-      <div className="grid gap-6 lg:grid-cols-[1fr_minmax(18rem,22rem)]">
-        <div className="space-y-3 text-sm">
-          <StatusBadge status={item.status} />
-          <p><Link href={`/admin/farms/${item.farmId}`} className="text-[var(--admin-brand-primary)] hover:underline">{item.farmName}</Link></p>
-          <p>{t('need')}: {item.professionalNeed}</p>
-          {item.currentSituation ? <p className="whitespace-pre-wrap">{item.currentSituation}</p> : null}
-          <Link href={`/admin/requests/${item.id}`} className="text-xs text-[var(--admin-brand-primary)] hover:underline">{t('unifiedRequest')}</Link>
-          <DataTable><thead><tr><Th>{t('col.decision')}</Th><Th>{t('col.comment')}</Th></tr></thead><tbody>{item.reviews.map((r, i) => (<tr key={i}><Td>{r.decision}</Td><Td>{r.comment ?? '—'}</Td></tr>))}</tbody></DataTable>
-        </div>
-        <SpecializedWorkflowPanel requestId={item.id} status={item.status} reviewerOptions={staff.reviewerOptions} caseAgentOptions={staff.caseAgentOptions} onDecide={decideFarmManagementAction} />
-      </div>
+      <AdminDetailHeader
+        backHref="/admin/farm-management"
+        backLabel={t('back')}
+        title={item.requestNumber}
+        status={item.status}
+        refreshLabel={t('refresh')}
+      />
+      <DetailWorkspace
+        main={
+          <div className="space-y-6">
+            <AdminDetailSection title={tc('summary')}>
+              <p className="mb-4 text-xs leading-relaxed text-[var(--admin-text-muted)]">{t('noAutoManager')}</p>
+              <dl className="admin-detail-dl sm:grid-cols-2">
+                <div>
+                  <dt>{t('need')}</dt>
+                  <dd>{item.professionalNeed}</dd>
+                </div>
+                <div>
+                  <dt>{t('farm')}</dt>
+                  <dd>
+                    <Link href={`/admin/farms/${item.farmId}`} className="font-medium text-[var(--admin-brand-primary)] hover:underline">
+                      {item.farmName}
+                    </Link>
+                  </dd>
+                </div>
+              </dl>
+              {item.managementTypes && item.managementTypes.length > 0 ? (
+                <div className="mt-4">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">{t('managementTypes')}</p>
+                  <ul className="mt-1 list-inside list-disc text-sm">
+                    {item.managementTypes.map((type) => (
+                      <li key={type}>{type}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {item.goals && item.goals.length > 0 ? (
+                <div className="mt-4">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">{t('goals')}</p>
+                  <ul className="mt-1 list-inside list-disc text-sm">
+                    {item.goals.map((goal) => (
+                      <li key={goal}>{goal}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {item.currentSituation ? (
+                <div className="mt-4">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">{t('situation')}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{item.currentSituation}</p>
+                </div>
+              ) : null}
+              <p className="mt-4">
+                <UnifiedRequestLink requestId={item.id} label={t('unifiedRequest')} />
+              </p>
+            </AdminDetailSection>
+            <AdminDetailSection title={tc('reviewHistory')}>
+              <WorkflowReviewsTable
+                reviews={item.reviews}
+                decisionLabel={t('col.decision')}
+                commentLabel={t('col.comment')}
+                emptyLabel={tc('noReviews')}
+              />
+            </AdminDetailSection>
+          </div>
+        }
+        aside={
+          <div className="space-y-6">
+            <SpecializedWorkflowPanel
+              requestId={item.id}
+              status={item.status}
+              reviewerOptions={staff.reviewerOptions}
+              caseAgentOptions={staff.caseAgentOptions}
+              onDecide={decideFarmManagementAction}
+            />
+            <OpportunityPublishPanel
+              requestId={item.id}
+              status={item.status}
+              visibility={item.visibility}
+              publishedAt={item.publishedAt}
+              submittedAt={item.submittedAt}
+              kind="management"
+            />
+          </div>
+        }
+      />
     </PageContainer>
   );
 }

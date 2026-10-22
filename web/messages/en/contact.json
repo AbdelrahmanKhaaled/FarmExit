@@ -1,0 +1,9 @@
+{
+  "whatsapp": {
+    "ariaLabel": "Contact FarmExit on WhatsApp",
+    "prefill": "Hello FarmExit, I would like help with my account or a farm request.",
+    "tooltip": "Chat with FarmExit on WhatsApp",
+    "placeholderTooltip": "WhatsApp support — number coming soon",
+    "placeholderAria": "WhatsApp support (coming soon)"
+  }
+}

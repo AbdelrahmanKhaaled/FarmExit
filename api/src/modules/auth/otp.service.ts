@@ -5,7 +5,8 @@ import type { Env } from '../../config/env.validation';
 import { AccountStatus } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { invalidCode, tooManyRequests } from './auth.errors';
-import { buildDevFixedOtpConfig, pickOtpCode, type DevFixedOtpConfig } from './dev-fixed-otp';
+import { buildClientDemoOtpConfig } from './client-demo-otp';
+import { buildDevFixedOtpConfig, pickOtpCodeFromConfigs, type DevFixedOtpConfig } from './dev-fixed-otp';
 import { SMS_PROVIDER, type SmsProvider } from './sms/sms-provider';
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -25,7 +26,7 @@ export class OtpService {
   private readonly cooldownMs: number;
   private readonly maxAttempts: number;
   private readonly maxPerHour: number;
-  private readonly devFixedOtp: DevFixedOtpConfig | null;
+  private readonly fixedOtpConfigs: readonly (DevFixedOtpConfig | null)[];
 
   constructor(
     private readonly prisma: PrismaService,
@@ -37,12 +38,20 @@ export class OtpService {
     this.cooldownMs = config.get('OTP_RESEND_COOLDOWN_SECONDS', { infer: true }) * 1000;
     this.maxAttempts = config.get('OTP_MAX_ATTEMPTS', { infer: true });
     this.maxPerHour = config.get('OTP_MAX_REQUESTS_PER_HOUR', { infer: true });
-    this.devFixedOtp = buildDevFixedOtpConfig({
+    const clientDemo = buildClientDemoOtpConfig({
+      NODE_ENV: config.get('NODE_ENV', { infer: true }),
+      DATABASE_URL: config.get('DATABASE_URL', { infer: true }),
+      CLIENT_DEMO_OTP_ENABLED: config.get('CLIENT_DEMO_OTP_ENABLED', { infer: true }),
+      CLIENT_DEMO_OTP_CODE: config.get('CLIENT_DEMO_OTP_CODE', { infer: true }),
+      CLIENT_DEMO_OTP_ALLOWED_MOBILES: config.get('CLIENT_DEMO_OTP_ALLOWED_MOBILES', { infer: true }),
+    });
+    const devFixed = buildDevFixedOtpConfig({
       NODE_ENV: config.get('NODE_ENV', { infer: true }),
       DEV_FIXED_OTP_ENABLED: config.get('DEV_FIXED_OTP_ENABLED', { infer: true }),
       DEV_FIXED_OTP_CODE: config.get('DEV_FIXED_OTP_CODE', { infer: true }),
       DEV_FIXED_OTP_ALLOWED_MOBILES: config.get('DEV_FIXED_OTP_ALLOWED_MOBILES', { infer: true }),
     });
+    this.fixedOtpConfigs = [clientDemo, devFixed];
   }
 
   /**
@@ -58,7 +67,7 @@ export class OtpService {
       where: { mobileE164 },
       select: { id: true, accountStatus: true },
     });
-    const code = pickOtpCode(mobileE164, this.devFixedOtp, () =>
+    const code = pickOtpCodeFromConfigs(mobileE164, this.fixedOtpConfigs, () =>
       String(randomInt(0, 1_000_000)).padStart(6, '0'),
     );
     const codeHash = this.hash(mobileE164, code);

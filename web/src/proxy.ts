@@ -12,5 +12,5 @@ export default async function proxy(request: NextRequest) {
 
 export const config = {
   // All paths except API routes, Next.js internals and files with an extension.
-  matcher: '/((?!api|trpc|_next|_vercel|.*\..*).*)',
+  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)',
 };

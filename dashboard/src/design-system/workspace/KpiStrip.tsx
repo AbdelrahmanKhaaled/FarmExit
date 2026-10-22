@@ -12,7 +12,7 @@ export function KpiStrip({
       {items.map((item, i) => (
         <article
           key={item.label}
-          className="relative overflow-hidden rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] p-4 shadow-[var(--admin-shadow-xs)]"
+          className="relative overflow-hidden rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] p-5 shadow-[var(--admin-shadow-soft)]"
         >
           <div
             className="absolute inset-x-0 top-0 h-0.5"
@@ -20,7 +20,7 @@ export function KpiStrip({
             aria-hidden
           />
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">{item.label}</p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-[var(--admin-text-primary)]">{item.value}</p>
+          <p className="mt-2 text-[var(--admin-text-3xl)] font-semibold tabular-nums tracking-tight text-[var(--admin-text-primary)]">{item.value}</p>
           {item.hint && <p className="mt-1 text-xs text-[var(--admin-text-muted)]">{item.hint}</p>}
         </article>
       ))}

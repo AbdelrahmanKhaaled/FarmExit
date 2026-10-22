@@ -1,10 +1,23 @@
 import { StaffRole } from '../../generated/prisma/enums';
-import { permissionsForRoles, STAFF_ROLE_PERMISSIONS, StaffPermission } from './staff-permissions';
+import {
+  permissionsForRoles,
+  staffHasDashboardAccess,
+  staffSatisfiesDeclaredRole,
+  STAFF_ROLE_PERMISSIONS,
+  StaffPermission,
+} from './staff-permissions';
 
 describe('staff permission matrix', () => {
   it('covers exactly the approved staff roles (superAdmin, admin, caseAgent, reviewer)', () => {
     expect(Object.keys(STAFF_ROLE_PERMISSIONS).sort()).toEqual(Object.values(StaffRole).sort());
     expect(Object.values(StaffRole).sort()).toEqual(['admin', 'caseAgent', 'reviewer', 'superAdmin']);
+  });
+
+  it('treats superAdmin as satisfying admin-only @StaffRoles', () => {
+    expect(staffSatisfiesDeclaredRole(['superAdmin'], StaffRole.admin)).toBe(true);
+    expect(staffSatisfiesDeclaredRole(['admin'], StaffRole.admin)).toBe(true);
+    expect(staffSatisfiesDeclaredRole(['superAdmin'], StaffRole.reviewer)).toBe(false);
+    expect(staffSatisfiesDeclaredRole(['reviewer'], StaffRole.admin)).toBe(false);
   });
 
   it('gives admin and superAdmin every permission', () => {
@@ -30,6 +43,17 @@ describe('staff permission matrix', () => {
     ]);
     expect(permissionsForRoles(['owner', 'buyer', 'superuser', ''])).toEqual([]);
     expect(permissionsForRoles([])).toEqual([]);
+  });
+
+  it('allows dashboard sign-in for approved staff roles only', () => {
+    expect(staffHasDashboardAccess(['admin'])).toBe(true);
+    expect(staffHasDashboardAccess(['superAdmin'])).toBe(true);
+    expect(staffHasDashboardAccess(['caseAgent'])).toBe(true);
+    expect(staffHasDashboardAccess(['reviewer'])).toBe(true);
+    expect(staffHasDashboardAccess(['caseAgent', 'reviewer'])).toBe(true);
+    expect(staffHasDashboardAccess(['owner', 'buyer'])).toBe(false);
+    expect(staffHasDashboardAccess([])).toBe(false);
+    expect(staffHasDashboardAccess(['admin', 'owner'])).toBe(true);
   });
 
   it('has no customer-style roles or permissions', () => {

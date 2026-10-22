@@ -1,0 +1,124 @@
+{
+  "feddans": "feddans",
+  "illustrativeImage": "Illustrative image",
+  "verifiedPublished": "Reviewed & published by FarmExit",
+  "badges": {
+    "management": "Management request",
+    "partnership": "Partnership request"
+  },
+  "mediation": {
+    "title": "FarmExit reviews every opportunity",
+    "body": "Published opportunities passed FarmExit review. FarmExit mediates contact — your phone number is never shared with other parties."
+  },
+  "ownerCta": {
+    "reviewNote": "Submitting a request does not automatically publish it on the marketplace.",
+    "management": {
+      "title": "Need someone to manage your farm?",
+      "body": "Submit a management request. FarmExit reviews it before anything is published.",
+      "action": "Submit management request"
+    },
+    "partnerships": {
+      "title": "Looking for a partner for your farm?",
+      "body": "Post a partnership opportunity. FarmExit reviews and publishes a safe public summary when approved.",
+      "action": "Submit partnership request"
+    }
+  },
+  "filters": {
+    "label": "Filters",
+    "openMobile": "Filters",
+    "close": "Close",
+    "location": "Location",
+    "governorate": "Governorate",
+    "area": "Area",
+    "farmActivity": "Farm activity",
+    "farmSize": "Farm size",
+    "minFeddans": "Min feddans",
+    "maxFeddans": "Max feddans",
+    "managementType": "Management type",
+    "managementTypeHint": "Filter by management type label",
+    "experience": "Experience",
+    "professionalNeed": "Professional need",
+    "objective": "Partnership objective",
+    "partnerType": "Partner type",
+    "any": "Any",
+    "clearAll": "Clear all filters"
+  },
+  "farmTypes": {
+    "vegetable": "Vegetables",
+    "fruit": "Fruits",
+    "livestock": "Livestock",
+    "mixed": "Mixed farming"
+  },
+  "experience": {
+    "entryLevel": "Entry level",
+    "experienced": "Experienced",
+    "expert": "Expert"
+  },
+  "professionalNeed": {
+    "farmManager": "Farm manager",
+    "agriculturalEngineer": "Agricultural engineer",
+    "both": "Manager & engineer"
+  },
+  "governorates": {
+    "beheira": "Beheira",
+    "ismailia": "Ismailia",
+    "menoufia": "Menoufia",
+    "qalyubia": "Qalyubia",
+    "giza": "Giza",
+    "sharqia": "Sharqia",
+    "beniSuef": "Beni Suef",
+    "minya": "Minya",
+    "fayoum": "Fayoum"
+  },
+  "sort": {
+    "label": "Sort",
+    "newest": "Newest",
+    "areaAsc": "Area (smallest first)",
+    "areaDesc": "Area (largest first)"
+  },
+  "results": { "count": "{count} opportunities" },
+  "pagination": {
+    "label": "Pagination",
+    "count": "{count} results",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "actions": {
+    "viewManagement": "View opportunity",
+    "viewPartnership": "View partnership"
+  },
+  "drawer": {
+    "close": "Close",
+    "managementTypes": "Management focus",
+    "experience": "Required experience",
+    "goals": "Management goals",
+    "responsibilities": "Responsibilities",
+    "facilities": "Available facilities",
+    "farmContext": "Farm context"
+  },
+  "managementApply": {
+    "gap": "Applying to management opportunities as a professional is not available on FarmExit yet. FarmExit will announce this workflow when the application API is live."
+  },
+  "hero": {
+    "location": "Location",
+    "minFeddans": "Min feddans",
+    "objective": "Partnership objective",
+    "find": "Find partnerships"
+  },
+  "detail": {
+    "back": "Back to partnerships",
+    "apply": "Request partnership",
+    "applySignIn": "Sign in to apply",
+    "nonBinding": "Partnership interest is non-binding. FarmExit reviews applications and mediates next steps.",
+    "sections": {
+      "about": "About this opportunity",
+      "terms": "Partnership terms",
+      "expertise": "Expertise, equipment & market access",
+      "requirements": "Partner requirements",
+      "situation": "Current farm situation",
+      "overview": "Farm overview",
+      "process": "What happens after submission",
+      "recipient": "Who receives your request"
+    }
+  }
+}

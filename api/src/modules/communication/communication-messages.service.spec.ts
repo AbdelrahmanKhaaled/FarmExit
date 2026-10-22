@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CommunicationAccessService } from './communication-access.service';
 import { CommunicationMessagesService } from './communication-messages.service';
+import { CommunicationRealtimePublisher } from './communication-realtime.publisher';
 
 describe('CommunicationMessagesService', () => {
   let service: CommunicationMessagesService;
@@ -32,6 +33,7 @@ describe('CommunicationMessagesService', () => {
         CommunicationMessagesService,
         { provide: PrismaService, useValue: prisma },
         { provide: CommunicationAccessService, useValue: access },
+        { provide: CommunicationRealtimePublisher, useValue: { messageCreated: jest.fn() } },
       ],
     }).compile();
     service = moduleRef.get(CommunicationMessagesService);
@@ -48,6 +50,39 @@ describe('CommunicationMessagesService', () => {
     await expect(
       service.relayStaff(2n, 1n, { sourceMessageId: '3', targetExternalUserId: '4', body: 'Hi' }),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('publishes realtime event after successful user send', async () => {
+    const realtime = { messageCreated: jest.fn() };
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        CommunicationMessagesService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: CommunicationAccessService, useValue: access },
+        { provide: CommunicationRealtimePublisher, useValue: realtime },
+      ],
+    }).compile();
+    const svc = moduleRef.get(CommunicationMessagesService);
+    prisma.communicationCase.findUnique.mockResolvedValue({ id: 1n, status: 'open' });
+    access.assertCaseParticipant.mockResolvedValue(undefined);
+    prisma.conversation.findFirst.mockResolvedValue({ id: 11n });
+    prisma.$transaction.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) =>
+      fn({
+        message: {
+          create: jest.fn().mockResolvedValue({
+            id: 5n,
+            senderId: 3n,
+            body: 'Hi',
+            sentAt: new Date('2026-01-01'),
+          }),
+        },
+        auditLog: { create: jest.fn() },
+      }),
+    );
+    await svc.sendUser(3n, 1n, { body: 'Hi' });
+    expect(realtime.messageCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ caseId: '1', conversationId: '11' }),
+    );
   });
 
   it('blocks staff send to unauthorized external user', async () => {

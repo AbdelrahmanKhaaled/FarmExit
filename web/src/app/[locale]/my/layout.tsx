@@ -5,7 +5,7 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { MyFarmExitLayout } from '@/features/my-farmexit/MyFarmExitLayout';
-import { requireWebsiteSession } from '@/lib/auth/require-session';
+import { getWebsiteSession } from '@/lib/auth/session.server';
 
 export const instant = false;
 export const metadata = { robots: { index: false, follow: false } };
@@ -23,13 +23,15 @@ export default async function MyPortalLayout({
 
   return (
     <Suspense fallback={null}>
-      <AuthenticatedPortal locale={locale}>{children}</AuthenticatedPortal>
+      <AuthenticatedPortal>{children}</AuthenticatedPortal>
     </Suspense>
   );
 }
 
-async function AuthenticatedPortal({ locale, children }: { locale: string; children: ReactNode }) {
+async function AuthenticatedPortal({ children }: { children: ReactNode }) {
   await connection();
-  const session = await requireWebsiteSession(locale, `/${locale}/my`);
+  const session = await getWebsiteSession();
+  // Each portal page enforces its own session and preserves its specific return URL.
+  if (!session) return children;
   return <MyFarmExitLayout session={session}>{children}</MyFarmExitLayout>;
 }

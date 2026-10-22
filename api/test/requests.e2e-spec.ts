@@ -430,10 +430,18 @@ describe('Unified Requests, Review & Forwarding E2E', () => {
         .expect(400);
     });
 
-    it('allows recipient owner to record decision on forwarded request', async () => {
+    it('rejects reviewers recording staff-mediated owner decision with 403', async () => {
+      await as(reviewerUser)
+        .post(`/api/v1/staff/requests/${underReviewRequestId}/forwardings/${forwardingId}/decision`, {
+          decision: 'accepted',
+        })
+        .expect(403);
+    });
+
+    it('allows assigned case agent to record mediated owner decision via staff route', async () => {
       const res = json(
-        await as(ownerUser)
-          .post(`/api/v1/requests/${underReviewRequestId}/forwardings/${forwardingId}/decision`, {
+        await as(caseAgentUser)
+          .post(`/api/v1/staff/requests/${underReviewRequestId}/forwardings/${forwardingId}/decision`, {
             decision: 'accepted',
             reason: 'Listing approved for publication',
           })
@@ -444,6 +452,22 @@ describe('Unified Requests, Review & Forwarding E2E', () => {
       const decided = forwardings.find((f) => f.id === forwardingId.toString());
       expect(decided?.ownerDecision).toBe('accepted');
       expect(decided?.decisionReason).toBe('Listing approved for publication');
+    });
+
+    it('rejects repeat owner decision on finalized forwarding with 409', async () => {
+      await as(ownerUser)
+        .post(`/api/v1/requests/${underReviewRequestId}/forwardings/${forwardingId}/decision`, {
+          decision: 'declined',
+        })
+        .expect(409);
+    });
+
+    it('rejects repeat staff-mediated decision with 409', async () => {
+      await as(caseAgentUser)
+        .post(`/api/v1/staff/requests/${underReviewRequestId}/forwardings/${forwardingId}/decision`, {
+          decision: 'declined',
+        })
+        .expect(409);
     });
 
     it('rejects unrelated user recording owner decision with 403', async () => {

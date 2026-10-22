@@ -75,13 +75,8 @@ export function toSearchParams({ filters: f, sort, page }: MarketplaceState): Re
   if (f.purpose === 'rent') q.listing = 'rent';
   if (f.size[0] !== FARM_SIZE_RANGE.min) q.sizeMin = String(f.size[0]);
   if (f.size[1] !== FARM_SIZE_RANGE.max) q.sizeMax = String(f.size[1]);
-  if (f.farmTypes.length) q.type = f.farmTypes.join(',');
   if (f.governorate) q.gov = f.governorate;
   if (f.governorate && f.area) q.area = f.area;
-  if (f.waterSources.length) q.water = f.waterSources.join(',');
-  if (f.irrigationMethods.length) q.irrigation = f.irrigationMethods.join(',');
-  if (f.energySources.length) q.energy = f.energySources.join(',');
-  if (f.cropTypes.length) q.crop = f.cropTypes.join(',');
   if (f.price[0] !== PRICE_RANGE.min) q.priceMin = String(f.price[0]);
   if (f.price[1] !== PRICE_RANGE.max) q.priceMax = String(f.price[1]);
   if (sort !== 'newest') q.sort = sort;
@@ -91,16 +86,18 @@ export function toSearchParams({ filters: f, sort, page }: MarketplaceState): Re
 
 /** Filters a user has applied. Transaction (Buy/Rent) always counts, as in the Figma "Filters · 1" default. */
 export function appliedCount(f: MarketplaceFilters): number {
+  return supportedAppliedCount(f);
+}
+
+/** Count of filters that the public marketplace API can apply (excludes farm profile facets). */
+export function supportedAppliedCount(f: MarketplaceFilters): number {
   return (
     1 +
     Number(f.size[0] !== FARM_SIZE_RANGE.min || f.size[1] !== FARM_SIZE_RANGE.max) +
-    f.farmTypes.length +
     Number(f.governorate !== null) +
     Number(f.area !== null) +
-    f.waterSources.length +
-    f.irrigationMethods.length +
-    f.energySources.length +
-    f.cropTypes.length +
+    (f.saleMethods?.length ?? 0) +
+    (f.exchangeAssetTypes?.length ?? 0) +
     Number(f.price[0] !== PRICE_RANGE.min || f.price[1] !== PRICE_RANGE.max)
   );
 }

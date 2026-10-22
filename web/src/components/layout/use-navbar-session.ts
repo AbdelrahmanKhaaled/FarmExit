@@ -6,13 +6,18 @@ import { toNavbarUser } from '@/lib/auth/navbar-user';
 import type { AuthUser } from '@/lib/auth/types';
 
 /** Read HttpOnly session state through the BFF; never prerender a signed-in visitor as a guest. */
-export function useNavbarSession(initialUser?: NavbarUser) {
-  const [session, setSession] = useState<{ user?: NavbarUser; pending: boolean }>({ pending: true });
+export function useNavbarSession(initialUser?: NavbarUser, sessionResolved = false) {
+  const [session, setSession] = useState<{ user?: NavbarUser; pending: boolean }>(() => {
+    if (initialUser) return { user: initialUser, pending: false };
+    if (sessionResolved) return { pending: false };
+    return { pending: true };
+  });
+
   useEffect(() => {
-    if (initialUser) return;
     let active = true;
-    let running = false;
     const controller = new AbortController();
+    let running = false;
+
     async function readSession() {
       if (running || document.visibilityState === 'hidden') return;
       running = true;
@@ -30,16 +35,27 @@ export function useNavbarSession(initialUser?: NavbarUser) {
         running = false;
       }
     }
-    const onVisible = () => void readSession();
-    void readSession();
-    window.addEventListener('focus', onVisible);
-    document.addEventListener('visibilitychange', onVisible);
+
+    const onVisible = () => {
+      if (document.visibilityState !== 'hidden') void readSession();
+    };
+
+    if (!initialUser) {
+      if (!sessionResolved) void readSession();
+      window.addEventListener('focus', onVisible);
+      document.addEventListener('visibilitychange', onVisible);
+    } else {
+      window.addEventListener('focus', onVisible);
+      document.addEventListener('visibilitychange', onVisible);
+    }
+
     return () => {
       active = false;
       controller.abort();
       window.removeEventListener('focus', onVisible);
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [initialUser]);
-  return initialUser ? { user: initialUser, pending: false } : session;
+  }, [initialUser, sessionResolved]);
+
+  return session;
 }

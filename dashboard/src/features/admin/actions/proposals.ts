@@ -1,10 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { apiMutateAdmin, getAdminSession } from '@/lib/admin/session.server';
+import { apiMutateAdmin } from '@/lib/admin/session.server';
 import { routing } from '@/i18n/routing';
-
-export type ActionResult = { ok: true } | { ok: false; message: string };
+import { isStaffActionDenied, requireAdminActionSession } from '@/lib/admin/staff-action-session';
 
 function revalidateAdminPages(...segments: string[]) {
   for (const locale of routing.locales) {
@@ -14,9 +13,15 @@ function revalidateAdminPages(...segments: string[]) {
   }
 }
 
-export async function assignProposalCaseAgentAction(proposalId: string, assignedStaffId: string): Promise<ActionResult> {
-  const session = await getAdminSession();
-  if (!session?.isAdmin) return { ok: false, message: 'Unauthorized' };
+export type ActionResult = { ok: true } | { ok: false; message: string };
+
+export async function assignProposalCaseAgentAction(
+  proposalId: string,
+  assignedStaffId: string,
+): Promise<ActionResult> {
+  const auth = await requireAdminActionSession();
+  if (isStaffActionDenied(auth)) return auth;
+  const session = auth.session;
   const res = await apiMutateAdmin(`/staff/purchase-proposals/${proposalId}/assignments`, session.accessToken, {
     method: 'PUT',
     body: { assignedStaffId },

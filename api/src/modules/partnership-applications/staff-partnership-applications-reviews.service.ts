@@ -45,7 +45,10 @@ export class StaffPartnershipApplicationsReviewsService {
   }
 
   async get(userId: bigint, requestId: bigint): Promise<PartnershipApplicationResponseDto> {
-    await this.underReview(requestId);
+    const request = await this.prisma.request.findFirst({
+      where: { id: requestId, requestType: RequestType.partnershipApplication },
+    });
+    if (!request) throw notFound();
     await this.assertMayView(userId, requestId);
     return this.applications.getById(requestId);
   }
@@ -78,13 +81,6 @@ export class StaffPartnershipApplicationsReviewsService {
     });
     if (mine.length === 0) return null;
     return { ...where, id: { in: mine.map((r) => r.requestId) } };
-  }
-
-  private async underReview(requestId: bigint): Promise<void> {
-    const request = await this.prisma.request.findFirst({
-      where: { id: requestId, requestType: RequestType.partnershipApplication, status: REQUEST_STATUS_UNDER_REVIEW },
-    });
-    if (!request) throw notFound();
   }
 
   private async assertMayView(userId: bigint, requestId: bigint): Promise<void> {

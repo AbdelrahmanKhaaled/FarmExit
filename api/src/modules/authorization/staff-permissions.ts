@@ -31,9 +31,16 @@ export function staffHasAdminScope(roles: readonly string[]): boolean {
   return roles.includes(StaffRole.admin) || roles.includes(StaffRole.superAdmin);
 }
 
-/** Roles allowed to sign in to the admin dashboard (email + password). */
+/** Whether active staff roles satisfy a route-declared `@StaffRoles` requirement. */
+export function staffSatisfiesDeclaredRole(staffRoles: readonly string[], required: StaffRole): boolean {
+  if (staffRoles.includes(required)) return true;
+  if (required === StaffRole.admin && staffHasAdminScope(staffRoles)) return true;
+  return false;
+}
+
+/** Roles allowed to sign in to the shared FarmExit dashboard (email + password, dashboard audience). */
 export function staffHasDashboardAccess(roles: readonly string[]): boolean {
-  return staffHasAdminScope(roles);
+  return roles.some((role) => role in STAFF_ROLE_PERMISSIONS);
 }
 
 export function staffIsSuperAdmin(roles: readonly string[]): boolean {

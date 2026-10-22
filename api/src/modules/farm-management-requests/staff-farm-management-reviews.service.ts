@@ -1,10 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, type Request } from '../../generated/prisma/client';
-import {
-  RequestStaffAssignmentType,
-  RequestType,
-  StaffRole,
-} from '../../generated/prisma/enums';
+import { Prisma } from '../../generated/prisma/client';
+import { RequestStaffAssignmentType, RequestType, StaffRole } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { forbidden } from '../authorization/authorization.errors';
 import { StaffAuthorizationService } from '../authorization/staff-authorization.service';
@@ -12,7 +8,10 @@ import { staffHasAdminScope, StaffPermission } from '../authorization/staff-perm
 import { DEFAULT_PAGE_SIZE, type ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
 import { REQUEST_STATUS_UNDER_REVIEW } from '../requests/request-workflow.policy';
 import type { DecideListingReviewDto } from '../listing-requests/dto/staff-listing-review.dto';
-import type { FarmManagementRequestListResponseDto, FarmManagementRequestResponseDto } from './dto/farm-management-request.dto';
+import type {
+  FarmManagementRequestListResponseDto,
+  FarmManagementRequestResponseDto,
+} from './dto/farm-management-request.dto';
 import { FarmManagementRequestsService } from './farm-management-requests.service';
 
 const notFound = (): NotFoundException => new NotFoundException('Farm management request not found');
@@ -50,12 +49,19 @@ export class StaffFarmManagementReviewsService {
   }
 
   async get(userId: bigint, requestId: bigint): Promise<FarmManagementRequestResponseDto> {
-    await this.underReview(requestId);
+    const request = await this.prisma.request.findFirst({
+      where: { id: requestId, requestType: RequestType.farmManagement },
+    });
+    if (!request) throw notFound();
     await this.assertMayView(userId, requestId);
     return this.management.getById(requestId);
   }
 
-  async decide(userId: bigint, requestId: bigint, dto: DecideListingReviewDto): Promise<FarmManagementRequestResponseDto> {
+  async decide(
+    userId: bigint,
+    requestId: bigint,
+    dto: DecideListingReviewDto,
+  ): Promise<FarmManagementRequestResponseDto> {
     const decision = dto.decision;
     const comment = dto.comment ?? null;
     if (decision !== 'approved' && !comment) {
@@ -69,7 +75,6 @@ export class StaffFarmManagementReviewsService {
   private async inboxWhere(userId: bigint, staff: { roles: StaffRole[] }): Promise<Prisma.RequestWhereInput | null> {
     const where: Prisma.RequestWhereInput = {
       requestType: RequestType.farmManagement,
-      status: REQUEST_STATUS_UNDER_REVIEW,
     };
     if (staffHasAdminScope(staff.roles)) return where;
     if (!staff.roles.includes(StaffRole.reviewer)) return null;
@@ -79,14 +84,6 @@ export class StaffFarmManagementReviewsService {
     });
     if (mine.length === 0) return null;
     return { ...where, id: { in: mine.map((r) => r.requestId) } };
-  }
-
-  private async underReview(requestId: bigint): Promise<Request> {
-    const request = await this.prisma.request.findFirst({
-      where: { id: requestId, requestType: RequestType.farmManagement, status: REQUEST_STATUS_UNDER_REVIEW },
-    });
-    if (!request) throw notFound();
-    return request;
   }
 
   private async assertMayView(userId: bigint, requestId: bigint): Promise<void> {

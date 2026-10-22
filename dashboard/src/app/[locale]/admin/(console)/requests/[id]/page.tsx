@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageContainer } from '@/design-system';
+import { DetailWorkspace } from '@/design-system/workspace/DetailWorkspace';
 import { DataTable, Td, Th } from '@/design-system/workspace/DataTable';
 import { RefreshButton } from '@/features/admin/RefreshButton';
 import { RequestActions } from '@/features/admin/requests/RequestActions';
@@ -9,7 +10,8 @@ import { RequestDocumentsPanel } from '@/features/admin/requests/RequestDocument
 import { RequestForwardingPanel, type RequestForwardingRow } from '@/features/admin/requests/RequestForwardingPanel';
 import { StatusBadge } from '@/features/admin/workspace/StatusBadge';
 import { Link } from '@/i18n/navigation';
-import { apiFetchAdminResult, getAdminSession } from '@/lib/admin/session.server';
+import { apiFetchAdminResult } from '@/lib/admin/session.server';
+import { requireConsolePage } from '@/lib/admin/console-page';
 import { loadStaffOptionSets } from '@/lib/admin/assignable-staff.server';
 import { specializedAdminPath } from '@/lib/admin/specialized-request-path';
 import { SPECIALIZED_REQUEST_TYPES, type StaffRequestDetail } from '@/lib/api/types/staff';
@@ -19,8 +21,7 @@ export default async function RequestDetailPage({ params }: PageProps<'/[locale]
   const { locale, id } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const session = await getAdminSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireConsolePage(locale, 'requestDetail');
   const t = await getTranslations('admin.requestDetail');
   const loc = await getLocale();
 
@@ -34,6 +35,7 @@ export default async function RequestDetailPage({ params }: PageProps<'/[locale]
   const specialized = SPECIALIZED_REQUEST_TYPES.has(request.requestType);
   const canReview = session.staff.permissions.includes('requests.review');
   const canForward = session.staff.permissions.includes('requests.forward');
+  const canRecordDecision = canForward;
   const forwardings = (request.forwardings as RequestForwardingRow[]) ?? [];
   const staff = await loadStaffOptionSets(session.accessToken);
   const modulePath = specializedAdminPath(request.requestType, request.id);
@@ -62,7 +64,8 @@ export default async function RequestDetailPage({ params }: PageProps<'/[locale]
         </Link>
       </p>
 
-      <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_minmax(18rem,22rem)]">
+      <DetailWorkspace
+        main={
         <div className="space-y-6 text-sm">
           <div className="flex flex-wrap gap-4">
             <div><span className="text-[var(--admin-text-muted)]">{t('status')}: </span><StatusBadge status={request.status} /></div>
@@ -127,19 +130,27 @@ export default async function RequestDetailPage({ params }: PageProps<'/[locale]
           </DataTable>
 
           <RequestDocumentsPanel requestId={request.id} documents={request.documents} />
-          <RequestForwardingPanel requestId={request.id} forwardings={forwardings} canForward={canForward} />
+          <RequestForwardingPanel
+            requestId={request.id}
+            forwardings={forwardings}
+            canForward={canForward}
+            canRecordDecision={canRecordDecision}
+          />
         </div>
-
+        }
+        aside={
         <RequestActions
           requestId={request.id}
           requestType={request.requestType}
           status={request.status}
           specialized={specialized}
           canReview={canReview}
+          isAdmin={session.isAdmin}
           reviewerOptions={staff.reviewerOptions}
           caseAgentOptions={staff.caseAgentOptions}
         />
-      </div>
+        }
+      />
     </PageContainer>
   );
 }

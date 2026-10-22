@@ -42,7 +42,10 @@ export class StaffPartnershipReviewsService {
   }
 
   async get(userId: bigint, requestId: bigint): Promise<PartnershipRequestResponseDto> {
-    await this.underReview(requestId);
+    const request = await this.prisma.request.findFirst({
+      where: { id: requestId, requestType: RequestType.partnership },
+    });
+    if (!request) throw notFound();
     await this.assertMayView(userId, requestId);
     return this.partnerships.getById(requestId);
   }
@@ -62,7 +65,12 @@ export class StaffPartnershipReviewsService {
     staffUserId: bigint,
     partnershipRequestId: bigint,
     query: ListFarmsQueryDto,
-  ): Promise<{ items: { id: string; status: string; createdAt: string | null }[]; page: number; pageSize: number; total: number }> {
+  ): Promise<{
+    items: { id: string; status: string; createdAt: string | null }[];
+    page: number;
+    pageSize: number;
+    total: number;
+  }> {
     await this.assertMayViewAnyPartnership(staffUserId, partnershipRequestId);
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? DEFAULT_PAGE_SIZE;
@@ -95,7 +103,6 @@ export class StaffPartnershipReviewsService {
   private async inboxWhere(userId: bigint, staff: { roles: StaffRole[] }): Promise<Prisma.RequestWhereInput | null> {
     const where: Prisma.RequestWhereInput = {
       requestType: RequestType.partnership,
-      status: REQUEST_STATUS_UNDER_REVIEW,
     };
     if (staffHasAdminScope(staff.roles)) return where;
     if (!staff.roles.includes(StaffRole.reviewer)) return null;
@@ -105,13 +112,6 @@ export class StaffPartnershipReviewsService {
     });
     if (mine.length === 0) return null;
     return { ...where, id: { in: mine.map((r) => r.requestId) } };
-  }
-
-  private async underReview(requestId: bigint): Promise<void> {
-    const request = await this.prisma.request.findFirst({
-      where: { id: requestId, requestType: RequestType.partnership, status: REQUEST_STATUS_UNDER_REVIEW },
-    });
-    if (!request) throw notFound();
   }
 
   private async assertMayView(userId: bigint, requestId: bigint): Promise<void> {

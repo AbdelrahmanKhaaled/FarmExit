@@ -7,6 +7,7 @@ import { Icon } from '@/components/icons/Icon';
 import { PortalStatus } from '@/features/my-farmexit/PortalUI';
 import { SaleTermsEditor } from './SaleTermsEditor';
 import { RequestDocumentsPanel } from './RequestDocumentsPanel';
+import { MessageFarmExitPanel } from '@/features/my-messages/MessageFarmExitPanel';
 import { editableListing, type ListingDraft } from './types';
 export type ListingRequestHistory = {
   id: string;
@@ -111,7 +112,10 @@ export function ListingTracking({
             {t('private')}
           </p>
         </div>
-        <RequestDocumentsPanel requestId={request.id} canEdit={canEdit} />
+        <div className="flex flex-col gap-24">
+          <RequestDocumentsPanel requestId={request.id} canEdit={canEdit} />
+          <MessageFarmExitPanel requestId={request.id} requestStatus={request.status} />
+        </div>
       </div>
     </div>
   );

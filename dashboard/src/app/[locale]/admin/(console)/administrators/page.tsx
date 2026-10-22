@@ -2,11 +2,14 @@ import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageContainer, EmptyState } from '@/design-system';
-import { DataTable, Td, Th } from '@/design-system/workspace/DataTable';
-import { RefreshButton } from '@/features/admin/RefreshButton';
-import { TablePaginationLinks } from '@/features/admin/workspace/TablePaginationLinks';
+import { Td, Th } from '@/design-system/workspace/DataTable';
+import { AdminFilterForm } from '@/features/admin/workspace/AdminFilterForm';
+import { AdminListPageHeader } from '@/features/admin/workspace/AdminListPageHeader';
+import { EnumLabel } from '@/features/admin/workspace/EnumLabel';
+import { PaginatedTableShell } from '@/features/admin/workspace/PaginatedTableShell';
 import { Link } from '@/i18n/navigation';
-import { apiFetchAdmin, getAdminSession } from '@/lib/admin/session.server';
+import { apiFetchAdmin } from '@/lib/admin/session.server';
+import { requireConsolePage } from '@/lib/admin/console-page';
 import type { AdminUsersList } from '@/lib/api/types/admin-ops';
 import { routing } from '@/i18n/routing';
 
@@ -17,8 +20,7 @@ export default async function AdministratorsPage({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const session = await getAdminSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireConsolePage(locale, 'administrators');
   const sp = await searchParams;
   const page = sp.page ?? '1';
   const t = await getTranslations('admin.administratorsPage');
@@ -26,70 +28,54 @@ export default async function AdministratorsPage({
   const qs = new URLSearchParams({ tab: 'admins', pageSize: '10', page });
   if (sp.search) qs.set('search', sp.search);
   const data = await apiFetchAdmin<AdminUsersList>(`/staff/admin/users?${qs}`, session.accessToken);
+  const pagination = { page: data.page, pageSize: data.pageSize, total: data.total, query: { search: sp.search }, pathname: '/admin/administrators' };
 
   return (
     <PageContainer>
-      <div className="mb-6 flex justify-between">
-        <div>
-          <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-[var(--admin-brand-primary)]">{t('eyebrow')}</p>
-          <h1 className="text-2xl font-semibold">{t('title')}</h1>
-          <p className="text-sm text-[var(--admin-text-muted)]">{t('desc')}</p>
-        </div>
-        <RefreshButton label={t('refresh')} />
-      </div>
-
+      <AdminListPageHeader eyebrow={t('eyebrow')} title={t('title')} description={t('desc')} refreshLabel={t('refresh')} />
       <p className="mb-4 text-xs text-[var(--admin-text-muted)]">{t('noProvisionUi')}</p>
-
-      <form method="get" className="mb-4 flex flex-wrap gap-2 text-sm">
-        <input name="search" placeholder={t('searchPlaceholder')} defaultValue={sp.search ?? ''} className="rounded border px-2 py-1" />
-        <button type="submit" className="rounded bg-[var(--admin-brand-primary)] px-3 py-1 text-xs font-semibold text-white">{t('filter')}</button>
-      </form>
+      <AdminFilterForm submitLabel={t('filter')}>
+        <input name="search" placeholder={t('searchPlaceholder')} defaultValue={sp.search ?? ''} className="admin-form-control max-w-md" />
+      </AdminFilterForm>
 
       {data.adminItems.length === 0 ? (
         <EmptyState title={t('emptyTitle')} description={t('emptyDesc')} />
       ) : (
-        <>
-          <DataTable>
-            <thead>
-              <tr>
-                <Th>{t('col.name')}</Th>
-                <Th>{t('col.email')}</Th>
-                <Th>{t('col.mobile')}</Th>
-                <Th>{t('col.role')}</Th>
-                <Th>{t('col.credential')}</Th>
-                <Th>{t('col.created')}</Th>
+        <PaginatedTableShell pagination={pagination}>
+          <thead>
+            <tr>
+              <Th>{t('col.name')}</Th>
+              <Th>{t('col.email')}</Th>
+              <Th>{t('col.mobile')}</Th>
+              <Th>{t('col.role')}</Th>
+              <Th>{t('col.credential')}</Th>
+              <Th>{t('col.created')}</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.adminItems.map((row) => (
+              <tr key={row.userId}>
+                <Td>{row.fullName ?? '—'}</Td>
+                <Td>{row.email ?? '—'}</Td>
+                <Td>{row.mobile ?? '—'}</Td>
+                <Td>
+                  <div className="flex flex-wrap gap-1">
+                    {row.roles.map((role) => (
+                      <EnumLabel key={role} value={role} group="adminRole" className="text-xs font-medium" />
+                    ))}
+                  </div>
+                </Td>
+                <Td>{row.hasCredential ? t('credentialActive') : t('credentialMissing')}</Td>
+                <Td className="tabular-nums text-[var(--admin-text-muted)]">
+                  {new Intl.DateTimeFormat(loc, { dateStyle: 'medium' }).format(new Date(row.createdAt))}
+                </Td>
               </tr>
-            </thead>
-            <tbody>
-              {data.adminItems.map((row) => (
-                <tr key={row.userId}>
-                  <Td>{row.fullName ?? '—'}</Td>
-                  <Td>{row.email ?? '—'}</Td>
-                  <Td>{row.mobile ?? '—'}</Td>
-                  <Td>{row.roles.join(', ')}</Td>
-                  <Td>{row.hasCredential ? t('credentialActive') : t('credentialMissing')}</Td>
-                  <Td>{new Intl.DateTimeFormat(loc, { dateStyle: 'medium' }).format(new Date(row.createdAt))}</Td>
-                </tr>
-              ))}
-            </tbody>
-          </DataTable>
-          <TablePaginationLinks
-            page={data.page}
-            pageSize={data.pageSize}
-            total={data.total}
-            pathname="/admin/administrators"
-            query={{ search: sp.search }}
-            labels={{
-              showing: t('pagination.showing'),
-              prev: t('pagination.prev'),
-              next: t('pagination.next'),
-              page: t('pagination.page'),
-            }}
-          />
-        </>
+            ))}
+          </tbody>
+        </PaginatedTableShell>
       )}
-      <p className="mt-4 text-sm">
-        <Link href="/admin/users" className="text-[var(--admin-brand-primary)] hover:underline">{t('linkUsers')}</Link>
+      <p className="mt-6 text-sm">
+        <Link href="/admin/users" className="font-semibold text-[var(--admin-brand-primary)] hover:underline">{t('linkUsers')}</Link>
       </p>
     </PageContainer>
   );

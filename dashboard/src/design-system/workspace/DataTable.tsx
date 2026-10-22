@@ -1,9 +1,29 @@
 import { cn } from '@/lib/cn';
 
-export function DataTable({ children, className }: { children: React.ReactNode; className?: string }) {
+export function DataTable({
+  children,
+  className,
+  embedded,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  /** Inside PaginatedTableShell — no outer card chrome */
+  embedded?: boolean;
+}) {
+  const table = (
+    <table className="w-full min-w-[48rem] border-collapse text-[var(--admin-text-base)]">{children}</table>
+  );
+  if (embedded) {
+    return <div className={cn('overflow-x-auto', className)}>{table}</div>;
+  }
   return (
-    <div className={cn('overflow-x-auto rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)]', className)}>
-      <table className="w-full min-w-[48rem] border-collapse text-sm">{children}</table>
+    <div
+      className={cn(
+        'overflow-hidden rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] shadow-[var(--admin-shadow-soft)]',
+        className,
+      )}
+    >
+      <div className="overflow-x-auto">{table}</div>
     </div>
   );
 }
@@ -12,7 +32,7 @@ export function Th({ children, className }: { children: React.ReactNode; classNa
   return (
     <th
       className={cn(
-        'border-b border-[var(--admin-border-subtle)] bg-[var(--admin-bg-subtle)] px-4 py-2.5 text-start text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--admin-text-muted)]',
+        'border-b border-[var(--admin-border-subtle)] bg-[var(--admin-surface-sunken)] px-4 py-3 text-start text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]',
         className,
       )}
     >
@@ -31,7 +51,7 @@ export function Td({
   colSpan?: number;
 }) {
   return (
-    <td colSpan={colSpan} className={cn('border-b border-[var(--admin-border-subtle)] px-4 py-3 text-[var(--admin-text-secondary)]', className)}>
+    <td colSpan={colSpan} className={cn('border-b border-[var(--admin-border-subtle)] px-4 py-3.5 text-[var(--admin-text-secondary)] transition-colors hover:bg-[var(--admin-surface-muted)]/80', className)}>
       {children}
     </td>
   );

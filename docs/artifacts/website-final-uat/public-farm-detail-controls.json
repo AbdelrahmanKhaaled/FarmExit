@@ -1,0 +1,122 @@
+[
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Open menu",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "View all photos (1 / 1)",
+    "placeholder": null,
+    "text": "1 / 1",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Save [DEMO-DASH] Ismailia Farm 10",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "View all photos (1 / 1)",
+    "placeholder": null,
+    "text": "1 / 1",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Show photo 1 of 1",
+    "placeholder": null,
+    "text": "Illustrative image",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Save [DEMO-DASH] Ismailia Farm 10",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Zoom in",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Zoom out",
+    "placeholder": null,
+    "text": "",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Save [DEMO-DASH] Ismailia Farm 10",
+    "placeholder": null,
+    "text": "Save farm",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Save [DEMO-DASH] Ismailia Farm 10",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  }
+]

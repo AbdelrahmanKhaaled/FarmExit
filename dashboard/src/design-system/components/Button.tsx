@@ -1,13 +1,15 @@
 import { cn } from '@/lib/cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type Size = 'sm' | 'md';
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-[var(--admin-brand-primary)] text-white hover:bg-[var(--admin-brand-secondary)] shadow-[var(--admin-shadow-xs)]',
+    'bg-[var(--admin-brand-primary)] text-white hover:bg-[var(--admin-brand-primary-hover)] shadow-[var(--admin-shadow-xs)]',
   secondary:
     'border border-[var(--admin-border-strong)] bg-[var(--admin-surface)] text-[var(--admin-text-primary)] hover:border-[var(--admin-brand-secondary)] hover:text-[var(--admin-brand-primary)]',
+  outline:
+    'border border-[var(--admin-border-subtle)] bg-transparent text-[var(--admin-text-secondary)] hover:border-[var(--admin-brand-secondary)] hover:text-[var(--admin-brand-primary)]',
   ghost: 'text-[var(--admin-text-secondary)] hover:bg-[var(--admin-bg-subtle)]',
   danger: 'bg-[var(--admin-status-danger)] text-white hover:opacity-90',
 };

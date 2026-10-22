@@ -1,0 +1,62 @@
+[
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "Close",
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "tel",
+    "name": null,
+    "id": "_R_paatper9etb_",
+    "label": null,
+    "placeholder": "10 0000 0000",
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "submit",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Continue",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "next-logo",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "Cache disabled",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Collapse Cache disabled badge",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  }
+]

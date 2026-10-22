@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/design-system';
-import { DataTable, Td, Th } from '@/design-system/workspace/DataTable';
 import { StatusBadge } from '@/features/admin/workspace/StatusBadge';
 import { updateEvaluationAction } from '@/features/admin/actions/platform';
+import { EvaluationChecksPanel } from './EvaluationChecksPanel';
+import { EVALUATION_STATUSES_EDITABLE, evaluationIsLocked } from './evaluation-domain';
 
 export type EvaluationDetail = {
   id: string;
@@ -25,15 +27,14 @@ export type EvaluationDetail = {
   }[];
 };
 
-const LOCKED = new Set(['approved', 'published', 'superseded']);
-
 type Props = {
   evaluation: EvaluationDetail;
 };
 
 export function EvaluationEditPanel({ evaluation }: Props) {
   const t = useTranslations('admin.evaluationDetail');
-  const locked = LOCKED.has(evaluation.status);
+  const router = useRouter();
+  const locked = evaluationIsLocked(evaluation.status);
   const [pending, start] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [scoreValue, setScoreValue] = useState(evaluation.scoreValue?.toString() ?? '');
@@ -49,32 +50,15 @@ export function EvaluationEditPanel({ evaluation }: Props) {
         <div><span className="text-[var(--admin-text-muted)]">{t('status')}: </span><StatusBadge status={evaluation.status} /></div>
         <div><span className="text-[var(--admin-text-muted)]">{t('reviewer')}: </span>{evaluation.reviewer.fullName ?? evaluation.reviewer.id}</div>
       </div>
-      {message ? <p>{message}</p> : null}
+      {message ? <p role="alert">{message}</p> : null}
 
-      <DataTable>
-        <thead>
-          <tr>
-            <Th>{t('col.check')}</Th>
-            <Th>{t('col.checkStatus')}</Th>
-            <Th>{t('col.notes')}</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {evaluation.checks.map((c) => (
-            <tr key={c.id}>
-              <Td>{c.checkKey}</Td>
-              <Td><StatusBadge status={c.checkStatus} /></Td>
-              <Td>{c.reviewerNotes ?? '—'}</Td>
-            </tr>
-          ))}
-        </tbody>
-      </DataTable>
+      <EvaluationChecksPanel evaluation={evaluation} locked={locked} />
 
       {locked ? (
         <p className="text-[var(--admin-text-muted)]">{t('immutable')}</p>
       ) : (
         <form
-          className="grid max-w-lg gap-2 rounded border p-4"
+          className="admin-detail-panel grid max-w-lg gap-3"
           onSubmit={(e) => {
             e.preventDefault();
             setMessage(null);
@@ -86,29 +70,34 @@ export function EvaluationEditPanel({ evaluation }: Props) {
             start(async () => {
               const res = await updateEvaluationAction(evaluation.farmId, evaluation.id, body);
               setMessage(res.ok ? t('saved') : res.message ?? t('error'));
+              if (res.ok) router.refresh();
             });
           }}
         >
           <p className="font-medium">{t('editTitle')}</p>
           <label className="text-xs text-[var(--admin-text-muted)]">
             {t('scoreValue')}
-            <input className="mt-1 w-full rounded border px-2 py-1" value={scoreValue} onChange={(e) => setScoreValue(e.target.value)} disabled={pending} />
+            <input className="admin-form-control mt-1 w-full" value={scoreValue} onChange={(e) => setScoreValue(e.target.value)} disabled={pending} />
           </label>
           <label className="text-xs text-[var(--admin-text-muted)]">
             {t('scoreMax')}
-            <input className="mt-1 w-full rounded border px-2 py-1" value={scoreMax} onChange={(e) => setScoreMax(e.target.value)} disabled={pending} />
+            <input className="admin-form-control mt-1 w-full" value={scoreMax} onChange={(e) => setScoreMax(e.target.value)} disabled={pending} />
           </label>
           <label className="text-xs text-[var(--admin-text-muted)]">
             {t('methodologyVersion')}
-            <input className="mt-1 w-full rounded border px-2 py-1" value={methodologyVersion} onChange={(e) => setMethodologyVersion(e.target.value)} disabled={pending} />
+            <input className="admin-form-control mt-1 w-full" value={methodologyVersion} onChange={(e) => setMethodologyVersion(e.target.value)} disabled={pending} />
           </label>
           <label className="text-xs text-[var(--admin-text-muted)]">
             {t('internalNotes')}
-            <textarea className="mt-1 w-full rounded border px-2 py-1" rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} disabled={pending} />
+            <textarea className="admin-form-control mt-1 w-full" rows={3} value={internalNotes} onChange={(e) => setInternalNotes(e.target.value)} disabled={pending} />
           </label>
           <label className="text-xs text-[var(--admin-text-muted)]">
             {t('statusField')}
-            <input className="mt-1 w-full rounded border px-2 py-1" value={status} onChange={(e) => setStatus(e.target.value)} disabled={pending} />
+            <select className="admin-form-control mt-1 w-full" value={status} onChange={(e) => setStatus(e.target.value)} disabled={pending}>
+              {EVALUATION_STATUSES_EDITABLE.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
           </label>
           <Button type="submit" disabled={pending}>{t('save')}</Button>
         </form>

@@ -13,6 +13,7 @@ import {
   MinLength,
   validateSync,
 } from 'class-validator';
+import { assertClientDemoOtpEnvironment } from '../modules/auth/client-demo-otp';
 import { assertDevFixedOtpEnvironment } from '../modules/auth/dev-fixed-otp';
 
 export enum NodeEnv {
@@ -130,6 +131,18 @@ export class EnvironmentVariables {
   @IsNotEmpty({ each: true })
   CORS_ORIGINS: string[] = ['http://localhost:3000', 'http://localhost:3002'];
 
+  /** Socket.IO HTTP path (default /socket.io). */
+  @IsString()
+  @IsNotEmpty()
+  SOCKET_IO_PATH = '/socket.io';
+
+  /** Connected socket session revalidation interval (ms). Max revocation detection delay ≈ this value. */
+  @Type(() => Number)
+  @IsInt()
+  @Min(5_000)
+  @Max(120_000)
+  REALTIME_SESSION_REVALIDATE_MS = 30_000;
+
   /** Development-only fixed OTP for allowlisted mobiles (never in production). */
   @Transform(toBoolean)
   @IsBoolean()
@@ -142,6 +155,22 @@ export class EnvironmentVariables {
   @Transform(toList)
   @IsString({ each: true })
   DEV_FIXED_OTP_ALLOWED_MOBILES: string[] = [];
+
+  /**
+   * Client-demo fixed OTP (explicit opt-in). Requires loopback `farmexit` database; refused in production.
+   * Does not activate from NODE_ENV alone — set CLIENT_DEMO_OTP_ENABLED=true.
+   */
+  @Transform(toBoolean)
+  @IsBoolean()
+  CLIENT_DEMO_OTP_ENABLED = false;
+
+  @IsOptional()
+  @IsString()
+  CLIENT_DEMO_OTP_CODE = '';
+
+  @Transform(toList)
+  @IsString({ each: true })
+  CLIENT_DEMO_OTP_ALLOWED_MOBILES: string[] = [];
 
   /** Swagger UI. Unset: enabled outside production, disabled in production. */
   @IsOptional()
@@ -165,5 +194,6 @@ export function validateEnv(config: Record<string, unknown>): Env {
     );
   }
   assertDevFixedOtpEnvironment(env);
+  assertClientDemoOtpEnvironment(env);
   return { ...env, SWAGGER_ENABLED: env.SWAGGER_ENABLED ?? env.NODE_ENV !== NodeEnv.Production };
 }

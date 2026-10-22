@@ -5,11 +5,18 @@ import { getApiBaseUrl } from '@/lib/api/config';
 import type { StaffMe } from '@/lib/api/types/admin-dashboard';
 import { ADMIN_ACCESS_COOKIE } from './cookies';
 import { ADMIN_ROLE, SUPER_ADMIN_ROLE } from './roles';
+import { staffHasConsoleAccess, staffIsAdminScope } from './staff-permissions';
 
 export { ADMIN_ROLE, SUPER_ADMIN_ROLE };
 
+/** Active admin or superAdmin (full platform console scope). */
 export function staffHasDashboardConsoleAccess(roles: readonly string[]): boolean {
-  return roles.includes(ADMIN_ROLE) || roles.includes(SUPER_ADMIN_ROLE);
+  return staffIsAdminScope(roles);
+}
+
+/** Any approved FarmExit staff role that may use the shared dashboard. */
+export function staffHasSharedConsoleAccess(roles: readonly string[]): boolean {
+  return staffHasConsoleAccess({ roles: [...roles] });
 }
 
 /** Read access token from cookies only — no refresh, no cookie mutation (safe in RSC). */
@@ -31,6 +38,7 @@ export async function fetchStaffMe(accessToken: string): Promise<StaffMe | null>
 export type AdminSession = {
   accessToken: string;
   staff: StaffMe;
+  /** Admin or superAdmin — not case agents or reviewers. */
   isAdmin: boolean;
 };
 
@@ -43,7 +51,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   if (!accessToken) return null;
   const staff = await fetchStaffMe(accessToken);
   if (!staff) return null;
-  const isAdmin = staffHasDashboardConsoleAccess(staff.roles);
+  const isAdmin = staffIsAdminScope(staff.roles);
   return { accessToken, staff, isAdmin };
 }
 
@@ -54,6 +62,13 @@ export function assertAdminConsoleSession(session: AdminSession): AdminConsoleSe
     throw new Error('ADMIN_SESSION_REQUIRED');
   }
   return { ...session, isAdmin: true };
+}
+
+export function assertSharedConsoleSession(session: AdminSession): AdminSession {
+  if (!staffHasConsoleAccess(session.staff)) {
+    throw new Error('STAFF_CONSOLE_SESSION_REQUIRED');
+  }
+  return session;
 }
 
 export async function apiFetchAdmin<T>(path: string, accessToken: string): Promise<T> {

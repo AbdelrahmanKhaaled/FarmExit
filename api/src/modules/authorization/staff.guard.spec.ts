@@ -98,6 +98,10 @@ describe('StaffGuard', () => {
     );
   });
 
+  it('admits superAdmin to routes declared admin-only', async () => {
+    await expect(guardWith(['superAdmin']).canActivate(contextFor(admin.adminOnly, authed()))).resolves.toBe(true);
+  });
+
   it('enforces declared permissions (all of)', async () => {
     await expect(guardWith(['reviewer']).canActivate(contextFor(admin.review, authed()))).resolves.toBe(true);
     await expect(guardWith(['caseAgent']).canActivate(contextFor(admin.review, authed()))).rejects.toBeInstanceOf(

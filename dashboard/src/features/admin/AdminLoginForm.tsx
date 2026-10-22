@@ -106,7 +106,7 @@ export function AdminLoginForm() {
             aria-label={t('passwordLabel')}
             className={cn(
               'w-full rounded-[var(--admin-radius-md)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)]',
-              'px-4 py-3 pe-12 text-base outline-none transition-shadow',
+              'px-4 py-3 pe-16 text-base outline-none transition-shadow sm:pe-20',
               'focus:border-[var(--admin-brand-secondary)] focus:ring-2 focus:ring-[var(--admin-focus-ring)]/25',
             )}
             placeholder={t('passwordPlaceholder')}
@@ -116,7 +116,7 @@ export function AdminLoginForm() {
           />
           <button
             type="button"
-            className="absolute inset-y-0 end-2 px-2 text-xs font-medium text-[var(--admin-text-muted)] hover:text-[var(--admin-brand-primary)]"
+            className="absolute inset-y-0 end-2 max-w-[5.5rem] truncate px-1 text-xs font-medium text-[var(--admin-text-muted)] hover:text-[var(--admin-brand-primary)]"
             onClick={() => setShowPassword((v) => !v)}
             tabIndex={-1}
             aria-label={showPassword ? t('hidePassword') : t('showPassword')}

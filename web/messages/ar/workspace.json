@@ -6,8 +6,8 @@
     "overview": "نظرة عامة",
     "farms": "مزارعي",
     "requests": "طلباتي",
-    "applications": "التقديمات",
-    "saved": "الإعلانات المحفوظة",
+    "applications": "تقديماتي",
+    "saved": "المحفوظ",
     "messages": "الرسائل",
     "documents": "المستندات",
     "notifications": "الإشعارات",
@@ -421,31 +421,64 @@
   },
   "messages": {
     "title": "الرسائل",
-    "intro": "محادثات خاصة مع FarmExit حول طلباتك. لا تتواصل مباشرة مع مشترين أو ملاك آخرين.",
+    "intro": "كل محادثة تتم مع FarmExit. لا تُشارَ أرقام الهواتف أو البريد بين المستخدمين.",
     "loading": "جاري تحميل الرسائل…",
     "loadError": "تعذّر تحميل الرسائل.",
     "empty": "لا توجد محادثات مع FarmExit بعد.",
     "emptyNote": "عند فتح قضية على طلبك ستظهر هنا.",
+    "inboxTitle": "المحادثات",
+    "selectConversation": "اختر محادثة",
+    "selectConversationHint": "اختر قضية من القائمة لقراءة رسائل FarmExit.",
     "caseLabel": "قضية #{id}",
+    "requestRef": "طلب #{id}",
+    "requestContextFallback": "محادثة FarmExit",
     "relatedRequest": "الطلب المرتبط",
     "back": "العودة للرسائل",
     "conversationTitle": "محادثة مع FarmExit",
     "mediationNote": "FarmExit تُنسّق هذه المحادثة. الأطراف الأخرى غير ظاهرة.",
+    "privacyBanner": "هذه المحادثة مع FarmExit. الأطراف الأخرى لا ترى رقمك أو بريدك — FarmExit ينقل الأسئلة ويشارك ما يناسب فقط.",
     "history": "سجل الرسائل",
     "noMessages": "لا رسائل بعد.",
     "you": "أنت",
     "farmExit": "FarmExit",
+    "messageMetaYou": "أنت · {time}",
+    "messageMetaFarmExit": "FarmExit · {time}",
     "composerLabel": "رسالتك",
+    "composerPlaceholder": "اكتب رسالة إلى FarmExit…",
+    "composerDisabledPreview": "الإرسال معطّل في معاينة التصميم.",
     "send": "إرسال الرسالة",
     "sending": "جاري الإرسال…",
     "sendError": "تعذّر إرسال الرسالة.",
+    "realtimeReconnecting": "جارٍ إعادة الاتصال لاستقبال الرسائل الجديدة…",
+    "jumpToLatest": "رسائل جديدة — الانتقال إلى الأحدث",
     "caseClosed": "هذه القضية مغلقة. لا يمكن إرسال رسائل جديدة.",
     "openCase": "فتح رسائل FarmExit",
     "opening": "جاري الفتح…",
     "openError": "تعذّر فتح الرسائل لهذا الطلب.",
     "noAgent": "لم يُعيَّن موظف قضية بعد. حاول بعد مراجعة الطلب.",
+    "messagingUnavailable": "الرسائل متاحة بعد إرسال الطلب.",
+    "requestContextLoading": "جاري تحميل تفاصيل الطلب…",
+    "viewRequest": "عرض الطلب",
+    "errors": {
+      "unauthorized": "سجّل الدخول لمراسلة FarmExit.",
+      "forbidden": "لا يمكنك فتح رسائل لهذا الطلب.",
+      "notFound": "لم يُعثر على الطلب أو لم يعد متاحاً.",
+      "conflict": "الرسائل غير متاحة لهذا الطلب في حالته الحالية.",
+      "network": "تعذّر الاتصال بـ FarmExit. تحقق من الشبكة وحاول مجدداً."
+    },
+    "requestTypes": {
+      "farmListing": "طلب إدراج مزرعة",
+      "farmManagement": "طلب إدارة مزرعة",
+      "partnership": "طلب شراكة",
+      "partnershipApplication": "طلب انضمام لشراكة",
+      "professionalVerification": "التحقق المهني",
+      "farmDetails": "طلب تفاصيل مزرعة",
+      "farmPurchaseProposal": "عرض شراء"
+    },
     "statuses": {
       "open": "مفتوحة",
+      "waitingCustomer": "بانتظار ردك",
+      "waitingOwner": "قيد المتابعة",
       "closed": "مغلقة"
     }
   },
@@ -915,5 +948,57 @@
     "chooseGovernorate": "اختر المحافظات",
     "otherGovernorate": "محافظة أخرى",
     "addArea": "أضف محافظة"
+  },
+  "unifiedRequests": {
+    "intro": "كل طلب تبدأه مع FarmExit يظهر هنا. نراجع كل طلب وننسّقه — الموافقة لا تعني النشر للعامة.",
+    "filtersLabel": "تصفية الطلبات",
+    "filters": {
+      "all": "الكل",
+      "farmListing": "إعلانات المزارع",
+      "farmDetails": "تفاصيل المزرعة",
+      "farmManagement": "إدارة المزرعة",
+      "partnership": "الشراكات",
+      "professionalVerification": "التحقق المهني",
+      "farmPurchaseProposal": "عروض الشراء",
+      "other": "أخرى"
+    },
+    "sections": {
+      "active": "نشطة / قيد المتابعة",
+      "decided": "مغلقة / محسومة"
+    },
+    "actions": {
+      "continueDraft": "متابعة المسودة",
+      "updateInfo": "تحديث المعلومات",
+      "track": "متابعة المراجعة",
+      "view": "عرض الطلب"
+    },
+    "updated": "آخر تحديث {date}",
+    "emptyTitle": "لا توجد طلبات بعد",
+    "browseCta": "تصفح المزارع",
+    "pagination": "صفحات الطلبات",
+    "prev": "السابق",
+    "next": "التالي",
+    "attentionTitle": "يتطلب انتباهك"
+  },
+  "unifiedApplications": {
+    "title": "تقديماتي",
+    "intro": "التقديمات التي قدّمتها على فرص الشراكة التي ينسّقها FarmExit.",
+    "filtersLabel": "تصفية التقديمات",
+    "filters": {
+      "all": "الكل",
+      "partnership": "شراكة",
+      "management": "إدارة"
+    },
+    "sections": {
+      "inProgress": "قيد المتابعة",
+      "decided": "محسومة"
+    },
+    "actions": {
+      "continue": "متابعة التقديم",
+      "track": "متابعة التقديم"
+    },
+    "managementUnavailable": "تقديمات فرص الإدارة غير متاحة بعد. ستُضاف بعد إطلاق سوق الإدارة العام.",
+    "emptyBody": "عند التقديم على فرصة شراكة منشورة، ستظهر هنا.",
+    "discoverCta": "تعرّف على الشراكات"
   }
 }

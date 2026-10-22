@@ -1,0 +1,578 @@
+[
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Open menu",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Sign out",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Sign out",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Save & exit",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "1Professional type",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "2Profile & experience",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "3Expertise & service areas",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "4Professional documents",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "5Review & submit",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "1Professional type",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "2Profile & experience",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "3Expertise & service areas",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "4Professional documents",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "5Review & submit",
+    "disabled": true
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "professionalType",
+    "id": "",
+    "label": "Farm manager",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "professionalType",
+    "id": "",
+    "label": "Agricultural engineer",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": null,
+    "id": "_R_36daatpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "headline",
+    "id": "_R_56daatpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "SELECT",
+    "type": null,
+    "name": "baseGovernorate",
+    "id": "_R_n6daatpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false,
+    "options": [
+      {
+        "value": "",
+        "label": "Select governorates"
+      },
+      {
+        "value": "Beheira",
+        "label": "Beheira"
+      },
+      {
+        "value": "Ismailia",
+        "label": "Ismailia"
+      },
+      {
+        "value": "Menoufia",
+        "label": "Menoufia"
+      },
+      {
+        "value": "Qalyubia",
+        "label": "Qalyubia"
+      },
+      {
+        "value": "Giza",
+        "label": "Giza"
+      },
+      {
+        "value": "Sharqia",
+        "label": "Sharqia"
+      },
+      {
+        "value": "Beni Suef",
+        "label": "Beni Suef"
+      },
+      {
+        "value": "Minya",
+        "label": "Minya"
+      },
+      {
+        "value": "Fayoum",
+        "label": "Fayoum"
+      },
+      {
+        "value": "custom",
+        "label": "Other governorate"
+      }
+    ]
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": null,
+    "name": "bio",
+    "id": "_R_96daatpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "yearsExperience",
+    "id": "_R_3adaatpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": null,
+    "name": "experienceSummary",
+    "id": "_R_5adaatpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "farmActivity",
+    "id": "",
+    "label": "Vegetables",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "farmActivity",
+    "id": "",
+    "label": "Fruits",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "farmActivity",
+    "id": "",
+    "label": "Livestock",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "farmActivity",
+    "id": "",
+    "label": "Mixed farming",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "cropExpertise",
+    "id": "_R_a7daatpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "managementType",
+    "id": "",
+    "label": "Full operation management",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "managementType",
+    "id": "",
+    "label": "Production supervision",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "managementType",
+    "id": "",
+    "label": "Agricultural consulting",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "managementType",
+    "id": "",
+    "label": "Seasonal management",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "areaOfExpertise",
+    "id": "",
+    "label": "Drip irrigation",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "areaOfExpertise",
+    "id": "",
+    "label": "Soil & fertilisation",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "areaOfExpertise",
+    "id": "",
+    "label": "Farm operations",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "areaOfExpertise",
+    "id": "",
+    "label": "Team management",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "areaOfExpertise",
+    "id": "",
+    "label": "Greenhouses",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Beheira",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Ismailia",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Menoufia",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Qalyubia",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Giza",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Sharqia",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Beni Suef",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Minya",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "serviceAreas",
+    "id": "",
+    "label": "Fayoum",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "otherServiceArea",
+    "id": "_R_l6fdaatpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Add governorate",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Back",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Continue",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "next-logo",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "Cache disabled",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Collapse Cache disabled badge",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  }
+]

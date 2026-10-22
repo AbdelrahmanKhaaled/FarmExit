@@ -8,7 +8,7 @@
     "start": "next start -p 3002",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint . && node scripts/check-direction.mjs && node scripts/check-messages.mjs && node scripts/check-sidebar-motion.mjs && node scripts/check-session-readonly.mjs",
-    "test:unit": "node --import tsx --test src/lib/admin/session-token.test.ts src/lib/admin/specialized-request-path.test.ts src/config/admin-navigation.test.ts src/features/admin/analytics/analytics-query.test.ts",
+    "test:unit": "node --import tsx --test src/lib/admin/session-token.test.ts src/lib/admin/console-routes.test.ts src/lib/admin/specialized-request-path.test.ts src/config/admin-navigation.test.ts src/features/admin/analytics/analytics-query.test.ts src/features/admin/communications/message-merge.test.ts src/features/admin/requests/forwarding-decision.test.ts src/features/admin/requests/request-status-transitions.test.ts src/features/admin/workspace/pagination-range.test.ts src/features/admin/workspace/status-variants.test.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:e2e": "playwright test"
@@ -17,7 +17,8 @@
     "next": "16.4.0",
     "next-intl": "^4.14.9",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",

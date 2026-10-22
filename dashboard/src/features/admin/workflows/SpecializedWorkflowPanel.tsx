@@ -31,7 +31,7 @@ export function SpecializedWorkflowPanel({
   );
 
   return (
-    <div className="space-y-4 rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] p-4">
+    <div className="admin-action-panel space-y-4">
       <h2 className="text-sm font-semibold">{t('actionsTitle')}</h2>
       {nonBindingNote ? <p className="text-xs text-[var(--admin-text-muted)]">{nonBindingNote}</p> : null}
       <StaffAssignmentForm

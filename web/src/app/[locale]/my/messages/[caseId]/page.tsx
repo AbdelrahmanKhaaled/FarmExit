@@ -2,9 +2,8 @@ import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { Link } from '@/i18n/navigation';
 import { requireCompletedProfile } from '@/lib/auth/require-session';
-import { MessageThread } from '@/features/my-messages/MessageThread';
+import { MessagesWorkspace } from '@/features/my-messages/MessagesWorkspace';
 
 export default async function ConversationPage({ params }: PageProps<'/[locale]/my/messages/[caseId]'>) {
   const { locale, caseId } = await params;
@@ -13,12 +12,12 @@ export default async function ConversationPage({ params }: PageProps<'/[locale]/
   const t = await getTranslations('workspace.messages');
   const session = await requireCompletedProfile(locale, `/${locale}/my/messages/${caseId}`);
   return (
-    <div className="flex flex-col gap-16">
-      <Link href="/my/messages" className="type-label-button text-text-brand">
-        {t('back')}
-      </Link>
-      <h2 className="type-display-h4">{t('conversationTitle')}</h2>
-      <MessageThread caseId={caseId} userId={session.user.id} />
+    <div className="fx-messages-host flex min-h-0 min-w-0 flex-1 flex-col gap-16">
+      <div className="desktop:hidden">
+        <h2 className="type-display-h4">{t('title')}</h2>
+        <p className="mt-8 type-body-caption text-text-muted">{t('intro')}</p>
+      </div>
+      <MessagesWorkspace caseId={caseId} userId={session.user.id} />
     </div>
   );
 }

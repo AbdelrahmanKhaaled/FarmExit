@@ -4,8 +4,8 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { requireCompletedProfile } from '@/lib/auth/require-session';
 import { apiFetchWebsite } from '@/lib/auth/session.server';
+import { UnifiedApplicationsWorkspace } from '@/features/my-farmexit/UnifiedApplicationsWorkspace';
 
-import { PartnershipList } from '@/features/phase8/PartnershipList';
 export const instant = false;
 
 type Item = { id: string; requestNumber: string; parentPartnershipRequestId: string; status: string };
@@ -20,5 +20,5 @@ export default async function MyApplicationsPage({ params }: PageProps<'/[locale
     session.accessToken,
   );
 
-  return <PartnershipList items={data.items} application />;
+  return <UnifiedApplicationsWorkspace items={data.items} />;
 }

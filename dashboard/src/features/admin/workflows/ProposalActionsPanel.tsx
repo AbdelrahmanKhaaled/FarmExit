@@ -13,7 +13,7 @@ export function ProposalActionsPanel({
 }) {
   const t = useTranslations('admin.proposalDetail');
   return (
-    <div className="space-y-3 rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] p-4">
+    <div className="admin-action-panel space-y-3">
       <h2 className="text-sm font-semibold">{t('actionsTitle')}</h2>
       <p className="text-xs text-[var(--admin-text-muted)]">{t('nonBinding')}</p>
       <p className="text-xs text-[var(--admin-text-muted)]">{t('noStaffDecision')}</p>

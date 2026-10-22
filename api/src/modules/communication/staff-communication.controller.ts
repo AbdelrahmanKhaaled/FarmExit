@@ -1,12 +1,17 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AuthSessionAudience } from '../../generated/prisma/enums';
 import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
-import { StaffOnly, StaffPermissions } from '../authorization/staff.decorators';
+import { StaffDashboardOnly, StaffOnly, StaffPermissions } from '../authorization/staff.decorators';
 import { StaffPermission } from '../authorization/staff-permissions';
 import { CurrentAuth } from '../auth/auth.decorators';
 import type { AuthContext } from '../auth/auth.types';
+import { RateLimit, RateLimitGuard } from '../auth/rate-limit';
+import { CommunicationRealtimeTicketService } from './communication-realtime-ticket.service';
+import { RealtimeTicketResponseDto } from './dto/realtime-ticket.dto';
 import { ConversationSummaryDto } from './dto/conversation-summary.dto';
 import { ListCommunicationCasesQueryDto } from './dto/list-communication-cases-query.dto';
+import { ListStaffMessagesQueryDto } from './dto/list-staff-messages-query.dto';
 import { CommunicationCasesService } from './communication-cases.service';
 import { CommunicationMessagesService } from './communication-messages.service';
 import {
@@ -27,7 +32,18 @@ export class StaffCommunicationController {
   constructor(
     private readonly cases: CommunicationCasesService,
     private readonly messages: CommunicationMessagesService,
+    private readonly realtimeTickets: CommunicationRealtimeTicketService,
   ) {}
+
+  @Post('realtime-ticket')
+  @StaffDashboardOnly()
+  @StaffPermissions(StaffPermission.CommunicationRelay)
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ limit: 30, windowSeconds: 60 })
+  @ApiCreatedResponse({ type: RealtimeTicketResponseDto })
+  mintRealtimeTicket(@CurrentAuth() auth: AuthContext): RealtimeTicketResponseDto {
+    return this.realtimeTickets.mint(auth.userId, auth.sessionId, AuthSessionAudience.dashboard);
+  }
 
   @Get('cases')
   @ApiOkResponse({ type: CommunicationCaseListResponseDto })
@@ -92,10 +108,9 @@ export class StaffCommunicationController {
   listMessages(
     @CurrentAuth() auth: AuthContext,
     @Param('id', ParseBigIntIdPipe) id: bigint,
-    @Query() query: ListCommunicationCasesQueryDto,
-    @Query('conversationId') conversationId?: string,
+    @Query() query: ListStaffMessagesQueryDto,
   ): Promise<MessageListResponseDto> {
-    const convId = conversationId ? BigInt(conversationId) : undefined;
+    const convId = query.conversationId ? BigInt(query.conversationId) : undefined;
     return this.messages.listStaff(auth.userId, id, query, convId);
   }
 }

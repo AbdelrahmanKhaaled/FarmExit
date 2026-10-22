@@ -7,6 +7,7 @@ import { farmDetailsFromPublicListing } from '@/lib/data/public-farm-details';
 import { loadPublicListingBySlug } from '@/lib/data/load-farm-marketplace';
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
+import { toNavbarUser } from '@/lib/auth/navbar-user';
 import { FarmDetailsView } from '@/features/farm-details/FarmDetailsView';
 import { getWebsiteSession } from '@/lib/auth/session.server';
 import { gatedPortalHref } from '@/lib/auth/portal-href';
@@ -46,7 +47,7 @@ export default async function FarmDetailsPage({ params }: PageProps<'/[locale]/f
 
   return (
     <>
-      <Navbar />
+      <Navbar user={session ? toNavbarUser(session.user) : undefined} sessionResolved={!session} />
       <FarmDetailsView
         details={details}
         similar={[]}

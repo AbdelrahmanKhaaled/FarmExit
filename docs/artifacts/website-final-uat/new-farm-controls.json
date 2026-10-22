@@ -1,0 +1,650 @@
+[
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Save & exit",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Save & exit",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Save",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "1Farm basicsIn progress",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "2Location & landNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "3Agriculture & facilitiesNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "4Listing detailsNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "5PhotosNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "6DocumentsNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "7Review & submitNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "1Farm basicsIn progress",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "2Location & landNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "3Agriculture & facilitiesNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "4Listing detailsNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "5PhotosNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "6DocumentsNot started",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "7Review & submitNot started",
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "name",
+    "id": "_R_69955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "farmType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "farmType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "farmType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "farmType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "mainActivity",
+    "id": "_R_e9955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "areaFeddan",
+    "id": "_R_6h955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "SELECT",
+    "type": null,
+    "name": "irrigationMethod",
+    "id": "_R_ah955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false,
+    "options": [
+      {
+        "value": "",
+        "label": "Select an option"
+      },
+      {
+        "value": "drip",
+        "label": "Drip irrigation"
+      },
+      {
+        "value": "sprinkler",
+        "label": "Sprinkler irrigation"
+      },
+      {
+        "value": "gravity",
+        "label": "Gravity irrigation"
+      }
+    ]
+  },
+  {
+    "tag": "SELECT",
+    "type": null,
+    "name": "governorate",
+    "id": "_R_56a955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false,
+    "options": [
+      {
+        "value": "",
+        "label": "Select an option"
+      },
+      {
+        "value": "Beheira",
+        "label": "Beheira"
+      },
+      {
+        "value": "Ismailia",
+        "label": "Ismailia"
+      },
+      {
+        "value": "Menoufia",
+        "label": "Menoufia"
+      },
+      {
+        "value": "Qalyubia",
+        "label": "Qalyubia"
+      },
+      {
+        "value": "Giza",
+        "label": "Giza"
+      },
+      {
+        "value": "Sharqia",
+        "label": "Sharqia"
+      },
+      {
+        "value": "Beni Suef",
+        "label": "Beni Suef"
+      },
+      {
+        "value": "Minya",
+        "label": "Minya"
+      },
+      {
+        "value": "Fayoum",
+        "label": "Fayoum"
+      },
+      {
+        "value": "__other",
+        "label": "Another governorate"
+      }
+    ]
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "areaName",
+    "id": "_R_26a955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "nearestMainRoad",
+    "id": "_R_6i955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "roadDistanceKm",
+    "id": "_R_ai955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "soilType",
+    "id": "_R_6q955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": null,
+    "name": "farmDescription",
+    "id": "_R_aq955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "SELECT",
+    "type": null,
+    "name": "waterSource",
+    "id": "_R_4b955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false,
+    "options": [
+      {
+        "value": "",
+        "label": "Select an option"
+      },
+      {
+        "value": "well",
+        "label": "Well"
+      },
+      {
+        "value": "canal",
+        "label": "Canal"
+      }
+    ]
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "currentProduction",
+    "id": "_R_kr955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "harvestSeasons",
+    "id": "_R_sr955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "notes",
+    "id": "_R_14r955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "highlight1",
+    "id": "_R_d3955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "highlight2",
+    "id": "_R_l3955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "highlight3",
+    "id": "_R_t3955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "listingType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "listingType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "saleMode",
+    "id": "",
+    "label": "Normal Sale — cash only",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "saleMode",
+    "id": "",
+    "label": "Quick Sale",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "askingPrice",
+    "id": "_R_1cs955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "statedSalePricePerFeddan",
+    "id": "_R_2cs955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "availability",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "availability",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "TEXTAREA",
+    "type": null,
+    "name": "listingDescription",
+    "id": "_R_5c955esnebn9er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Back",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Continue",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Save draft & leave",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Keep editing",
+    "disabled": false
+  }
+]

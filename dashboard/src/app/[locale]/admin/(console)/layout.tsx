@@ -3,7 +3,8 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { redirect } from '@/i18n/navigation';
 import { AdminShell } from '@/features/admin/AdminShell';
-import { assertAdminConsoleSession, getAdminSession } from '@/lib/admin/session.server';
+import { assertSharedConsoleSession, getAdminSession } from '@/lib/admin/session.server';
+import { staffHasConsoleAccess } from '@/lib/admin/staff-permissions';
 import { routing } from '@/i18n/routing';
 
 export default async function AdminConsoleLayout({
@@ -18,10 +19,10 @@ export default async function AdminConsoleLayout({
     redirect({ href: '/admin/login', locale });
     throw new Error('REDIRECT');
   }
-  if (!raw.isAdmin) {
+  if (!staffHasConsoleAccess(raw.staff)) {
     redirect({ href: '/admin/forbidden', locale });
     throw new Error('REDIRECT');
   }
-  const { staff } = assertAdminConsoleSession(raw);
+  const { staff } = assertSharedConsoleSession(raw);
   return <AdminShell staff={staff}>{children}</AdminShell>;
 }

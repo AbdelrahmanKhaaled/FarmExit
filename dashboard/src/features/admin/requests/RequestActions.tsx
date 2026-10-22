@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/design-system';
 import { assignRequestStaffAction, recordRequestReviewAction } from '@/features/admin/actions/requests';
+import { RequestStatusTransitionPanel } from '@/features/admin/requests/RequestStatusTransitionPanel';
 import { StaffAssignmentForm, type StaffOption } from '@/features/admin/workspace/StaffAssignmentForm';
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
   status: string;
   specialized: boolean;
   canReview: boolean;
+  isAdmin: boolean;
   reviewerOptions: StaffOption[];
   caseAgentOptions: StaffOption[];
 };
@@ -22,6 +24,7 @@ export function RequestActions({
   status,
   specialized,
   canReview,
+  isAdmin,
   reviewerOptions,
   caseAgentOptions,
 }: Props) {
@@ -46,7 +49,7 @@ export function RequestActions({
   const reviewable = canReview && !specialized && status !== 'draft';
 
   return (
-    <div className="space-y-6 rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] p-4">
+    <div className="admin-action-panel space-y-6">
       <h2 className="text-sm font-semibold">{t('actionsTitle')}</h2>
       {specialized ? (
         <p className="text-sm text-[var(--admin-text-muted)]">{t('specializedWorkflow', { type: requestType })}</p>
@@ -93,6 +96,14 @@ export function RequestActions({
           <Button type="submit" disabled={pending}>{t('submitDecision')}</Button>
         </form>
       ) : null}
+
+      <RequestStatusTransitionPanel
+        requestId={requestId}
+        requestType={requestType}
+        status={status}
+        isAdmin={isAdmin}
+        canReview={canReview}
+      />
     </div>
   );
 }

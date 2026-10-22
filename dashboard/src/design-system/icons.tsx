@@ -85,6 +85,39 @@ export function IconMenu({ className }: IconProps) {
   );
 }
 
+export function IconAnalytics({ className }: IconProps) {
+  return (
+    <svg className={cn('size-5 shrink-0', className)} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M4 19V5M10 19V9M16 19V13M22 19V7" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconShield({ className }: IconProps) {
+  return (
+    <svg className={cn('size-5 shrink-0', className)} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function IconClipboard({ className }: IconProps) {
+  return (
+    <svg className={cn('size-5 shrink-0', className)} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke="currentColor" strokeWidth="1.75" />
+      <path d="M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2Z" stroke="currentColor" strokeWidth="1.75" />
+    </svg>
+  );
+}
+
+export function IconAudit({ className }: IconProps) {
+  return (
+    <svg className={cn('size-5 shrink-0', className)} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M14 3H6a2 2 0 0 0-2 2v14l4-2 4 2 4-2 4 2V8l-6-5Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function IconChevron({ className, dir = 'start' }: IconProps & { dir?: 'start' | 'end' }) {
   return (
     <svg

@@ -150,14 +150,19 @@ export class StaffRequestsController {
 
   @Post(':id/forwardings/:forwardingId/decision')
   @HttpCode(HttpStatus.OK)
+  @StaffPermissions(StaffPermission.RequestsForward)
   @ApiOperation({
     summary: 'Record owner decision on a forwarded request via staff mediation',
-    description: 'Allows authorized staff to record an owner decision received via mediated contact.',
+    description:
+      'Requires requests.forward permission. May be executed by an admin or the assigned case agent recording a mediated owner response. ' +
+      'Does not replace the website owner self-service decision route.',
   })
   @ApiParam({ name: 'id', example: '1', description: 'Request ID' })
   @ApiParam({ name: 'forwardingId', example: '1', description: 'Forwarding record ID' })
   @ApiOkResponse({ type: RequestResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid decision payload' })
+  @ApiConflictResponse({ description: 'Forwarding is closed or a decision was already recorded' })
+  @ApiForbiddenResponse({ description: 'Caller lacks requests.forward or is not the assigned case agent or an administrator' })
   @ApiNotFoundResponse({ description: 'Request or forwarding record not found' })
   recordForwardingDecision(
     @CurrentAuth() auth: AuthContext,

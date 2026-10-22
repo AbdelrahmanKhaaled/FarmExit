@@ -1,0 +1,124 @@
+{
+  "feddans": "فدان",
+  "illustrativeImage": "صورة توضيحية",
+  "verifiedPublished": "تمت المراجعة والنشر بواسطة FarmExit",
+  "badges": {
+    "management": "طلب إدارة",
+    "partnership": "طلب شراكة"
+  },
+  "mediation": {
+    "title": "FarmExit تراجع كل فرصة",
+    "body": "الفرص المنشورة اجتازت مراجعة FarmExit. FarmExit تتوسط التواصل — رقم هاتفك لا يُشارك مع أطراف أخرى."
+  },
+  "ownerCta": {
+    "reviewNote": "تقديم الطلب لا ينشره تلقائياً في السوق.",
+    "management": {
+      "title": "تحتاج مديراً لمزرعتك؟",
+      "body": "قدّم طلب إدارة. FarmExit تراجعه قبل أي نشر.",
+      "action": "تقديم طلب إدارة"
+    },
+    "partnerships": {
+      "title": "تبحث عن شريك لمزرعتك؟",
+      "body": "انشر فرصة شراكة. FarmExit تراجع وينشر ملخصاً عاماً آمناً عند الموافقة.",
+      "action": "تقديم طلب شراكة"
+    }
+  },
+  "filters": {
+    "label": "التصفية",
+    "openMobile": "التصفية",
+    "close": "إغلاق",
+    "location": "الموقع",
+    "governorate": "المحافظة",
+    "area": "المنطقة",
+    "farmActivity": "نشاط المزرعة",
+    "farmSize": "مساحة المزرعة",
+    "minFeddans": "أقل فدان",
+    "maxFeddans": "أكثر فدان",
+    "managementType": "نوع الإدارة",
+    "managementTypeHint": "تصفية حسب نوع الإدارة",
+    "experience": "الخبرة",
+    "professionalNeed": "الاحتياج المهني",
+    "objective": "هدف الشراكة",
+    "partnerType": "نوع الشريك",
+    "any": "أي",
+    "clearAll": "مسح كل التصفيات"
+  },
+  "farmTypes": {
+    "vegetable": "خضار",
+    "fruit": "فواكه",
+    "livestock": "ثروة حيوانية",
+    "mixed": "زراعة مختلطة"
+  },
+  "experience": {
+    "entryLevel": "مبتدئ",
+    "experienced": "خبير",
+    "expert": "متخصص"
+  },
+  "professionalNeed": {
+    "farmManager": "مدير مزرعة",
+    "agriculturalEngineer": "مهندس زراعي",
+    "both": "مدير ومهندس"
+  },
+  "governorates": {
+    "beheira": "البحيرة",
+    "ismailia": "الإسماعيلية",
+    "menoufia": "المنوفية",
+    "qalyubia": "القليوبية",
+    "giza": "الجيزة",
+    "sharqia": "الشرقية",
+    "beniSuef": "بني سويف",
+    "minya": "المنيا",
+    "fayoum": "الفيوم"
+  },
+  "sort": {
+    "label": "ترتيب",
+    "newest": "الأحدث",
+    "areaAsc": "المساحة (الأصغر)",
+    "areaDesc": "المساحة (الأكبر)"
+  },
+  "results": { "count": "{count} فرصة" },
+  "pagination": {
+    "label": "الصفحات",
+    "count": "{count} نتيجة",
+    "previous": "السابق",
+    "next": "التالي"
+  },
+  "actions": {
+    "viewManagement": "عرض الفرصة",
+    "viewPartnership": "عرض الشراكة"
+  },
+  "drawer": {
+    "close": "إغلاق",
+    "managementTypes": "محور الإدارة",
+    "experience": "الخبرة المطلوبة",
+    "goals": "أهداف الإدارة",
+    "responsibilities": "المسؤوليات",
+    "facilities": "المرافق المتاحة",
+    "farmContext": "سياق المزرعة"
+  },
+  "managementApply": {
+    "gap": "التقديم على فرص الإدارة كمحترف غير متاح بعد على FarmExit."
+  },
+  "hero": {
+    "location": "الموقع",
+    "minFeddans": "أقل فدان",
+    "objective": "هدف الشراكة",
+    "find": "ابحث عن شراكات"
+  },
+  "detail": {
+    "back": "العودة للشراكات",
+    "apply": "طلب الشراكة",
+    "applySignIn": "سجّل الدخول للتقديم",
+    "nonBinding": "اهتمام الشراكة غير ملزم. FarmExit تراجع الطلبات وتتوسط الخطوات التالية.",
+    "sections": {
+      "about": "عن هذه الفرصة",
+      "terms": "شروط الشراكة",
+      "expertise": "الخبرة والمعدات وصول السوق",
+      "requirements": "متطلبات الشريك",
+      "situation": "الوضع الحالي للمزرعة",
+      "overview": "نظرة على المزرعة",
+      "process": "ما بعد التقديم",
+      "recipient": "من يستلم طلبك"
+    }
+  }
+}

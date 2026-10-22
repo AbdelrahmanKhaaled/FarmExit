@@ -4,7 +4,7 @@ export function FilterBar({ children, className }: { children: React.ReactNode; 
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center gap-3 rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface-muted)] p-3',
+        'flex flex-wrap items-end gap-3 rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] p-4 shadow-[var(--admin-shadow-xs)]',
         className,
       )}
     >

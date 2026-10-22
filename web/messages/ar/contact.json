@@ -1,0 +1,9 @@
+{
+  "whatsapp": {
+    "ariaLabel": "تواصل مع FarmExit عبر واتساب",
+    "prefill": "مرحباً FarmExit، أحتاج مساعدة بخصوص حسابي أو طلب مزرعة.",
+    "tooltip": "تواصل مع FarmExit على واتساب",
+    "placeholderTooltip": "دعم واتساب — الرقم قريباً",
+    "placeholderAria": "دعم واتساب (قريباً)"
+  }
+}

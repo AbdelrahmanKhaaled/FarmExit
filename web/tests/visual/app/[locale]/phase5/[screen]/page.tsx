@@ -91,7 +91,61 @@ export default async function Fixture({ params }: { params: Promise<{ locale: st
         <MessagesInbox />
       </div>
     );
-  else if (screen === 'conversation') content = <MessageThread caseId="visual-case" userId="visual-user" />;
+  else if (screen === 'conversation')
+    content = (
+      <MessageThread
+        caseId="visual-case"
+        userId="visual-user"
+        preview={{
+          cases: [
+            {
+              id: 'visual-case',
+              requestId: '9001',
+              status: 'open',
+              createdAt: '2026-09-28T10:00:00.000Z',
+              closedAt: null,
+            },
+          ],
+          caseRow: {
+            id: 'visual-case',
+            requestId: '9001',
+            status: 'open',
+            createdAt: '2026-09-28T10:00:00.000Z',
+            closedAt: null,
+          },
+          request: {
+            id: '9001',
+            requestNumber: 'REQ-VIS-9001',
+            requestType: 'farmDetails',
+            status: 'approved',
+            farm: {
+              id: '1',
+              name: locale === 'ar' ? 'مزرعة نوبارية' : 'Nubaria reference farm',
+              governorate: null,
+            },
+          },
+          messages: [
+            {
+              id: '1',
+              senderId: 'visual-user',
+              body: locale === 'ar' ? 'مرحباً — هل يمكن مشاركة ملخص ترخيص المياه؟' : 'Hello — could you share the water licence summary?',
+              sentAt: '2026-09-28T15:20:00.000Z',
+              isRelayedCopy: false,
+            },
+            {
+              id: '2',
+              senderId: 'staff-1',
+              body:
+                locale === 'ar'
+                  ? 'مرحباً — المالك شارك ملخص ترخيص المياه. بئران مرخصان.'
+                  : 'Hello — the owner shared the water licence summary. Two licensed wells.',
+              sentAt: '2026-09-30T07:15:00.000Z',
+              isRelayedCopy: true,
+            },
+          ],
+        }}
+      />
+    );
   else if (screen === 'saved')
     content = (
       <div className="flex flex-col gap-24">

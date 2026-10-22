@@ -3,6 +3,7 @@ import { SavedListings, type SavedListing } from './SavedListings';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Icon } from '@/components/icons/Icon';
+import { requestDetailHref } from '@/features/my-messages/request-context';
 import { PortalHeading, PortalRow, VerificationCard } from './PortalUI';
 
 export type OverviewData = {
@@ -51,7 +52,10 @@ export function OverviewContent({ data }: { data: OverviewData }) {
   ] as const;
   return (
     <div className="flex flex-col gap-40 tablet:gap-48">
-      <PortalHeading title={v('welcome', { name: data.name })} description={v('intro')} />
+      <PortalHeading
+        title={newAccount ? v('welcome', { name: data.name }) : t('overview.welcome', { name: data.name })}
+        description={v('intro')}
+      />
       {data.capabilities.map((capability) => (
         <VerificationCard
           key={capability.id}
@@ -106,7 +110,7 @@ export function OverviewContent({ data }: { data: OverviewData }) {
                                 title={request.requestNumber}
                                 meta={request.requestType}
                                 status={request.status}
-                                href={`/my/requests/${request.id}`}
+                                href={requestDetailHref(request)}
                               />
                             </li>
                           ))

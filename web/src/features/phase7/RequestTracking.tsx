@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Surface';
 import { ButtonLink } from '@/components/ui/Button';
 import { PortalHeading, PortalStatus } from '@/features/my-farmexit/PortalUI';
 import { RequestDocumentsPanel } from '@/features/my-farms/RequestDocumentsPanel';
+import { MessageFarmExitPanel } from '@/features/my-messages/MessageFarmExitPanel';
 
 export function RequestTracking({
   id,
@@ -85,13 +86,7 @@ export function RequestTracking({
         </div>
         <div className="flex min-w-0 flex-col gap-24">
           <RequestDocumentsPanel requestId={id} canEdit={false} />
-          <Card surface="muted">
-            <h3 className="type-label-large">{t('communication')}</h3>
-            <p className="mt-12 type-body-caption text-text-muted">{t('communicationNote')}</p>
-            <ButtonLink href="/my/messages" variant="outline" className="mt-16">
-              {t('help')}
-            </ButtonLink>
-          </Card>
+          <MessageFarmExitPanel requestId={id} requestStatus={status} />
         </div>
       </div>
     </div>

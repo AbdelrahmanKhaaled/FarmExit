@@ -122,6 +122,9 @@ export class FarmManagementRequestResponseDto {
   @ApiProperty() farmName!: string;
   @ApiProperty({ enum: ProfessionalNeed }) professionalNeed!: ProfessionalNeed;
   @ApiProperty() status!: string;
+  @ApiProperty() visibility!: string;
+  @ApiProperty({ nullable: true, type: String }) publishedAt!: string | null;
+  @ApiProperty({ nullable: true, type: String }) submittedAt!: string | null;
   @ApiProperty({ type: [String], nullable: true }) managementTypes!: string[] | null;
   @ApiProperty({ nullable: true, type: String }) term!: string | null;
   @ApiProperty({ nullable: true, type: String }) currentSituation!: string | null;

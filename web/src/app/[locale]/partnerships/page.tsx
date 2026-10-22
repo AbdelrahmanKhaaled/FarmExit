@@ -1,15 +1,17 @@
+import { PartnershipHeroSearch } from '@/features/opportunity-marketplace/PartnershipHeroSearch';
+import { PartnershipMarketplace } from '@/features/opportunity-marketplace/PartnershipMarketplace';
+import { fetchPublicOpportunities, parseOpportunityFilters } from '@/lib/opportunities/public-opportunity';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
-import { accountLinks } from '@/components/layout/site-links';
 import { Container } from '@/components/layout/Container';
 import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
-import { ButtonLink } from '@/components/ui/Button';
-import { Surface } from '@/components/ui/Surface';
+import { PublicNavbar } from '@/components/layout/PublicNavbar';
+
+export const instant = false;
 
 export async function generateMetadata({ params }: PageProps<'/[locale]/partnerships'>): Promise<Metadata> {
   const { locale } = await params;
@@ -18,15 +20,19 @@ export async function generateMetadata({ params }: PageProps<'/[locale]/partners
   return { title: t('metaTitle'), description: t('metaDescription') };
 }
 
-export default async function PartnershipMarketplacePage({ params }: PageProps<'/[locale]/partnerships'>) {
+export default async function PartnershipMarketplacePage({ params, searchParams }: PageProps<'/[locale]/partnerships'>) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
+  const query = await searchParams;
+  const filters = parseOpportunityFilters(query as Record<string, string | string[] | undefined>);
+  const data =
+    (await fetchPublicOpportunities('partnerships', filters)) ?? { items: [], page: 1, pageSize: 20, total: 0 };
   const t = await getTranslations('partnership');
 
   return (
     <>
-      <Navbar />
+      <PublicNavbar />
       <main id="main" data-testid="partnership-marketplace">
         <section aria-labelledby="partnership-marketplace-title" className="fx-band-depth">
           <Container
@@ -50,18 +56,12 @@ export default async function PartnershipMarketplacePage({ params }: PageProps<'
               </h1>
               <p className="type-body-lead text-overlay-on-dark-body">{t('description')}</p>
             </div>
+            <PartnershipHeroSearch filters={filters} />
           </Container>
         </section>
 
         <Container size="app" className="flex flex-col gap-24 pt-24 pb-72 tablet:gap-32 tablet:pt-40 tablet:pb-96">
-          <Surface className="flex flex-col gap-16 p-28">
-            <p className="type-heading-h4 text-text-primary">{t('notLiveTitle')}</p>
-            <p className="type-body-default text-text-secondary">{t('notLiveBody')}</p>
-            <p className="type-body-caption text-text-muted">{t('nonBindingNote')}</p>
-            <ButtonLink href={accountLinks.signIn} variant="primary" size="md" className="self-start">
-              {t('ctaOwner')}
-            </ButtonLink>
-          </Surface>
+          <PartnershipMarketplace locale={locale} initial={data} filters={filters} />
         </Container>
       </main>
       <Footer />

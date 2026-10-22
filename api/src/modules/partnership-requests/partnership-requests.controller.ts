@@ -1,10 +1,12 @@
+import { PublicOpportunityListDto } from '../marketplace/dto/public-opportunity.dto';
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
 import { RequireCompletedProfile } from '../auth/auth-guards.decorators';
 import { CurrentAuth } from '../auth/auth.decorators';
 import type { AuthContext } from '../auth/auth.types';
-import { ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
+import { PublicOpportunityQueryDto } from '../marketplace/dto/public-opportunity-query.dto';
+import { PublicOpportunityDto } from '../marketplace/dto/public-opportunity.dto';
 import {
   CreatePartnershipRequestDto,
   PartnershipRequestListResponseDto,
@@ -40,13 +42,19 @@ export class PartnershipRequestsController {
 
   @Get()
   @ApiOkResponse({ type: PartnershipRequestListResponseDto })
-  list(@CurrentAuth() auth: AuthContext, @Query() query: ListFarmsQueryDto): Promise<PartnershipRequestListResponseDto> {
+  list(
+    @CurrentAuth() auth: AuthContext,
+    @Query() query: ListFarmsQueryDto,
+  ): Promise<PartnershipRequestListResponseDto> {
     return this.partnerships.listMine(auth.userId, query);
   }
 
   @Get(':id')
   @ApiOkResponse({ type: PartnershipRequestResponseDto })
-  get(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint): Promise<PartnershipRequestResponseDto> {
+  get(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id', ParseBigIntIdPipe) id: bigint,
+  ): Promise<PartnershipRequestResponseDto> {
     return this.partnerships.get(auth.userId, id);
   }
 
@@ -62,7 +70,27 @@ export class PartnershipRequestsController {
 
   @Post(':id/submit')
   @ApiOkResponse({ type: PartnershipRequestResponseDto })
-  submit(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint): Promise<PartnershipRequestResponseDto> {
+  submit(
+    @CurrentAuth() auth: AuthContext,
+    @Param('id', ParseBigIntIdPipe) id: bigint,
+  ): Promise<PartnershipRequestResponseDto> {
     return this.partnerships.submit(auth.userId, id);
+  }
+}
+
+@Controller('public/partnerships')
+export class PublicPartnershipMarketplaceController {
+  constructor(private readonly opportunities: PartnershipRequestsService) {}
+
+  @Get()
+  @ApiOkResponse({ type: PublicOpportunityListDto })
+  list(@Query() query: PublicOpportunityQueryDto): Promise<PublicOpportunityListDto> {
+    return this.opportunities.listPublic(query);
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: PublicOpportunityDto })
+  get(@Param('id', ParseBigIntIdPipe) id: bigint): Promise<PublicOpportunityDto> {
+    return this.opportunities.getPublic(id);
   }
 }

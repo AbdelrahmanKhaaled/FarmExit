@@ -2,10 +2,14 @@ import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageContainer } from '@/design-system';
+import { DetailWorkspace } from '@/design-system/workspace/DetailWorkspace';
 import { DataTable, Td, Th } from '@/design-system/workspace/DataTable';
-import { RefreshButton } from '@/features/admin/RefreshButton';
+import { AdminDetailHeader } from '@/features/admin/workspace/AdminDetailHeader';
+import { AdminDetailSection } from '@/features/admin/workspace/AdminDetailSection';
+import { EnumLabel } from '@/features/admin/workspace/EnumLabel';
 import { Link } from '@/i18n/navigation';
-import { apiFetchAdminResult, getAdminSession } from '@/lib/admin/session.server';
+import { apiFetchAdminResult } from '@/lib/admin/session.server';
+import { requireConsolePage } from '@/lib/admin/console-page';
 import type { AdminUserDetail } from '@/lib/api/types/admin-ops';
 import { routing } from '@/i18n/routing';
 
@@ -13,8 +17,7 @@ export default async function UserDetailPage({ params }: PageProps<'/[locale]/ad
   const { locale, id } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const session = await getAdminSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireConsolePage(locale, 'userDetail');
   const t = await getTranslations('admin.userDetail');
   const loc = await getLocale();
 
@@ -27,46 +30,73 @@ export default async function UserDetailPage({ params }: PageProps<'/[locale]/ad
 
   return (
     <PageContainer>
-      <div className="mb-6 flex justify-between">
-        <div>
-          <Link href="/admin/users" className="text-xs text-[var(--admin-brand-primary)] hover:underline">{t('back')}</Link>
-          <h1 className="mt-1 text-2xl font-semibold">{user.fullName ?? user.id}</h1>
-          <p className="text-sm text-[var(--admin-text-muted)]">{t('farmRolesHint')}</p>
-        </div>
-        <RefreshButton label={t('refresh')} />
-      </div>
-
-      <dl className="mb-8 grid gap-2 text-sm sm:grid-cols-2">
-        <div><dt className="text-[var(--admin-text-muted)]">{t('mobile')}</dt><dd>{user.mobile}</dd></div>
-        <div><dt className="text-[var(--admin-text-muted)]">{t('email')}</dt><dd>{user.email ?? '—'}</dd></div>
-        <div><dt className="text-[var(--admin-text-muted)]">{t('status')}</dt><dd>{user.accountStatus}</dd></div>
-        <div><dt className="text-[var(--admin-text-muted)]">{t('requestsCreated')}</dt><dd>{user.requestsCreatedCount}</dd></div>
-        <div><dt className="text-[var(--admin-text-muted)]">{t('registered')}</dt><dd>{new Intl.DateTimeFormat(loc, { dateStyle: 'medium' }).format(new Date(user.createdAt))}</dd></div>
-      </dl>
-
-      <h2 className="mb-2 text-sm font-semibold">{t('farmRelationships')}</h2>
-      <DataTable>
-        <thead>
-          <tr>
-            <Th>{t('col.farm')}</Th>
-            <Th>{t('col.role')}</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {user.farmRelationships.length === 0 ? (
-            <tr><Td colSpan={2}>{t('none')}</Td></tr>
-          ) : (
-            user.farmRelationships.map((r) => (
-              <tr key={`${r.farmId}-${r.relationshipRole}`}>
-                <Td>
-                  <Link href={`/admin/farms/${r.farmId}`} className="text-[var(--admin-brand-primary)] hover:underline">{r.farmName}</Link>
-                </Td>
-                <Td>{r.relationshipRole}</Td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </DataTable>
+      <AdminDetailHeader
+        backHref="/admin/users"
+        backLabel={t('back')}
+        title={user.fullName ?? user.id}
+        subtitle={t('farmRolesHint')}
+        status={user.accountStatus}
+        statusGroup="accountStatus"
+        refreshLabel={t('refresh')}
+      />
+      <DetailWorkspace
+        main={
+          <div className="space-y-6">
+            <AdminDetailSection title={t('profile')}>
+              <dl className="admin-detail-dl sm:grid-cols-2">
+                <div>
+                  <dt>{t('mobile')}</dt>
+                  <dd className="tabular-nums">{user.mobile}</dd>
+                </div>
+                <div>
+                  <dt>{t('email')}</dt>
+                  <dd>{user.email ?? '—'}</dd>
+                </div>
+                <div>
+                  <dt>{t('status')}</dt>
+                  <dd><EnumLabel value={user.accountStatus} group="accountStatus" /></dd>
+                </div>
+                <div>
+                  <dt>{t('requestsCreated')}</dt>
+                  <dd className="tabular-nums">{user.requestsCreatedCount}</dd>
+                </div>
+                <div>
+                  <dt>{t('registered')}</dt>
+                  <dd className="tabular-nums text-[var(--admin-text-muted)]">
+                    {new Intl.DateTimeFormat(loc, { dateStyle: 'medium' }).format(new Date(user.createdAt))}
+                  </dd>
+                </div>
+              </dl>
+            </AdminDetailSection>
+            <AdminDetailSection title={t('farmRelationships')}>
+              <DataTable embedded>
+                <thead>
+                  <tr>
+                    <Th>{t('col.farm')}</Th>
+                    <Th>{t('col.role')}</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {user.farmRelationships.length === 0 ? (
+                    <tr><Td colSpan={2}>{t('none')}</Td></tr>
+                  ) : (
+                    user.farmRelationships.map((r) => (
+                      <tr key={`${r.farmId}-${r.relationshipRole}`}>
+                        <Td>
+                          <Link href={`/admin/farms/${r.farmId}`} className="font-medium text-[var(--admin-brand-primary)] hover:underline">
+                            {r.farmName}
+                          </Link>
+                        </Td>
+                        <Td>{r.relationshipRole}</Td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </DataTable>
+            </AdminDetailSection>
+          </div>
+        }
+      />
     </PageContainer>
   );
 }

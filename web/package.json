@@ -11,14 +11,16 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "tokens": "node scripts/build-tokens.mjs && prettier --write src/styles/tokens.css src/styles/token-manifest.generated.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:unit": "node --experimental-strip-types --test src/features/my-messages/message-merge.test.ts src/features/my-messages/message-scroll.test.ts src/features/my-farmexit/unified-requests.test.ts"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
     "next": "16.4.0",
     "next-intl": "^4.14.9",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",

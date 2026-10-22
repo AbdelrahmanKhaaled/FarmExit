@@ -4,7 +4,7 @@ import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
+import { PublicNavbar } from '@/components/layout/PublicNavbar';
 import { AboutSection } from '@/features/home/AboutSection';
 import { CtaSection } from '@/features/home/CtaSection';
 import { FeaturedFarms } from '@/features/home/FeaturedFarms';
@@ -14,6 +14,8 @@ import { JourneysSection } from '@/features/home/JourneysSection';
 import { ManagementSection } from '@/features/home/ManagementSection';
 import { MarketInsights } from '@/features/home/MarketInsights';
 import { Testimonials } from '@/features/home/Testimonials';
+
+export const instant = false;
 
 /*
  * Homepage (Figma: Website Screens → Homepage / Desktop 1440 / EN, Tablet 1024 and Mobile 390 validation frames;
@@ -34,7 +36,7 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
 
   return (
     <>
-      <Navbar />
+      <PublicNavbar />
       <main id="main" data-testid="locale-root">
         <HomeHero />
         <AboutSection />

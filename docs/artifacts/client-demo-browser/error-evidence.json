@@ -1,0 +1,12 @@
+[
+  {
+    "scenario": "en public API-unavailable error state",
+    "status": "LIVE VERIFIED",
+    "http": 200
+  },
+  {
+    "scenario": "ar public API-unavailable error state",
+    "status": "LIVE VERIFIED",
+    "http": 200
+  }
+]

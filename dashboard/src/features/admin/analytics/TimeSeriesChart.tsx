@@ -26,8 +26,12 @@ export function TimeSeriesChart({
       <p className="mb-2 text-xs text-[var(--admin-text-muted)]">
         {t('granularityLabel', { granularity })} · {t('seriesTotal', { total })}
       </p>
+      <div className="mb-1 flex justify-between text-[0.65rem] tabular-nums text-[var(--admin-text-muted)]">
+        <span>0</span>
+        <span>{max}</span>
+      </div>
       <div
-        className="flex h-36 items-end gap-0.5"
+        className="flex h-44 items-end gap-1 border-b border-[var(--admin-border-subtle)] bg-[linear-gradient(to_top,var(--admin-bg-subtle)_1px,transparent_1px)] bg-size-[100%_25%]"
         role="img"
         aria-label={t('chartSummary', { total, points: series.length })}
       >

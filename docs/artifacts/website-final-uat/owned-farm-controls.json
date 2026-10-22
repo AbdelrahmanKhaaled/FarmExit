@@ -1,0 +1,322 @@
+[
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Open menu",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Sign out",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Sign out",
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "name",
+    "id": "_R_3cslritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "governorate",
+    "id": "_R_5cslritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "areaName",
+    "id": "_R_7cslritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "description",
+    "id": "_R_9cslritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "submit",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Save changes",
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "facilityType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "facilityType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "facilityType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "radio",
+    "name": "facilityType",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "name",
+    "id": "_R_dd9klritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "description",
+    "id": "_R_ld9klritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "governorate",
+    "id": "_R_td9klritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "areaName",
+    "id": "_R_15d9klritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "submit",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Add facility",
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "file",
+    "name": "file",
+    "id": "",
+    "label": "Choose photo",
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "altEn",
+    "id": "_R_1t9slritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "altAr",
+    "id": "_R_2d9slritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "checkbox",
+    "name": "isIllustrative",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "submit",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Upload",
+    "disabled": false
+  },
+  {
+    "tag": "SELECT",
+    "type": null,
+    "name": "listingType",
+    "id": "_R_3u4lritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false,
+    "options": [
+      {
+        "value": "sale",
+        "label": "Sale"
+      },
+      {
+        "value": "rent",
+        "label": "Rent"
+      }
+    ]
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "askingPrice",
+    "id": "_R_lu4lritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "statedSalePricePerFeddan",
+    "id": "_R_15u4lritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": null,
+    "name": "listingDescription",
+    "id": "_R_7u4lritpet59er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "submit",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Submit listing request",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "next-logo",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "Cache disabled",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Collapse Cache disabled badge",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  }
+]

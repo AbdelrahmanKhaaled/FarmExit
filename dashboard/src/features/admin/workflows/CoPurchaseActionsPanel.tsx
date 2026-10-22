@@ -3,15 +3,23 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/design-system';
-import { addCoPurchaseMemberAction, updateCoPurchaseGroupAction } from '@/features/admin/actions/co-purchase';
+import {
+  addCoPurchaseMemberAction,
+  updateCoPurchaseGroupAction,
+  updateCoPurchaseMemberAction,
+} from '@/features/admin/actions/co-purchase';
 import { StaffAssignmentForm, type StaffOption } from '@/features/admin/workspace/StaffAssignmentForm';
+
+type MemberRow = { id: string; proposalId: string; proposedSharePercent: string; memberStatus: string };
 
 export function CoPurchaseActionsPanel({
   groupId,
   staffOptions,
+  members = [],
 }: {
   groupId: string;
   staffOptions: StaffOption[];
+  members?: MemberRow[];
 }) {
   const t = useTranslations('admin.coPurchaseDetail');
   const [pending, start] = useTransition();
@@ -22,7 +30,7 @@ export function CoPurchaseActionsPanel({
   const [notes, setNotes] = useState('');
 
   return (
-    <div className="space-y-4 rounded-[var(--admin-radius-lg)] border border-[var(--admin-border-subtle)] bg-[var(--admin-surface)] p-4">
+    <div className="admin-action-panel space-y-4">
       <h2 className="text-sm font-semibold">{t('actionsTitle')}</h2>
       <p className="text-xs text-[var(--admin-text-muted)]">{t('nonBinding')}</p>
       {message ? <p className="text-xs">{message}</p> : null}
@@ -91,6 +99,42 @@ export function CoPurchaseActionsPanel({
         />
         <Button type="submit" disabled={pending}>{t('addMemberBtn')}</Button>
       </form>
+
+      {members.length > 0 ? (
+        <div className="space-y-2 border-t border-[var(--admin-border-subtle)] pt-3">
+          <p className="text-xs font-medium">{t('updateMember')}</p>
+          {members.map((m) => (
+            <form
+              key={m.id}
+              className="grid gap-1 rounded border p-2 text-xs"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const memberStatus = String(fd.get('memberStatus') ?? '');
+                const shareRaw = String(fd.get('share') ?? '').trim();
+                setMessage(null);
+                start(async () => {
+                  const res = await updateCoPurchaseMemberAction(groupId, m.id, {
+                    memberStatus,
+                    ...(shareRaw ? { proposedSharePercent: Number(shareRaw) } : {}),
+                  });
+                  setMessage(res.ok ? t('success') : res.message ?? t('error'));
+                });
+              }}
+            >
+              <p className="font-mono">{m.proposalId}</p>
+              <select name="memberStatus" defaultValue={m.memberStatus} className="rounded border px-2 py-1">
+                <option value="candidate">{t('memberCandidate')}</option>
+                <option value="shortlisted">{t('memberShortlisted')}</option>
+                <option value="withdrawn">{t('memberWithdrawn')}</option>
+                <option value="archived">{t('memberArchived')}</option>
+              </select>
+              <input name="share" defaultValue={m.proposedSharePercent} placeholder={t('sharePercent')} className="rounded border px-2 py-1" />
+              <Button type="submit" disabled={pending} variant="secondary">{t('saveMember')}</Button>
+            </form>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

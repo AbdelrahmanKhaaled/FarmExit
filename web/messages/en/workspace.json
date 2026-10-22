@@ -6,8 +6,8 @@
     "overview": "Overview",
     "farms": "My farms",
     "requests": "My requests",
-    "applications": "Applications",
-    "saved": "Saved listings",
+    "applications": "My applications",
+    "saved": "Saved",
     "messages": "Messages",
     "documents": "Documents",
     "notifications": "Notifications",
@@ -421,31 +421,64 @@
   },
   "messages": {
     "title": "Messages",
-    "intro": "Private conversations with FarmExit about your requests. You never message other buyers or owners directly.",
+    "intro": "Every conversation is with FarmExit. Phone numbers and emails are never shared between users.",
     "loading": "Loading messages…",
     "loadError": "Could not load messages.",
     "empty": "No FarmExit conversations yet.",
     "emptyNote": "When FarmExit opens a case on your request, it will appear here.",
+    "inboxTitle": "Conversations",
+    "selectConversation": "Select a conversation",
+    "selectConversationHint": "Choose a case from the list to read messages from FarmExit.",
     "caseLabel": "Case #{id}",
+    "requestRef": "Request #{id}",
+    "requestContextFallback": "FarmExit conversation",
     "relatedRequest": "Related request",
     "back": "Back to messages",
     "conversationTitle": "Conversation with FarmExit",
     "mediationNote": "FarmExit mediates this conversation. Other parties are not shown.",
+    "privacyBanner": "This conversation is with FarmExit. Other parties never see your phone number or email — FarmExit relays questions and shares only what is appropriate.",
     "history": "Message history",
     "noMessages": "No messages yet.",
     "you": "You",
     "farmExit": "FarmExit",
+    "messageMetaYou": "You · {time}",
+    "messageMetaFarmExit": "FarmExit · {time}",
     "composerLabel": "Your message",
+    "composerPlaceholder": "Write a message to FarmExit…",
+    "composerDisabledPreview": "Composer is disabled in visual preview.",
     "send": "Send message",
     "sending": "Sending…",
     "sendError": "Could not send the message.",
+    "realtimeReconnecting": "Reconnecting for new messages…",
+    "jumpToLatest": "New messages — jump to latest",
     "caseClosed": "This case is closed. You cannot send new messages.",
     "openCase": "Open FarmExit messages",
     "opening": "Opening…",
     "openError": "Could not open messages for this request.",
     "noAgent": "FarmExit has not assigned a case agent yet. Try again after your request is in review.",
+    "messagingUnavailable": "Messages are available after you submit this request.",
+    "requestContextLoading": "Loading request details…",
+    "viewRequest": "View request",
+    "errors": {
+      "unauthorized": "Sign in to message FarmExit.",
+      "forbidden": "You cannot open messages for this request.",
+      "notFound": "This request was not found or is no longer available.",
+      "conflict": "Messages are not available for this request in its current state.",
+      "network": "Could not reach FarmExit. Check your connection and try again."
+    },
+    "requestTypes": {
+      "farmListing": "Farm listing request",
+      "farmManagement": "Farm management request",
+      "partnership": "Partnership request",
+      "partnershipApplication": "Partnership application",
+      "professionalVerification": "Professional verification",
+      "farmDetails": "Farm details request",
+      "farmPurchaseProposal": "Purchase proposal"
+    },
     "statuses": {
       "open": "Open",
+      "waitingCustomer": "Waiting for you",
+      "waitingOwner": "In progress",
       "closed": "Closed"
     }
   },
@@ -915,5 +948,57 @@
     "chooseGovernorate": "Select governorates",
     "otherGovernorate": "Other governorate",
     "addArea": "Add governorate"
+  },
+  "unifiedRequests": {
+    "intro": "Every request you start with FarmExit appears here. We review and mediate each one — approval does not mean public publication.",
+    "filtersLabel": "Filter requests",
+    "filters": {
+      "all": "All",
+      "farmListing": "Farm listings",
+      "farmDetails": "Farm details",
+      "farmManagement": "Farm management",
+      "partnership": "Partnerships",
+      "professionalVerification": "Professional verification",
+      "farmPurchaseProposal": "Purchase proposals",
+      "other": "Other"
+    },
+    "sections": {
+      "active": "Active / in progress",
+      "decided": "Closed / decided"
+    },
+    "actions": {
+      "continueDraft": "Continue draft",
+      "updateInfo": "Update information",
+      "track": "Track review",
+      "view": "View request"
+    },
+    "updated": "Updated {date}",
+    "emptyTitle": "No requests yet",
+    "browseCta": "Browse farms",
+    "pagination": "Requests pages",
+    "prev": "Previous",
+    "next": "Next",
+    "attentionTitle": "Needs your attention"
+  },
+  "unifiedApplications": {
+    "title": "My applications",
+    "intro": "Applications you submitted to FarmExit-mediated partnership opportunities.",
+    "filtersLabel": "Filter applications",
+    "filters": {
+      "all": "All",
+      "partnership": "Partnership",
+      "management": "Management"
+    },
+    "sections": {
+      "inProgress": "In progress",
+      "decided": "Decided"
+    },
+    "actions": {
+      "continue": "Continue application",
+      "track": "Track application"
+    },
+    "managementUnavailable": "Management opportunity applications are not available yet. FarmExit will add them after the public management marketplace launches.",
+    "emptyBody": "When you apply to a published partnership opportunity, it will appear here.",
+    "discoverCta": "Learn about partnerships"
   }
 }

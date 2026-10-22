@@ -1,0 +1,346 @@
+[
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Open menu",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Close",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Buy",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Rent",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Management",
+    "disabled": false
+  },
+  {
+    "tag": "SELECT",
+    "type": null,
+    "name": "location",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false,
+    "options": [
+      {
+        "value": "",
+        "label": "All Egypt"
+      },
+      {
+        "value": "beheira",
+        "label": "Beheira"
+      },
+      {
+        "value": "ismailia",
+        "label": "Ismailia"
+      },
+      {
+        "value": "menoufia",
+        "label": "Menoufia"
+      },
+      {
+        "value": "minya",
+        "label": "Minya"
+      },
+      {
+        "value": "fayoum",
+        "label": "Fayoum"
+      }
+    ]
+  },
+  {
+    "tag": "SELECT",
+    "type": null,
+    "name": "activity",
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false,
+    "options": [
+      {
+        "value": "",
+        "label": "All activities"
+      },
+      {
+        "value": "vegetables",
+        "label": "Vegetables"
+      },
+      {
+        "value": "fieldCrops",
+        "label": "Field crops"
+      }
+    ]
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "sizeMin",
+    "id": "",
+    "label": "Area (feddans) minimum",
+    "placeholder": "From",
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "sizeMax",
+    "id": "",
+    "label": "Area (feddans) maximum",
+    "placeholder": "To",
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "priceMin",
+    "id": "",
+    "label": "Budget (EGP) minimum",
+    "placeholder": "From",
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "INPUT",
+    "type": "number",
+    "name": "priceMax",
+    "id": "",
+    "label": "Budget (EGP) maximum",
+    "placeholder": "To",
+    "text": null,
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "submit",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "Search farms",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "All0",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "For sale0",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "For rent0",
+    "disabled": false
+  },
+  {
+    "tag": "SELECT",
+    "type": null,
+    "name": null,
+    "id": "_R_2955er9etb_",
+    "label": null,
+    "placeholder": null,
+    "text": null,
+    "disabled": false,
+    "options": [
+      {
+        "value": "newest",
+        "label": "Newest listings"
+      },
+      {
+        "value": "priceAsc",
+        "label": "Price: low to high"
+      },
+      {
+        "value": "priceDesc",
+        "label": "Price: high to low"
+      }
+    ]
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "how-it-works-tab-buyers",
+    "label": null,
+    "placeholder": null,
+    "text": "Buyers & renters",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "how-it-works-tab-owners",
+    "label": null,
+    "placeholder": null,
+    "text": "Farm owners",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "how-it-works-tab-managers",
+    "label": null,
+    "placeholder": null,
+    "text": "Farm managers",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Previous testimonial",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Next testimonial",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "",
+    "disabled": true
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Copy Error Info",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": null,
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": "button",
+    "name": null,
+    "id": "",
+    "label": "Expand client/server diff",
+    "placeholder": null,
+    "text": "client/server diff",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "next-logo",
+    "label": "Open Next.js Dev Tools",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Open issues overlay",
+    "placeholder": null,
+    "text": "01 Issue",
+    "disabled": false
+  },
+  {
+    "tag": "BUTTON",
+    "type": null,
+    "name": null,
+    "id": "",
+    "label": "Collapse issues badge",
+    "placeholder": null,
+    "text": "",
+    "disabled": false
+  }
+]

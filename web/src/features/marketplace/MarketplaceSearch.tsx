@@ -2,7 +2,7 @@
 
 import type { FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { farmTypes, listingPurposes, type FarmType } from '@/lib/domain/enums';
+import { listingPurposes } from '@/lib/domain/enums';
 import { governorates, type GovernorateKey } from '@/lib/data/marketplace';
 import { SearchField, SearchPanel, SearchSubmit, SearchTabs } from '@/features/search/SearchBar';
 import { defaultState, type MarketplaceState } from './url-state';
@@ -28,7 +28,6 @@ export function MarketplaceSearchView({
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const gov = (data.get('gov') as GovernorateKey | '') || null;
-    const type = (data.get('type') as FarmType | '') || null;
     setState({
       ...state,
       page: 1,
@@ -36,7 +35,7 @@ export function MarketplaceSearchView({
         ...f,
         governorate: gov,
         area: gov === f.governorate ? f.area : null,
-        farmTypes: type ? [type] : [],
+        farmTypes: [],
       },
     });
   }
@@ -48,7 +47,7 @@ export function MarketplaceSearchView({
       onSubmit={onSubmit}
       className="flex flex-col"
       // Remount when the applied values change so the uncontrolled selects show them.
-      key={`${f.governorate}-${f.farmTypes.join()}`}
+      key={`${f.governorate}-${f.purpose}`}
     >
       <SearchTabs
         label={t('search.modesLabel')}
@@ -65,22 +64,13 @@ export function MarketplaceSearchView({
             </option>
           ))}
         </SearchField>
-        <SearchField
-          label={t('search.farmType.label')}
-          name="type"
-          defaultValue={f.farmTypes.length === 1 ? f.farmTypes[0] : ''}
-        >
-          <option value="">{t('search.farmType.any')}</option>
-          {farmTypes.map((type) => (
-            <option key={type} value={type}>
-              {t(`options.farmTypes.${type}`)}
-            </option>
-          ))}
-        </SearchField>
-        <SearchField label={t('search.area.label')} name="size" defaultValue="">
+        <p className="type-body-caption text-overlay-on-dark-muted tablet:col-span-2">
+          {t('filters.unavailableSection')}: {t('search.farmType.label')}
+        </p>
+        <SearchField label={t('search.area.label')} name="size" defaultValue="" disabled>
           <option value="">{t('search.area.any')}</option>
         </SearchField>
-        <SearchField label={t('search.price.label')} name="price" defaultValue="">
+        <SearchField label={t('search.price.label')} name="price" defaultValue="" disabled>
           <option value="">{t('search.price.any')}</option>
         </SearchField>
         <SearchSubmit>{t('search.submit')}</SearchSubmit>

@@ -27,7 +27,8 @@
       "cooldownGeneric": "يرجى الانتظار قبل طلب رمز جديد."
     },
     "panelTagline": "عمليات أجريتك راقية",
-    "panelBody": "صفقات مزارع بوساطة فارم إكزيت، قوائم موثّقة، وتواصل منسّق مع الملاك — من منصة واحدة."
+    "panelBody": "صفقات مزارع بوساطة فارم إكزيت، قوائم موثّقة، وتواصل منسّق مع الملاك — من منصة واحدة.",
+    "panelFooter": "فارم إكزيت · عمليات الموظفين"
   },
   "nav": {
     "workspaceSubtitle": "مساحة العمليات",
@@ -75,6 +76,8 @@
     "language": "اللغة",
     "roleSuperAdmin": "مشرف أعلى",
     "roleAdmin": "مسؤول",
+    "roleCaseAgent": "وكيل الحالات",
+    "roleReviewer": "مراجع",
     "roleStaff": "موظف"
   },
   "overview": {
@@ -122,6 +125,7 @@
     "quick": {
       "reviewRequests": "مراجعة الطلبات",
       "reviewListings": "مراجعة القوائم",
+      "communications": "صندوق التواصل",
       "analytics": "عرض التحليلات"
     },
     "loadError": "تعذّر تحميل مؤشرات اللوحة.",
@@ -247,8 +251,18 @@
     "created": "تاريخ الإنشاء",
     "relationships": "العلاقات",
     "recentRequests": "طلبات حديثة",
+    "privateLocation": "الموقع الخاص (سري)",
+    "createEvaluation": "إنشاء تقييم FarmExit",
     "none": "لا يوجد",
     "col": { "role": "الدور", "user": "المستخدم", "request": "الطلب", "type": "النوع", "status": "الحالة", "created": "تاريخ الإنشاء" }
+  },
+  "privateLocation": {
+    "confidential": "الإحداثيات الدقيقة معلومات تشغيلية سرية.",
+    "staffReadOnly": "الموظفون يمكنهم العرض فقط. التحديث يتم من المالك عبر الموقع.",
+    "denied": "الموقع الخاص غير متاح لدورك.",
+    "unavailable": "تعذر تحميل الموقع الخاص.",
+    "noCoordinates": "لا يوجد موقع محفوظ بعد.",
+    "road": "أقرب طريق رئيسي"
   },
   "requestsPage": {
     "eyebrow": "إدارة الطلبات",
@@ -313,6 +327,7 @@
     "back": "← المستخدمون",
     "refresh": "تحديث",
     "farmRolesHint": "الوصول مرتبط بالمزرعة عبر العلاقات — وليس دورًا عامًا مثل مالك/مشتري.",
+    "profile": "الملف الشخصي",
     "mobile": "الجوال",
     "email": "البريد",
     "status": "حالة الحساب",
@@ -349,7 +364,27 @@
     "emptyTitle": "لا توجد تقييمات",
     "emptyDesc": "تظهر هنا تقييمات FarmExit المسجلة.",
     "col": { "farm": "المزرعة", "status": "الحالة", "score": "الدرجة", "reviewer": "المراجع", "created": "تاريخ الإنشاء" },
+    "create": "إنشاء تقييم",
     "pagination": { "showing": "عرض {from}–{to} من {total}", "prev": "السابق", "next": "التالي", "page": "صفحة {page} من {pages}" }
+  },
+  "evaluationCreate": {
+    "back": "← التقييمات",
+    "title": "إنشاء تقييم FarmExit",
+    "desc": "ينشئ تقييمًا كمسودة أو قيد المراجعة. النشر يتطلب موافقة إدارية منفصلة.",
+    "internalOnly": "تقييم داخلي للموظفين — وليس تقييمًا عامًا.",
+    "farmId": "معرف المزرعة",
+    "listingRequestId": "معرف طلب الإدراج (اختياري)",
+    "scoreValue": "قيمة الدرجة",
+    "scoreMax": "الحد الأقصى للدرجة",
+    "methodologyName": "اسم المنهجية",
+    "methodologyVersion": "إصدار المنهجية",
+    "reviewScopeEn": "نطاق المراجعة (إنجليزي)",
+    "internalNotes": "ملاحظات داخلية",
+    "status": "الحالة الأولية",
+    "confirm": "أؤكد أن التقييم مبني على فحوص موثقة وليس درجات مُختلقة.",
+    "submit": "إنشاء التقييم",
+    "submitting": "جارٍ الإنشاء…",
+    "error": "تعذر إنشاء التقييم."
   },
   "evaluationDetail": {
     "back": "← التقييمات",
@@ -369,7 +404,23 @@
     "save": "حفظ التغييرات",
     "saved": "تم الحفظ.",
     "error": "تعذر الحفظ.",
+    "editCheck": "تعديل",
+    "addOrUpdateCheck": "إضافة أو تحديث فحص",
+    "checkKeyHint": "استخدم مفتاح معيار معتمد (أمثلة: {examples}).",
+    "evidenceDocumentId": "معرف مستند الدليل (اختياري)",
+    "saveCheck": "حفظ الفحص",
+    "checkSaved": "تم حفظ الفحص.",
     "col": { "check": "الفحص", "checkStatus": "الحالة", "notes": "ملاحظات" }
+  },
+  "requestStatus": {
+    "title": "تغيير الحالة",
+    "hint": "لطلبات الموحدة العامة فقط. لا يستبدل مسارات الوحدات المتخصصة.",
+    "reason": "السبب (مطلوب للإغلاق)",
+    "reasonRequired": "السبب مطلوب.",
+    "confirm": "أؤكد نقل الطلب إلى «{status}». هذا لا يُكمِل بيعًا أو دفعًا.",
+    "submit": "تطبيق الحالة",
+    "success": "تم تحديث الحالة.",
+    "error": "تعذر تحديث الحالة."
   },
   "communicationsPage": {
     "eyebrow": "رسائل وسيطة",
@@ -381,6 +432,7 @@
     "filter": "تطبيق الفلاتر",
     "emptyTitle": "لا توجد قضايا",
     "emptyDesc": "تظهر قضايا التواصل عند فتح الوساطة لطلب.",
+    "caseLabel": "قضية #{id}",
     "col": { "case": "القضية", "request": "الطلب", "status": "الحالة", "agent": "وكيل القضية" },
     "pagination": { "showing": "عرض {from}–{to} من {total}", "prev": "السابق", "next": "التالي", "page": "صفحة {page} من {pages}" }
   },
@@ -390,6 +442,8 @@
     "title": "قضية {id}",
     "openRequest": "فتح الطلب المرتبط",
     "requestContext": "الطلب",
+    "assignedStaff": "وكيل القضية",
+    "caseContext": "سياق القضية",
     "caseStatus": "حالة القضية",
     "saveStatus": "تحديث الحالة",
     "statusSaved": "تم تحديث الحالة.",
@@ -398,6 +452,7 @@
     "selectConversation": "اختر مشاركًا لعرض الرسائل.",
     "noMessages": "لا توجد رسائل في هذه المحادثة بعد.",
     "relayedCopy": "نسخة مُرحّلة",
+    "staffMessage": "الموظف",
     "sendTo": "رسالة إلى {name}",
     "send": "إرسال رسالة موظف",
     "sent": "تم إرسال الرسالة.",
@@ -414,7 +469,9 @@
     "relayConfirmButton": "تأكيد الترحيل",
     "cancel": "إلغاء",
     "relayDone": "تم الترحيل.",
-    "error": "فشل الإجراء."
+    "error": "فشل الإجراء.",
+    "realtimeReconnecting": "جارٍ إعادة الاتصال للتحديثات المباشرة…",
+    "loadOlder": "تحميل رسائل أقدم"
   },
   "requestDocuments": {
     "title": "مراجعة المستندات",
@@ -426,6 +483,7 @@
     "error": "فشلت المراجعة."
   },
   "requestForwarding": {
+    "openOnRequestHub": "فتح لوحة الترحيل الكاملة في مركز الطلب",
     "title": "ترحيل الطلب",
     "nonbinding": "الترحيل غير ملزم ولا يُكمِل بيعًا ولا يُنشئ علاقات مزرعة.",
     "empty": "لا توجد سجلات ترحيل بعد.",
@@ -435,7 +493,29 @@
     "submit": "إنشاء ترحيل",
     "success": "تم إنشاء الترحيل.",
     "error": "فشل الترحيل.",
-    "col": { "recipient": "المستلم", "status": "الحالة", "ownerDecision": "قرار المستلم", "created": "تاريخ الإنشاء" }
+    "col": {
+      "id": "معرف الترحيل",
+      "recipient": "معرف المستخدم المستلم",
+      "status": "الحالة",
+      "ownerDecision": "رد المالك",
+      "created": "تاريخ الإرسال",
+      "decided": "تاريخ التسجيل"
+    },
+    "recordTitle": "تسجيل رد المالك",
+    "recordMediatedNote": "سجّل ردًا وصل عبر موظفي FarmExit. هذا لا يُكمِل بيعًا أو إيجارًا أو عقدًا.",
+    "decisionLabel": "رد المالك",
+    "decisionPlaceholder": "اختر الرد",
+    "decisionReason": "ملاحظات (اختياري، حتى 1000 حرف)",
+    "confirmCheckbox": "أؤكد أن هذا يعكس رد المالك المستلم عبر وساطة FarmExit.",
+    "decisionSubmit": "تسجيل رد المالك",
+    "decisionSubmitting": "جارٍ التسجيل…",
+    "decisionSuccess": "تم تسجيل رد المالك.",
+    "decisionError": "تعذر تسجيل رد المالك.",
+    "ownerDecisionValues": {
+      "accepted": "مقبول",
+      "declined": "مرفوض",
+      "pending": "قيد الانتظار"
+    }
   },
   "auditPage": {
     "eyebrow": "الأمان",
@@ -586,9 +666,25 @@
     "proposalId": "معرف عرض الشراء",
     "sharePercent": "حصة الاهتمام %",
     "addMemberBtn": "إضافة عضو",
+    "updateMember": "تحديث عضو",
+    "memberCandidate": "مرشح",
+    "memberShortlisted": "في القائمة المختصرة",
+    "memberWithdrawn": "منسحب",
+    "memberArchived": "مؤرشف",
+    "saveMember": "حفظ العضو",
     "success": "تم الحفظ.",
     "error": "فشل الإجراء.",
     "col": { "proposal": "العرض", "share": "الاهتمام %", "status": "الحالة" }
+  },
+  "opportunityPublish": {
+    "title": "السوق العام",
+    "statePublished": "منشور على الموقع العام.",
+    "stateApprovedPrivate": "موافق عليه — خاص (غير معروض في السوق العام بعد).",
+    "stateNotEligible": "غير مؤهل للنشر في الحالة الحالية.",
+    "confirmHint": "النشر يجعل ملخصاً آمناً لهذه الفرصة متاحاً للعامة على FarmExit. لا يشارك بيانات اتصال أو مستندات خاصة.",
+    "publish": "نشر الفرصة",
+    "success": "تم نشر الفرصة.",
+    "error": "تعذّر نشر هذه الفرصة."
   },
   "farmManagementPage": {
     "eyebrow": "الخدمات المهنية",
@@ -605,6 +701,10 @@
     "refresh": "تحديث",
     "noAutoManager": "الموافقة لا تعيّن مدير مزرعة ولا تنشئ علاقات مزرعة.",
     "need": "الاحتياج المهني",
+    "farm": "المزرعة",
+    "managementTypes": "أنواع الإدارة",
+    "goals": "الأهداف",
+    "situation": "الوضع الحالي",
     "unifiedRequest": "الطلب الموحد",
     "col": { "decision": "القرار", "comment": "تعليق" }
   },
@@ -646,7 +746,8 @@
     "nonBinding": "نتائج الشراكة وسيطة وغير ملزمة.",
     "unifiedRequest": "الطلب الموحد",
     "applications": "التقديمات المرتبطة",
-    "col": { "id": "التقديم", "status": "الحالة", "decision": "القرار", "comment": "تعليق" }
+    "noApplications": "لا توجد تقديمات مرتبطة بعد.",
+    "col": { "id": "التقديم", "farm": "المزرعة", "status": "الحالة", "decision": "القرار", "comment": "تعليق" }
   },
   "partnershipApplicationDetail": {
     "back": "← التقديمات",
@@ -676,6 +777,81 @@
     "farm": "المزرعة",
     "unifiedRequest": "الطلب الموحد",
     "col": { "decision": "القرار", "comment": "تعليق" }
+  },
+  "workflowCommon": {
+    "summary": "ملخص",
+    "reviewHistory": "سجل المراجعة",
+    "noReviews": "لا يوجد سجل مراجعة بعد.",
+    "relatedLinks": "روابط ذات صلة"
+  },
+  "pagination": {
+    "showing": "عرض {from}–{to} من {total}",
+    "showingEmpty": "لا توجد نتائج",
+    "prev": "السابق",
+    "next": "التالي",
+    "page": "صفحة {page} من {pages}"
+  },
+  "enums": {
+    "status": {
+      "active": "نشط",
+      "draft": "مسودة",
+      "submitted": "مُقدَّم",
+      "underFarmExitReview": "قيد مراجعة فارم إكزيت",
+      "changesRequested": "مطلوب تعديلات",
+      "approved": "موافق عليه",
+      "published": "منشور",
+      "rejected": "مرفوض",
+      "withdrawn": "مُسحوب",
+      "closed": "مغلق",
+      "pending": "قيد الانتظار",
+      "uploaded": "تم الرفع",
+      "inReview": "قيد المراجعة",
+      "underReview": "قيد المراجعة",
+      "verified": "موثّق",
+      "notApproved": "غير موافق عليه",
+      "collectingInterest": "جمع اهتمام",
+      "underStaffFollowup": "متابعة الموظفين",
+      "superseded": "مستبدل"
+    },
+    "requestType": {
+      "farmListing": "طلب إدراج مزرعة",
+      "farmManagement": "إدارة مزرعة",
+      "partnership": "شراكة",
+      "partnershipApplication": "طلب شراكة",
+      "professionalVerification": "التحقق المهني",
+      "professionalApplication": "طلب مهني",
+      "farmDetails": "استفسار تفاصيل المزرعة",
+      "farmPurchaseProposal": "عرض شراء"
+    },
+    "professionalType": {
+      "farmManager": "مدير مزرعة",
+      "agriculturalEngineer": "مهندس زراعي"
+    },
+    "listingType": {
+      "sale": "بيع",
+      "rent": "إيجار"
+    },
+    "adminRole": {
+      "superAdmin": "مشرف أعلى",
+      "admin": "مسؤول"
+    },
+    "accountStatus": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "suspended": "موقوف"
+    },
+    "caseStatus": {
+      "open": "مفتوح",
+      "waitingCustomer": "بانتظار العميل",
+      "waitingOwner": "بانتظار المالك",
+      "closed": "مغلق"
+    },
+    "proposalKind": {
+      "installment": "تقسيط",
+      "exchange": "مبادلة",
+      "mixed": "مختلط",
+      "cash": "نقدي"
+    }
   },
   "forbidden": {
     "title": "الوصول مرفوض",

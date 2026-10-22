@@ -25,11 +25,11 @@ export async function MyFarmExitLayout({ session, children, title }: Props) {
 
   return (
     <WizardLayoutGate wizard={children}>
-      <div className="pb-96 tablet:pb-0">
+      <div className="pb-[calc(96px+env(safe-area-inset-bottom))] tablet:pb-0">
         <Navbar user={navUser} />
         <main className="min-h-[calc(100dvh-78px)] bg-bg-page py-24 tablet:py-40" data-testid="my-farmexit">
           <h1 className="sr-only">{title ?? t('title')}</h1>
-          <Container size="app" className="grid items-start gap-24 desktop:grid-cols-[310px_minmax(0,1fr)]">
+          <Container size="app" className="grid items-stretch gap-24 desktop:grid-cols-[310px_minmax(0,1fr)]">
             <aside className="flex min-w-0 flex-col gap-16 desktop:rounded-card desktop:border desktop:border-border-hairline desktop:bg-bg-surface desktop:p-16 desktop:effect-premium-rest">
               <div className="flex flex-wrap items-center gap-12 desktop:block">
                 <div className="hidden items-center gap-12 px-8 py-8 tablet:flex">

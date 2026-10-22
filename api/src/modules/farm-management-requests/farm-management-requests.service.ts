@@ -1,10 +1,20 @@
+import type { PublicOpportunityListDto } from '../marketplace/dto/public-opportunity.dto';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Farm, type FarmManagementDetail, type Request } from '../../generated/prisma/client';
 import { FarmRelationshipRole, RequestType, RequestVisibility } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
 import { forbidden } from '../authorization/authorization.errors';
 import { FarmAccessService } from '../authorization/farm-access.service';
+import type { PublicOpportunityQueryDto } from '../marketplace/dto/public-opportunity-query.dto';
+import { toPublicOpportunityDto } from '../marketplace/public-opportunity-map';
+import {
+  assertPublicOpportunityRanges,
+  buildPublicOpportunityWhere,
+  publicOpportunityListSelect,
+  publicOpportunityOrderBy,
+} from '../marketplace/public-opportunity-query';
 import { DEFAULT_PAGE_SIZE, type ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
+import { RequestType } from '../../generated/prisma/enums';
 import { newRequestNumber } from '../requests/request-number';
 import {
   OWNER_EDITABLE_STATUSES,
@@ -27,6 +37,34 @@ export class FarmManagementRequestsService {
     private readonly prisma: PrismaService,
     private readonly farmAccess: FarmAccessService,
   ) {}
+
+  /** Read-only projection. Approval never grants public visibility or a publication timestamp. */
+  async listPublic(query: PublicOpportunityQueryDto): Promise<PublicOpportunityListDto> {
+    assertPublicOpportunityRanges(query);
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? DEFAULT_PAGE_SIZE;
+    const where = buildPublicOpportunityWhere(RequestType.farmManagement, query);
+    const [total, rows] = await Promise.all([
+      this.prisma.request.count({ where }),
+      this.prisma.request.findMany({
+        where,
+        orderBy: publicOpportunityOrderBy(query.sort),
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: publicOpportunityListSelect,
+      }),
+    ]);
+    return { items: rows.map(toPublicOpportunityDto), page, pageSize, total };
+  }
+
+  async getPublic(id: bigint) {
+    const row = await this.prisma.request.findFirst({
+      where: { AND: [buildPublicOpportunityWhere(RequestType.farmManagement, {}), { id }] },
+      select: publicOpportunityListSelect,
+    });
+    if (!row) throw notFound();
+    return toPublicOpportunityDto(row);
+  }
 
   async create(
     userId: bigint,
@@ -278,6 +316,9 @@ function toResponse(
     farmName: farm.name,
     professionalNeed: detail.professionalNeed,
     status: request.status,
+    visibility: request.visibility,
+    publishedAt: request.publishedAt?.toISOString() ?? null,
+    submittedAt: request.submittedAt?.toISOString() ?? null,
     managementTypes: jsonStrings(detail.managementTypes),
     term: detail.term,
     currentSituation: detail.currentSituation,

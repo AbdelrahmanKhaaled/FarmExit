@@ -72,6 +72,15 @@ export function MarketplaceResultsView({ state, setState }: Props) {
 
   const update = (next: MarketplaceFilters) => setState({ ...state, filters: next, page: 1 });
   const clearAll = () => update({ ...defaultFilters, purpose: filters.purpose });
+  const clearUnsupported = () =>
+    update({
+      ...filters,
+      farmTypes: [],
+      waterSources: [],
+      irrigationMethods: [],
+      energySources: [],
+      cropTypes: [],
+    });
   const openDrawer = () =>
     setDrawer({
       open: true,
@@ -124,9 +133,12 @@ export function MarketplaceResultsView({ state, setState }: Props) {
         <AppliedFilters filters={filters} onChange={update} onClearAll={clearAll} locale={locale} source={source} />
 
         {unsupported && (
-          <p className="rounded-xl border border-border-hairline bg-bg-muted px-16 py-12 type-body-caption text-text-muted">
-            {t('filters.unsupportedPublic')}
-          </p>
+          <div className="rounded-xl border border-border-hairline bg-bg-muted px-16 py-12">
+            <p className="type-body-caption text-text-muted">{t('filters.unsupportedPublic')}</p>
+            <Button variant="ghost" size="sm" className="mt-8" onClick={clearUnsupported}>
+              {t('filters.clearUnsupported')}
+            </Button>
+          </div>
         )}
 
         <TrustNote

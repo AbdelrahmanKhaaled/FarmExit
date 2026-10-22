@@ -1,0 +1,112 @@
+{
+  "database": {
+    "host": "127.0.0.1",
+    "name": "farmexit"
+  },
+  "request753": {
+    "id": "753",
+    "requestNumber": "FM555E9CBB575CFC6A666816DB",
+    "status": "approved",
+    "visibility": "private",
+    "publishedAt": null,
+    "documents": [
+      {
+        "reviewStatus": "reviewed"
+      }
+    ],
+    "farm": {
+      "farmStatus": "active",
+      "deletedAt": null,
+      "relationships": [
+        {
+          "userId": "954"
+        }
+      ]
+    }
+  },
+  "fixtures": [
+    {
+      "id": "762",
+      "requestNumber": "DEMO-MP-MGT-01",
+      "requestType": "farmManagement",
+      "status": "approved",
+      "visibility": "private",
+      "publishedAt": null,
+      "farm": {
+        "name": "[DEMO] Citrus Orchard Management",
+        "areaFeddan": "45",
+        "governorate": "[DEMO] Region"
+      }
+    },
+    {
+      "id": "763",
+      "requestNumber": "DEMO-MP-MGT-02",
+      "requestType": "farmManagement",
+      "status": "approved",
+      "visibility": "private",
+      "publishedAt": null,
+      "farm": {
+        "name": "[DEMO] Greenhouse Management",
+        "areaFeddan": "20",
+        "governorate": "[DEMO] Region"
+      }
+    },
+    {
+      "id": "764",
+      "requestNumber": "DEMO-MP-MGT-03",
+      "requestType": "farmManagement",
+      "status": "approved",
+      "visibility": "private",
+      "publishedAt": null,
+      "farm": {
+        "name": "[DEMO] Mixed Farm Management",
+        "areaFeddan": "80",
+        "governorate": "[DEMO] Region"
+      }
+    },
+    {
+      "id": "765",
+      "requestNumber": "DEMO-MP-PART-01",
+      "requestType": "partnership",
+      "status": "approved",
+      "visibility": "private",
+      "publishedAt": null,
+      "farm": {
+        "name": "[DEMO] Orchard Operating Partnership",
+        "areaFeddan": "60",
+        "governorate": "[DEMO] Region"
+      }
+    },
+    {
+      "id": "766",
+      "requestNumber": "DEMO-MP-PART-02",
+      "requestType": "partnership",
+      "status": "approved",
+      "visibility": "private",
+      "publishedAt": null,
+      "farm": {
+        "name": "[DEMO] Greenhouse Technical Partnership",
+        "areaFeddan": "30",
+        "governorate": "[DEMO] Region"
+      }
+    },
+    {
+      "id": "767",
+      "requestNumber": "DEMO-MP-PART-03",
+      "requestType": "partnership",
+      "status": "approved",
+      "visibility": "private",
+      "publishedAt": null,
+      "farm": {
+        "name": "[DEMO] Mixed Farm Distribution Partnership",
+        "areaFeddan": "95",
+        "governorate": "[DEMO] Region"
+      }
+    }
+  ],
+  "originalRequests": {
+    "count": 317,
+    "sha256": "62118c398722dbecfb493f17b18d34b685e15bb3572bec7c95c417732f84a3b8",
+    "unchangedFromInitialSnapshot": true
+  }
+}

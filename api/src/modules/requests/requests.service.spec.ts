@@ -53,6 +53,7 @@ type MockPrisma = {
     findFirst: jest.Mock;
     create: jest.Mock;
     update: jest.Mock;
+    updateMany: jest.Mock;
   };
   requestDocument: {
     findMany: jest.Mock;
@@ -155,6 +156,7 @@ describe('RequestsService', () => {
         findFirst: jest.fn().mockResolvedValue(null),
         create: jest.fn().mockResolvedValue({ id: 1n }),
         update: jest.fn().mockResolvedValue({ id: 1n }),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
       requestDocument: {
         findMany: jest.fn().mockResolvedValue([]),
@@ -292,9 +294,9 @@ describe('RequestsService', () => {
   });
 
   describe('Staff Assignment Rules', () => {
-    it('allows admin to assign an active reviewer', async () => {
+    it.each([StaffRole.admin, StaffRole.superAdmin])('allows %s to assign an active reviewer', async (role) => {
       staffAuth.loadContext
-        .mockResolvedValueOnce(adminStaff) // caller
+        .mockResolvedValueOnce({ ...adminStaff, roles: [role] }) // caller
         .mockResolvedValueOnce(reviewerStaff); // target
 
       const res = await service.assignStaff(1n, 100n, {
@@ -442,8 +444,98 @@ describe('RequestsService', () => {
       });
 
       expect(res.status).toBe('accepted');
-      expect(prisma.requestForwarding.update).toHaveBeenCalledTimes(1);
+      expect(prisma.requestForwarding.updateMany).toHaveBeenCalledTimes(1);
       expect(prisma.auditLog.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows assigned case agent to record mediated owner decision', async () => {
+      prisma.requestForwarding.findFirst.mockResolvedValue({
+        id: 5n,
+        requestId: 100n,
+        recipientUserId: 50n,
+        status: ForwardingStatus.sent,
+        ownerDecision: OwnerDecision.pending,
+      });
+      staffAuth.loadContext.mockResolvedValue(caseAgentStaff);
+      prisma.requestStaffAssignment.findFirst.mockResolvedValue({
+        id: 1n,
+        requestId: 100n,
+        assignedStaffId: 3n,
+        assignmentType: RequestStaffAssignmentType.caseAgent,
+      });
+
+      const res = await service.recordForwardingDecision(3n, 100n, 5n, {
+        decision: OwnerDecision.declined,
+        reason: 'Owner declined via phone',
+      });
+
+      expect(res.status).toBe('declined');
+      expect(prisma.requestForwarding.updateMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects staff without requests.forward recording mediated decision with 403', async () => {
+      prisma.requestForwarding.findFirst.mockResolvedValue({
+        id: 5n,
+        requestId: 100n,
+        recipientUserId: 50n,
+        status: ForwardingStatus.sent,
+        ownerDecision: OwnerDecision.pending,
+      });
+      staffAuth.loadContext.mockResolvedValue(reviewerStaff);
+
+      await expect(
+        service.recordForwardingDecision(2n, 100n, 5n, { decision: OwnerDecision.accepted }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.requestForwarding.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('rejects unassigned case agent recording mediated decision with 403', async () => {
+      prisma.requestForwarding.findFirst.mockResolvedValue({
+        id: 5n,
+        requestId: 100n,
+        recipientUserId: 50n,
+        status: ForwardingStatus.sent,
+        ownerDecision: OwnerDecision.pending,
+      });
+      staffAuth.loadContext.mockResolvedValue(caseAgentStaff);
+      prisma.requestStaffAssignment.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.recordForwardingDecision(3n, 100n, 5n, { decision: OwnerDecision.accepted }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('rejects repeat decision on already decided forwarding with 409', async () => {
+      prisma.requestForwarding.findFirst.mockResolvedValue({
+        id: 5n,
+        requestId: 100n,
+        recipientUserId: 50n,
+        status: ForwardingStatus.decided,
+        ownerDecision: OwnerDecision.accepted,
+      });
+      staffAuth.loadContext.mockResolvedValue(null);
+
+      await expect(
+        service.recordForwardingDecision(50n, 100n, 5n, { decision: OwnerDecision.declined }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects concurrent overwrite when updateMany matches zero rows with 409', async () => {
+      prisma.requestForwarding.findFirst.mockResolvedValue({
+        id: 5n,
+        requestId: 100n,
+        recipientUserId: 50n,
+        status: ForwardingStatus.sent,
+        ownerDecision: OwnerDecision.pending,
+      });
+      staffAuth.loadContext.mockResolvedValue(null);
+      prisma.requestForwarding.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(
+        service.recordForwardingDecision(50n, 100n, 5n, { decision: OwnerDecision.accepted }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(prisma.auditLog.create).not.toHaveBeenCalled();
     });
   });
 

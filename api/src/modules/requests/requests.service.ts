@@ -337,7 +337,7 @@ export class RequestsService {
    */
   async assignStaff(actorId: bigint, requestId: bigint, dto: AssignRequestStaffDto): Promise<RequestResponseDto> {
     const staff = await this.staffAuth.loadContext(actorId);
-    if (!staff?.roles.includes(StaffRole.admin)) {
+    if (!staff || !staffHasAdminScope(staff.roles)) {
       throw new ForbiddenException('Only administrators can assign or reassign staff');
     }
 
@@ -351,11 +351,11 @@ export class RequestsService {
     }
 
     if (dto.assignmentType === RequestStaffAssignmentType.reviewer) {
-      if (!targetStaff.roles.includes(StaffRole.reviewer) && !targetStaff.roles.includes(StaffRole.admin)) {
+      if (!targetStaff.roles.includes(StaffRole.reviewer) && !staffHasAdminScope(targetStaff.roles)) {
         throw new BadRequestException('Target staff member does not hold the reviewer role');
       }
     } else if (dto.assignmentType === RequestStaffAssignmentType.caseAgent) {
-      if (!targetStaff.roles.includes(StaffRole.caseAgent) && !targetStaff.roles.includes(StaffRole.admin)) {
+      if (!targetStaff.roles.includes(StaffRole.caseAgent) && !staffHasAdminScope(targetStaff.roles)) {
         throw new BadRequestException('Target staff member does not hold the case agent role');
       }
     }
@@ -516,22 +516,7 @@ export class RequestsService {
       throw new ConflictException(`Cannot forward request in '${request.status}' status`);
     }
 
-    // Role check: Admin or assigned case agent
-    if (!staffHasAdminScope(staff.roles)) {
-      if (!staff.roles.includes(StaffRole.caseAgent)) {
-        throw new ForbiddenException('Case agents only');
-      }
-      const assignment = await this.prisma.requestStaffAssignment.findFirst({
-        where: {
-          requestId,
-          assignedStaffId: actorId,
-          assignmentType: RequestStaffAssignmentType.caseAgent,
-        },
-      });
-      if (!assignment) {
-        throw new ForbiddenException('Only the assigned case agent or an administrator may forward this request');
-      }
-    }
+    await this.assertStaffMayMediateRequestForwarding(staff, actorId, requestId);
 
     const recipientUserId = BigInt(dto.recipientUserId);
     if (recipientUserId === request.createdBy) {
@@ -643,11 +628,14 @@ export class RequestsService {
       throw new NotFoundException('Forwarding record not found');
     }
 
-    const staff = await this.staffAuth.loadContext(actorOrOwnerId);
-    const isStaff = staff && staff.roles.length > 0;
+    const isRecipient = forwarding.recipientUserId === actorOrOwnerId;
+    if (!isRecipient) {
+      const staff = await this.assertStaffWithPermission(actorOrOwnerId, StaffPermission.RequestsForward);
+      await this.assertStaffMayMediateRequestForwarding(staff, actorOrOwnerId, requestId);
+    }
 
-    if (!isStaff && forwarding.recipientUserId !== actorOrOwnerId) {
-      throw new ForbiddenException('Only the recipient party or authorized FarmExit staff can record this decision');
+    if (!this.isForwardingEligibleForFirstDecision(forwarding)) {
+      throw new ConflictException('Forwarding decision has already been recorded or forwarding is not eligible');
     }
 
     const targetStatus =
@@ -656,8 +644,13 @@ export class RequestsService {
     const reason = dto.reason?.trim() || `Owner decision: ${dto.decision}`;
 
     const updated = await this.prisma.$transaction(async (tx) => {
-      await tx.requestForwarding.update({
-        where: { id: forwardingId },
+      const applied = await tx.requestForwarding.updateMany({
+        where: {
+          id: forwardingId,
+          requestId,
+          status: { in: [ForwardingStatus.sent, ForwardingStatus.viewed] },
+          OR: [{ ownerDecision: null }, { ownerDecision: OwnerDecision.pending }],
+        },
         data: {
           ownerDecision: dto.decision,
           decisionReason: dto.reason?.trim() || null,
@@ -666,6 +659,9 @@ export class RequestsService {
           status: ForwardingStatus.decided,
         },
       });
+      if (applied.count !== 1) {
+        throw new ConflictException('Forwarding decision has already been recorded or forwarding is not eligible');
+      }
 
       const request = await tx.request.findUnique({ where: { id: requestId } });
       if (!request) throw notFound();
@@ -836,6 +832,40 @@ export class RequestsService {
       throw new ForbiddenException(`Active staff membership with '${permission}' permission required`);
     }
     return staff;
+  }
+
+  private async assertStaffMayMediateRequestForwarding(
+    staff: StaffContext,
+    actorId: bigint,
+    requestId: bigint,
+  ): Promise<void> {
+    if (staffHasAdminScope(staff.roles)) return;
+
+    if (!staff.roles.includes(StaffRole.caseAgent)) {
+      throw new ForbiddenException('Case agents only');
+    }
+
+    const assignment = await this.prisma.requestStaffAssignment.findFirst({
+      where: {
+        requestId,
+        assignedStaffId: actorId,
+        assignmentType: RequestStaffAssignmentType.caseAgent,
+      },
+    });
+    if (!assignment) {
+      throw new ForbiddenException('Only the assigned case agent or an administrator may forward this request');
+    }
+  }
+
+  private isForwardingEligibleForFirstDecision(forwarding: {
+    status: ForwardingStatus;
+    ownerDecision: OwnerDecision | null;
+  }): boolean {
+    const openStatus =
+      forwarding.status === ForwardingStatus.sent || forwarding.status === ForwardingStatus.viewed;
+    const pendingDecision =
+      forwarding.ownerDecision === null || forwarding.ownerDecision === OwnerDecision.pending;
+    return openStatus && pendingDecision;
   }
 
   private async assertStaffCanAccessRequest(staff: StaffContext, requestId: bigint): Promise<void> {

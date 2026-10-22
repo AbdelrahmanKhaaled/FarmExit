@@ -38,7 +38,7 @@ export function AdminShell({ staff, children }: Props) {
           onToggleCollapse={() => setCollapsed((c) => !c)}
           onOpenMobile={() => setMobileOpen(true)}
         />
-        <main className="flex-1 px-4 py-5 md:px-6 md:py-6">{children}</main>
+        <main className="flex-1 px-4 py-5 md:px-8 md:py-7">{children}</main>
       </div>
       {mobileOpen && (
         <button

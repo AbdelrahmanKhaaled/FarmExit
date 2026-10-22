@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-22T08:37:56.865Z",
+  "evidence": [
+    {
+      "scenario": "/en/management",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/partnerships",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/ar/management",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/ar/partnerships",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "Logged-out application form redirects to sign-in with return path",
+      "status": "LIVE VERIFIED"
+    },
+    {
+      "scenario": "owner: real Website BFF OTP and HttpOnly cookie session",
+      "status": "LIVE VERIFIED"
+    },
+    {
+      "scenario": "/en/my/management/762",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/ar/my/management/762",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/my/requests",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/my/messages/25",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "applicant: real Website BFF OTP and HttpOnly cookie session",
+      "status": "LIVE VERIFIED"
+    },
+    {
+      "scenario": "/en/my/applications/768",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/ar/my/applications/768",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/my/applications",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "/en/my/messages/26",
+      "status": "LIVE VERIFIED",
+      "http": 200
+    },
+    {
+      "scenario": "Applicant conversation refresh preserves persisted messages",
+      "status": "LIVE VERIFIED"
+    },
+    {
+      "scenario": "Logout blocks protected API and refreshed customer page",
+      "status": "LIVE VERIFIED"
+    }
+  ]
+}

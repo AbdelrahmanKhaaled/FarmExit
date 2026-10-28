@@ -9,11 +9,11 @@ const { PrismaClient } = require('../dist/generated/prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
 const { toMariaDbPoolConfig } = require('../dist/prisma/database-url');
 const { TokenService } = require('../dist/modules/auth/token.service');
-const { chromium } = require('../../FarmExit_dashboard-v2_redesigned/dashboard-v2/node_modules/@playwright/test');
+const { chromium } = require('../../dashboard/node_modules/@playwright/test');
 const prisma = new PrismaClient({ adapter: new PrismaMariaDb(toMariaDbPoolConfig(process.env.DATABASE_URL)) });
 const out = path.resolve(
   root,
-  '../FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/artifacts/farm-publication-filters',
+  '../dashboard/docs/artifacts/farm-publication-filters',
 );
 const evidence = [];
 let browser;
@@ -158,13 +158,13 @@ async function main() {
   for (const locale of ['en', 'ar']) {
     const messages = JSON.parse(
       fs.readFileSync(
-        path.resolve(root, `../FarmExit_dashboard-v2_redesigned/dashboard-v2/messages/${locale}/batch.json`),
+        path.resolve(root, `../dashboard/messages/${locale}/batch.json`),
         'utf8',
       ),
     );
     const admin = JSON.parse(
       fs.readFileSync(
-        path.resolve(root, `../FarmExit_dashboard-v2_redesigned/dashboard-v2/messages/${locale}/admin.json`),
+        path.resolve(root, `../dashboard/messages/${locale}/admin.json`),
         'utf8',
       ),
     );

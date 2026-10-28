@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { createTranslator } from 'next-intl';
 
 const root = new URL('../', import.meta.url);
-const schema = readFileSync(new URL('../../api/prisma/schema.prisma', root), 'utf8');
+const schema = readFileSync(new URL('../api/prisma/schema.prisma', root), 'utf8');
 const groups = {
   ProposalKind: 'proposalKind',
   RequestType: 'requestType',

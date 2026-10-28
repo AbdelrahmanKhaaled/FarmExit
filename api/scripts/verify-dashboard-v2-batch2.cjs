@@ -9,14 +9,14 @@ require('./client-demo-safety.cjs').assertLocalDevelopment(process.env, ['--appl
 const { PrismaClient } = require('../dist/generated/prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
 const { toMariaDbPoolConfig } = require('../dist/prisma/database-url');
-const { chromium } = require('../../FarmExit_dashboard-v2_redesigned/dashboard-v2/node_modules/@playwright/test');
+const { chromium } = require('../../dashboard/node_modules/@playwright/test');
 const prisma = new PrismaClient({ adapter: new PrismaMariaDb(toMariaDbPoolConfig(process.env.DATABASE_URL)) });
 const suffix = randomBytes(6).toString('hex');
 const password = `VerifyAa12${randomBytes(18).toString('hex')}`;
 const email = `batch2-${suffix}@farmexit.invalid`;
 const staffEmail = `batch2-staff-${suffix}@farmexit.invalid`;
 const mobile = () => `+2010${String(randomInt(10000000, 99999999))}`;
-const out = path.resolve(root, '../FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/artifacts/batch2');
+const out = path.resolve(root, '../dashboard/docs/artifacts/batch2');
 const evidence = [];
 const userIds = [];
 let farm, listing, communication, browser;

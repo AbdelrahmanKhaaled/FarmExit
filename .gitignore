@@ -75,7 +75,7 @@ dashboard/.visual-qa/
 /dashboard-v2.zip
 .dashboard-adoption-backup-path.tmp
 **/.npm-cache-adoption/
-/FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/artifacts/
-/FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/batch-one-qa/
-/FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/*.log
-/FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/*-readonly.json
+/dashboard/docs/artifacts/
+/dashboard/docs/batch-one-qa/
+/dashboard/docs/*.log
+/dashboard/docs/*-readonly.json

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 for (const locale of ['en', 'ar']) {
-  for (const route of ['', '/analytics', '/listing-pipeline', '/farms', '/communications', '/requests']) {
+  for (const route of ['', '/analytics', '/farms', '/listings', '/listing-pipeline', '/requests', '/communications', '/users', '/administrators']) {
     test(`${locale} ${route || 'overview'} protects unauthenticated runtime data`, async ({ page }) => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));

@@ -1,7 +1,7 @@
 # FarmExit — Cross-App Implementation Roadmap (Stage 1)
 
 **Date:** 2026-10-21  
-**Prerequisite docs:** `docs/CROSS_APP_INTEGRATION_GAP_MAP.md`, `FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_REDESIGN_BLUEPRINT.md`, `web/docs/FINAL_FRONTEND_COMPLETENESS_AUDIT.md`.
+**Prerequisite docs:** `docs/CROSS_APP_INTEGRATION_GAP_MAP.md`, `dashboard/docs/DASHBOARD_REDESIGN_BLUEPRINT.md`, `web/docs/FINAL_FRONTEND_COMPLETENESS_AUDIT.md`.
 
 **Policy:** No new backend features until explicitly un-paused. This roadmap only connects **existing** APIs and improves dashboard UX.
 

@@ -13,7 +13,7 @@
     "build:web": "npm --prefix web run build",
     "build:dashboard": "npm --prefix FarmExit_dashboard-v2_redesigned/dashboard-v2 run build",
     "build:api": "npm --prefix api run build",
-    "deploy:api": "npm run build:api && npm --prefix api run seed:public-farms-demo:deploy",
+    "deploy:api": "node -e \"console.error('Backend deployment is blocked. See docs/FARMEXIT_PRODUCTION_BACKEND_DEPLOYMENT_PLAN.md; no build, restart, or seed was run.'); process.exit(1)\"",
     "deploy:seed-public-farms": "npm --prefix api run seed:public-marketplace-demo:deploy",
     "deploy:seed-public-marketplace": "npm --prefix api run seed:public-marketplace-demo:deploy",
     "start:web": "npm --prefix web run start",

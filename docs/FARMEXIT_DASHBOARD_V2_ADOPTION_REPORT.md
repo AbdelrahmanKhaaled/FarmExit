@@ -86,8 +86,8 @@ Fixture checks cover overview, farms/create/edit, listings, publication pipeline
 
 ## Git delivery
 
-Implementation commit: pending final review.
-Push result: pending; no force-push authorized or used.
+Implementation commit: 4b2e64b1e4a3ea59a72db4416cac72ead9bc092a.
+Push result: implementation commit successfully pushed to origin/main (e87a26d..4b2e64b). No force-push used. This report is finalized in a separate documentation commit; its own hash can be read from Git history.
 
 The exact changed/deleted file inventory is available in the implementation commit with git show --name-status. Git may represent source adoption as renames from the old dashboard into the canonical path.
 
@@ -97,3 +97,338 @@ The exact changed/deleted file inventory is available in the implementation comm
 2. Existing staff credentials are needed for live Super Admin/login/feature/realtime acceptance.
 3. Optional repository-wide backend typecheck/lint remain failing; build and the focused unit suite pass.
 4. Hosting root/environment changes and frontend deployments still need to be applied by the deployment owner.
+
+## Implementation file inventory
+
+```text
+M	.gitignore
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/.env.example
+R100	dashboard/.prettierrc.json	FarmExit_dashboard-v2_redesigned/dashboard-v2/.prettierrc.json
+R100	dashboard/AGENTS.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/AGENTS.md
+R090	dashboard/README.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/README.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/ADMIN_NAV_INFORMATION_ARCHITECTURE_AUDIT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/COMPLETE_PACES_LUXE_REBUILD_REPORT.md
+R100	dashboard/docs/DASHBOARD_COMPLETE_REDESIGN_REPORT.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_COMPLETE_REDESIGN_REPORT.md
+R100	dashboard/docs/DASHBOARD_DETAIL_WORKSPACES_COMPLETION_REPORT.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_DETAIL_WORKSPACES_COMPLETION_REPORT.md
+R100	dashboard/docs/DASHBOARD_FINAL_MODULE_MATRIX.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_FINAL_MODULE_MATRIX.md
+R100	dashboard/docs/DASHBOARD_FINAL_VISUAL_QA_REPORT.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_FINAL_VISUAL_QA_REPORT.md
+R100	dashboard/docs/DASHBOARD_FUNCTIONAL_COMPLETION_REPORT.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_FUNCTIONAL_COMPLETION_REPORT.md
+R100	dashboard/docs/DASHBOARD_PREMIUM_UI_COMPLETION_REPORT.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_PREMIUM_UI_COMPLETION_REPORT.md
+R100	dashboard/docs/DASHBOARD_REDESIGN_BLUEPRINT.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_REDESIGN_BLUEPRINT.md
+R100	dashboard/docs/DASHBOARD_REDESIGN_ROUTE_MATRIX.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_REDESIGN_ROUTE_MATRIX.md
+R100	dashboard/docs/DASHBOARD_REMAINING_BLOCKERS.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_REMAINING_BLOCKERS.md
+R100	dashboard/docs/DASHBOARD_RUNTIME_AND_UI_RECOVERY_REPORT.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_RUNTIME_AND_UI_RECOVERY_REPORT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_TEMPLATE_REDESIGN_REPORT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_V2_BATCH_1_FIXES_REPORT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_V2_BATCH_2_FIXES_REPORT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_V2_IMPLEMENTATION_REPORT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASHBOARD_V2_RUNTIME_FIX_REPORT.md
+R100	dashboard/docs/DASH_002_FORWARDING_DECISIONS_REPORT.md	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/DASH_002_FORWARDING_DECISIONS_REPORT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/FARMEXIT_V2_REDESIGN_HANDOFF.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/FARM_STATUS_LISTING_PUBLICATION_FILTERS_REPORT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/LINKED_REQUEST_APPLICATIONS_IMPLEMENTATION_REPORT.md
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/paces-area-reference.png
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/paces-charts-reference.png
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/paces-column-reference.png
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/paces-pie-reference.png
+R100	dashboard/eslint.config.mjs	FarmExit_dashboard-v2_redesigned/dashboard-v2/eslint.config.mjs
+R070	dashboard/messages/ar/admin.json	FarmExit_dashboard-v2_redesigned/dashboard-v2/messages/ar/admin.json
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/messages/ar/batch.json
+R100	dashboard/messages/ar/common.json	FarmExit_dashboard-v2_redesigned/dashboard-v2/messages/ar/common.json
+R069	dashboard/messages/en/admin.json	FarmExit_dashboard-v2_redesigned/dashboard-v2/messages/en/admin.json
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/messages/en/batch.json
+R100	dashboard/messages/en/common.json	FarmExit_dashboard-v2_redesigned/dashboard-v2/messages/en/common.json
+R071	dashboard/next-env.d.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/next-env.d.ts
+R100	dashboard/next.config.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/next.config.ts
+R095	dashboard/package-lock.json	FarmExit_dashboard-v2_redesigned/dashboard-v2/package-lock.json
+R072	dashboard/package.json	FarmExit_dashboard-v2_redesigned/dashboard-v2/package.json
+R100	dashboard/playwright.config.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/playwright.config.ts
+R100	dashboard/public/brand/logo-full-dark.svg	FarmExit_dashboard-v2_redesigned/dashboard-v2/public/brand/logo-full-dark.svg
+R100	dashboard/public/brand/logo-full-light.svg	FarmExit_dashboard-v2_redesigned/dashboard-v2/public/brand/logo-full-light.svg
+R100	dashboard/public/brand/logo-horizontal-dark.svg	FarmExit_dashboard-v2_redesigned/dashboard-v2/public/brand/logo-horizontal-dark.svg
+R100	dashboard/public/brand/logo-horizontal-light.svg	FarmExit_dashboard-v2_redesigned/dashboard-v2/public/brand/logo-horizontal-light.svg
+R100	dashboard/public/brand/logo-icon-dark.svg	FarmExit_dashboard-v2_redesigned/dashboard-v2/public/brand/logo-icon-dark.svg
+R100	dashboard/public/brand/logo-icon-light.svg	FarmExit_dashboard-v2_redesigned/dashboard-v2/public/brand/logo-icon-light.svg
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/scripts/batch-one-visual-qa.mjs
+R100	dashboard/scripts/check-direction.mjs	FarmExit_dashboard-v2_redesigned/dashboard-v2/scripts/check-direction.mjs
+R100	dashboard/scripts/check-messages.mjs	FarmExit_dashboard-v2_redesigned/dashboard-v2/scripts/check-messages.mjs
+R100	dashboard/scripts/check-session-readonly.mjs	FarmExit_dashboard-v2_redesigned/dashboard-v2/scripts/check-session-readonly.mjs
+R100	dashboard/scripts/check-sidebar-motion.mjs	FarmExit_dashboard-v2_redesigned/dashboard-v2/scripts/check-sidebar-motion.mjs
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/scripts/test-enum-coverage.mjs
+R073	dashboard/src/app/[locale]/admin/(console)/administrators/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/administrators/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/analytics/page.tsx
+R097	dashboard/src/app/[locale]/admin/(console)/audit-logs/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/audit-logs/page.tsx
+R096	dashboard/src/app/[locale]/admin/(console)/co-purchase/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/co-purchase/[id]/page.tsx
+R096	dashboard/src/app/[locale]/admin/(console)/co-purchase/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/co-purchase/page.tsx
+R097	dashboard/src/app/[locale]/admin/(console)/communications/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/communications/[id]/page.tsx
+R065	dashboard/src/app/[locale]/admin/(console)/communications/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/communications/page.tsx
+R094	dashboard/src/app/[locale]/admin/(console)/evaluations/[farmId]/[evaluationId]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/evaluations/[farmId]/[evaluationId]/page.tsx
+R075	dashboard/src/app/[locale]/admin/(console)/evaluations/new/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/evaluations/new/page.tsx
+R096	dashboard/src/app/[locale]/admin/(console)/evaluations/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/evaluations/page.tsx
+R097	dashboard/src/app/[locale]/admin/(console)/farm-details/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/farm-details/[id]/page.tsx
+R095	dashboard/src/app/[locale]/admin/(console)/farm-details/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/farm-details/page.tsx
+R098	dashboard/src/app/[locale]/admin/(console)/farm-management/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/farm-management/[id]/page.tsx
+R095	dashboard/src/app/[locale]/admin/(console)/farm-management/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/farm-management/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/farms/[id]/edit/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/farms/[id]/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/farms/new/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/farms/page.tsx
+R051	dashboard/src/app/[locale]/admin/(console)/layout.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/layout.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/listing-pipeline/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/listings/[id]/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/listings/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/loading.tsx
+R067	dashboard/src/app/[locale]/admin/(console)/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/page.tsx
+R096	dashboard/src/app/[locale]/admin/(console)/partnerships/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/partnerships/[id]/page.tsx
+R097	dashboard/src/app/[locale]/admin/(console)/partnerships/applications/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/partnerships/applications/[id]/page.tsx
+R096	dashboard/src/app/[locale]/admin/(console)/partnerships/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/partnerships/page.tsx
+R096	dashboard/src/app/[locale]/admin/(console)/proposals/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/proposals/[id]/page.tsx
+R095	dashboard/src/app/[locale]/admin/(console)/proposals/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/proposals/page.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/requests/[id]/page.tsx
+R064	dashboard/src/app/[locale]/admin/(console)/requests/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/requests/page.tsx
+R082	dashboard/src/app/[locale]/admin/(console)/users/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/users/[id]/page.tsx
+R073	dashboard/src/app/[locale]/admin/(console)/users/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/users/page.tsx
+R097	dashboard/src/app/[locale]/admin/(console)/verification/[id]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/verification/[id]/page.tsx
+R095	dashboard/src/app/[locale]/admin/(console)/verification/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/(console)/verification/page.tsx
+R100	dashboard/src/app/[locale]/admin/forbidden/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/forbidden/page.tsx
+R083	dashboard/src/app/[locale]/admin/layout.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/layout.tsx
+R100	dashboard/src/app/[locale]/admin/login/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/login/page.tsx
+R100	dashboard/src/app/[locale]/admin/not-found.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/not-found.tsx
+R100	dashboard/src/app/[locale]/layout.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/layout.tsx
+R100	dashboard/src/app/[locale]/page.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/page.tsx
+R100	dashboard/src/app/api/admin/auth/login/route.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/api/admin/auth/login/route.ts
+R100	dashboard/src/app/api/admin/auth/logout/route.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/api/admin/auth/logout/route.ts
+R100	dashboard/src/app/api/admin/auth/refresh/route.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/api/admin/auth/refresh/route.ts
+R100	dashboard/src/app/api/admin/communication/realtime-ticket/route.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/api/admin/communication/realtime-ticket/route.ts
+R100	dashboard/src/app/api/admin/staff/requests/[requestId]/documents/[documentId]/route.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/api/admin/staff/requests/[requestId]/documents/[documentId]/route.ts
+R100	dashboard/src/app/fonts.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/fonts.ts
+R100	dashboard/src/app/globals.css	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/globals.css
+R100	dashboard/src/components/brand/Logo.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/brand/Logo.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/dashboard/DonutDistribution.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/dashboard/LuxeCard.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/dashboard/StatCard.tsx
+R100	dashboard/src/design-system/icons.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/icons.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/layout/AppShell.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/layout/index.ts
+R100	dashboard/src/design-system/components/Badge.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/Badge.tsx
+R100	dashboard/src/design-system/components/Button.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/Button.tsx
+R100	dashboard/src/design-system/components/Card.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/Card.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/CardChrome.tsx
+R062	dashboard/src/design-system/components/ChartShell.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/ChartShell.tsx
+R100	dashboard/src/design-system/components/EmptyState.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/EmptyState.tsx
+R100	dashboard/src/design-system/components/ErrorState.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/ErrorState.tsx
+R057	dashboard/src/design-system/components/FilterBar.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/FilterBar.tsx
+R100	dashboard/src/design-system/components/Input.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/Input.tsx
+R067	dashboard/src/design-system/components/LoadingState.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/LoadingState.tsx
+R100	dashboard/src/design-system/components/MetricCard.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/MetricCard.tsx
+R080	dashboard/src/design-system/components/PageContainer.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/PageContainer.tsx
+R079	dashboard/src/design-system/components/PageHeader.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/PageHeader.tsx
+R085	dashboard/src/design-system/components/SectionHeader.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/SectionHeader.tsx
+R100	dashboard/src/design-system/components/StatCard.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/StatCard.tsx
+R100	dashboard/src/design-system/components/Table.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/Table.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/index.ts
+R088	dashboard/src/design-system/workspace/DataTable.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/workspace/DataTable.tsx
+R100	dashboard/src/design-system/workspace/DetailWorkspace.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/workspace/DetailWorkspace.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/workspace/KpiStrip.tsx
+R083	dashboard/src/design-system/workspace/WorkspacePageHeader.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/components/ui/workspace/WorkspacePageHeader.tsx
+R057	dashboard/src/config/admin-navigation.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/config/admin-navigation.test.ts
+R082	dashboard/src/config/admin-navigation.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/config/admin-navigation.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/AdminHeader.tsx
+R100	dashboard/src/features/admin/AdminLoginForm.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/AdminLoginForm.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/AdminOverview.tsx
+R075	dashboard/src/features/admin/AdminShell.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/AdminShell.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/AdminSidebar.tsx
+R087	dashboard/src/features/admin/RefreshButton.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/RefreshButton.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/accounts/CreateAdministratorForm.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/accounts/UserStatusAction.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/accounts.ts
+R100	dashboard/src/features/admin/actions/co-purchase.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/co-purchase.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/farms.ts
+R082	dashboard/src/features/admin/actions/listings.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/listings.ts
+R092	dashboard/src/features/admin/actions/platform.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/platform.ts
+R100	dashboard/src/features/admin/actions/proposals.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/proposals.ts
+R100	dashboard/src/features/admin/actions/requests.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/requests.ts
+R090	dashboard/src/features/admin/actions/workflows.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/workflows.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/analytics/AnalyticsDateFilters.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/analytics/AnalyticsWorkspace.tsx
+R100	dashboard/src/features/admin/analytics/DistributionBars.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/analytics/DistributionBars.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/analytics/TimeSeriesChart.tsx
+R100	dashboard/src/features/admin/analytics/analytics-query.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/analytics/analytics-query.test.ts
+R100	dashboard/src/features/admin/analytics/analytics-query.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/analytics/analytics-query.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/communications/CommunicationCaseWorkspace.tsx
+R100	dashboard/src/features/admin/communications/communications-types.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/communications/communications-types.ts
+R100	dashboard/src/features/admin/communications/message-merge.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/communications/message-merge.test.ts
+R100	dashboard/src/features/admin/communications/message-merge.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/communications/message-merge.ts
+R100	dashboard/src/features/admin/communications/useStaffCommunicationSocket.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/communications/useStaffCommunicationSocket.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/evaluations/CreateEvaluationForm.tsx
+R099	dashboard/src/features/admin/evaluations/EvaluationChecksPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/evaluations/EvaluationChecksPanel.tsx
+R099	dashboard/src/features/admin/evaluations/EvaluationEditPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/evaluations/EvaluationEditPanel.tsx
+R100	dashboard/src/features/admin/evaluations/evaluation-domain.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/evaluations/evaluation-domain.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/farms/FarmFilters.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/farms/FarmRowActions.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/farms/FarmWizard.tsx
+R100	dashboard/src/features/admin/farms/PrivateFarmLocationPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/farms/PrivateFarmLocationPanel.tsx
+R063	dashboard/src/features/admin/listings/ListingActions.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/listings/ListingActions.tsx
+R095	dashboard/src/features/admin/listings/PublishListingButton.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/listings/PublishListingButton.tsx
+R076	dashboard/src/features/admin/overview/OverviewActivity.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewActivity.tsx
+R095	dashboard/src/features/admin/overview/OverviewAlerts.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewAlerts.tsx
+R088	dashboard/src/features/admin/overview/OverviewCharts.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewCharts.tsx
+R097	dashboard/src/features/admin/overview/OverviewHero.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewHero.tsx
+R096	dashboard/src/features/admin/overview/OverviewKpis.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewKpis.tsx
+R095	dashboard/src/features/admin/overview/OverviewModuleShortcuts.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewModuleShortcuts.tsx
+R090	dashboard/src/features/admin/overview/OverviewNextActions.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewNextActions.tsx
+R096	dashboard/src/features/admin/overview/OverviewOperationalAttention.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewOperationalAttention.tsx
+R091	dashboard/src/features/admin/overview/OverviewQueue.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewQueue.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewRequestsTable.tsx
+R096	dashboard/src/features/admin/overview/OverviewWorkflow.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewWorkflow.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/OverviewWorkloadChart.tsx
+R100	dashboard/src/features/admin/overview/overview-metrics.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/overview/overview-metrics.ts
+R100	dashboard/src/features/admin/requests/EmbeddedRequestForwardingSection.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/EmbeddedRequestForwardingSection.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/LinkedApplicationsPanel.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/PartnershipApplicationReview.tsx
+R078	dashboard/src/features/admin/requests/RequestActions.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/RequestActions.tsx
+R077	dashboard/src/features/admin/requests/RequestDocumentsPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/RequestDocumentsPanel.tsx
+R083	dashboard/src/features/admin/requests/RequestForwardingPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/RequestForwardingPanel.tsx
+R100	dashboard/src/features/admin/requests/RequestHubForwardingLink.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/RequestHubForwardingLink.tsx
+R098	dashboard/src/features/admin/requests/RequestStatusTransitionPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/RequestStatusTransitionPanel.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/RequestWorkspace.tsx
+R100	dashboard/src/features/admin/requests/forwarding-decision.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/forwarding-decision.test.ts
+R100	dashboard/src/features/admin/requests/forwarding-decision.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/forwarding-decision.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/linked-applications.test.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/linked-applications.ts
+R100	dashboard/src/features/admin/requests/request-status-transitions.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/request-status-transitions.test.ts
+R100	dashboard/src/features/admin/requests/request-status-transitions.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/requests/request-status-transitions.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/shell/LuxeUserMenu.tsx
+R096	dashboard/src/features/admin/shell/nav-icons.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/shell/nav-icons.tsx
+R100	dashboard/src/features/admin/shell/sidebar-motion.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/shell/sidebar-motion.ts
+R099	dashboard/src/features/admin/workflows/CoPurchaseActionsPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workflows/CoPurchaseActionsPanel.tsx
+R098	dashboard/src/features/admin/workflows/CreateCoPurchaseForm.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workflows/CreateCoPurchaseForm.tsx
+R098	dashboard/src/features/admin/workflows/OpportunityPublishPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workflows/OpportunityPublishPanel.tsx
+R100	dashboard/src/features/admin/workflows/ProposalActionsPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workflows/ProposalActionsPanel.tsx
+R100	dashboard/src/features/admin/workflows/SpecializedWorkflowPanel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workflows/SpecializedWorkflowPanel.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/ActionIcon.tsx
+R070	dashboard/src/features/admin/workspace/AdminDetailHeader.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/AdminDetailHeader.tsx
+R100	dashboard/src/features/admin/workspace/AdminDetailSection.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/AdminDetailSection.tsx
+R090	dashboard/src/features/admin/workspace/AdminFilterForm.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/AdminFilterForm.tsx
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/AdminListPageHeader.tsx
+R098	dashboard/src/features/admin/workspace/DecideWorkflowForm.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/DecideWorkflowForm.tsx
+R100	dashboard/src/features/admin/workspace/EntityLink.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/EntityLink.tsx
+R058	dashboard/src/features/admin/workspace/EnumLabel.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/EnumLabel.tsx
+R065	dashboard/src/features/admin/workspace/PaginatedTableShell.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/PaginatedTableShell.tsx
+R080	dashboard/src/features/admin/workspace/StaffAssignmentForm.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/StaffAssignmentForm.tsx
+R091	dashboard/src/features/admin/workspace/StatusBadge.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/StatusBadge.tsx
+R100	dashboard/src/features/admin/workspace/TablePaginationLinks.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/TablePaginationLinks.tsx
+R100	dashboard/src/features/admin/workspace/UnifiedRequestLink.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/UnifiedRequestLink.tsx
+R093	dashboard/src/features/admin/workspace/WorkflowReviewsTable.tsx	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/WorkflowReviewsTable.tsx
+R100	dashboard/src/features/admin/workspace/pagination-range.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/pagination-range.test.ts
+R100	dashboard/src/features/admin/workspace/pagination-range.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/pagination-range.ts
+R100	dashboard/src/features/admin/workspace/status-variants.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/status-variants.test.ts
+R100	dashboard/src/features/admin/workspace/status-variants.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/workspace/status-variants.ts
+R080	dashboard/src/i18n/messages.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/i18n/messages.ts
+R100	dashboard/src/i18n/navigation.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/i18n/navigation.ts
+R100	dashboard/src/i18n/request.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/i18n/request.ts
+R100	dashboard/src/i18n/routing.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/i18n/routing.ts
+R100	dashboard/src/lib/admin/admin-console-path.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/admin-console-path.ts
+R100	dashboard/src/lib/admin/assignable-staff.server.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/assignable-staff.server.ts
+R100	dashboard/src/lib/admin/console-page.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/console-page.ts
+R082	dashboard/src/lib/admin/console-routes.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/console-routes.test.ts
+R100	dashboard/src/lib/admin/console-routes.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/console-routes.ts
+R100	dashboard/src/lib/admin/cookies.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/cookies.ts
+R100	dashboard/src/lib/admin/login-errors.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/login-errors.ts
+R100	dashboard/src/lib/admin/refresh-admin-tokens.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/refresh-admin-tokens.ts
+R100	dashboard/src/lib/admin/roles.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/roles.ts
+R100	dashboard/src/lib/admin/session-cookies.server.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/session-cookies.server.ts
+R100	dashboard/src/lib/admin/session-middleware.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/session-middleware.ts
+R100	dashboard/src/lib/admin/session-token.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/session-token.test.ts
+R100	dashboard/src/lib/admin/session-token.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/session-token.ts
+R097	dashboard/src/lib/admin/session.server.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/session.server.ts
+R100	dashboard/src/lib/admin/specialized-request-path.test.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/specialized-request-path.test.ts
+R100	dashboard/src/lib/admin/specialized-request-path.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/specialized-request-path.ts
+R100	dashboard/src/lib/admin/staff-action-session.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/staff-action-session.ts
+R100	dashboard/src/lib/admin/staff-api-result.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/staff-api-result.ts
+R100	dashboard/src/lib/admin/staff-permissions.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/admin/staff-permissions.ts
+R075	dashboard/src/lib/api/config.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/api/config.ts
+R100	dashboard/src/lib/api/forward-api.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/api/forward-api.ts
+R089	dashboard/src/lib/api/realtime-config.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/api/realtime-config.ts
+R100	dashboard/src/lib/api/types/admin-dashboard.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/api/types/admin-dashboard.ts
+R098	dashboard/src/lib/api/types/admin-ops.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/api/types/admin-ops.ts
+R098	dashboard/src/lib/api/types/staff.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/api/types/staff.ts
+R100	dashboard/src/lib/cn.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/cn.ts
+R100	dashboard/src/lib/phone.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/lib/phone.ts
+R100	dashboard/src/proxy.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/proxy.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/styles/batch-one.css
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/styles/components.css
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/styles/layout.css
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/styles/request-workspace.css
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/src/styles/tokens.css
+R100	dashboard/tests/e2e/admin-shell.spec.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/tests/e2e/admin-shell.spec.ts
+R100	dashboard/tests/e2e/admin-workflows.spec.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/tests/e2e/admin-workflows.spec.ts
+R100	dashboard/tests/e2e/admin.spec.ts	FarmExit_dashboard-v2_redesigned/dashboard-v2/tests/e2e/admin.spec.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/tests/e2e/batch-one-routes.spec.ts
+A	FarmExit_dashboard-v2_redesigned/dashboard-v2/tests/e2e/runtime-guards.spec.ts
+R100	dashboard/tsconfig.json	FarmExit_dashboard-v2_redesigned/dashboard-v2/tsconfig.json
+M	README.md
+M	api/eslint.config.mjs
+A	api/jest-dashboard-v2.json
+A	api/jest-publication.json
+A	api/scripts/verify-dashboard-v2-batch2.cjs
+A	api/scripts/verify-farm-publication-filters.cjs
+A	api/scripts/verify-linked-request-applications.cjs
+A	api/src/modules/admin-operations/admin-account-actions.service.spec.ts
+A	api/src/modules/admin-operations/admin-account-actions.service.ts
+M	api/src/modules/admin-operations/admin-analytics-range.spec.ts
+M	api/src/modules/admin-operations/admin-analytics-range.ts
+M	api/src/modules/admin-operations/admin-analytics.service.ts
+M	api/src/modules/admin-operations/admin-dashboard.controller.ts
+A	api/src/modules/admin-operations/admin-farms-publication.spec.ts
+M	api/src/modules/admin-operations/admin-farms.service.ts
+M	api/src/modules/admin-operations/admin-operations.module.ts
+M	api/src/modules/admin-operations/admin-users.service.ts
+A	api/src/modules/admin-operations/dto/admin-account-actions.dto.ts
+M	api/src/modules/admin-operations/dto/admin-farms.dto.ts
+A	api/src/modules/admin-operations/farm-publication-filter.ts
+A	api/src/modules/communication/communication-case-status.spec.ts
+M	api/src/modules/communication/communication-cases.service.ts
+A	api/src/modules/farms/admin-farm-management.controller.ts
+A	api/src/modules/farms/dto/admin-farm.dto.ts
+M	api/src/modules/farms/farms.module.ts
+M	api/src/modules/farms/farms.service.ts
+A	api/src/modules/listing-requests/listing-publication-authorization.spec.ts
+M	api/src/modules/listing-requests/listing-publication.service.ts
+A	api/src/modules/listing-requests/staff-listing-detail.spec.ts
+M	api/src/modules/listing-requests/staff-listing-reviews.service.ts
+A	api/src/modules/requests/dto/linked-applications.dto.ts
+A	api/src/modules/requests/linked-request-applications.service.spec.ts
+A	api/src/modules/requests/linked-request-applications.service.ts
+M	api/src/modules/requests/requests.module.ts
+A	api/src/modules/requests/staff-linked-applications.controller.ts
+A	api/test/admin-farm-management.e2e-spec.ts
+M	api/test/listing-reviews.e2e-spec.ts
+D	dashboard/.env.example
+D	dashboard/src/app/[locale]/admin/(console)/analytics/page.tsx
+D	dashboard/src/app/[locale]/admin/(console)/farms/[id]/page.tsx
+D	dashboard/src/app/[locale]/admin/(console)/farms/page.tsx
+D	dashboard/src/app/[locale]/admin/(console)/listing-pipeline/page.tsx
+D	dashboard/src/app/[locale]/admin/(console)/listings/[id]/page.tsx
+D	dashboard/src/app/[locale]/admin/(console)/listings/page.tsx
+D	dashboard/src/app/[locale]/admin/(console)/requests/[id]/page.tsx
+D	dashboard/src/design-system/index.ts
+D	dashboard/src/design-system/workspace/KpiStrip.tsx
+D	dashboard/src/features/admin/AdminHeader.tsx
+D	dashboard/src/features/admin/AdminOverview.tsx
+D	dashboard/src/features/admin/AdminSidebar.tsx
+D	dashboard/src/features/admin/analytics/AnalyticsDateFilters.tsx
+D	dashboard/src/features/admin/analytics/TimeSeriesChart.tsx
+D	dashboard/src/features/admin/communications/CommunicationCaseWorkspace.tsx
+D	dashboard/src/features/admin/evaluations/CreateEvaluationForm.tsx
+D	dashboard/src/features/admin/workspace/AdminListPageHeader.tsx
+D	dashboard/src/styles/admin-components.css
+D	dashboard/src/styles/admin-tokens.css
+M	docs/CROSS_APP_IMPLEMENTATION_ROADMAP.md
+M	docs/CROSS_APP_INTEGRATION_GAP_MAP.md
+A	docs/FARMEXIT_DASHBOARD_V2_ADOPTION_REPORT.md
+M	package.json
+M	web/.env.example
+M	web/next-env.d.ts
+M	web/src/features/my-messages/ConversationView.tsx
+```

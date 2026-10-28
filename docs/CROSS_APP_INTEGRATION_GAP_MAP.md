@@ -1,8 +1,8 @@
 # FarmExit — Cross-App Integration Gap Map (Stage 1)
 
-**Date:** 2026-10-21  
-**Mode:** Read-only audit — source inspected, no implementation.  
-**Apps:** `api/` (:4001), `web/` (:3000), `dashboard/` (:3002).  
+**Date:** 2026-10-21
+**Mode:** Read-only audit — source inspected, no implementation.
+**Apps:** `api/` (:4001), `web/` (:3000), `FarmExit_dashboard-v2_redesigned/dashboard-v2/` (:3003).
 **References:** `docs/BACKEND_RULES.md`, `web/docs/FINAL_FRONTEND_COMPLETENESS_AUDIT.md`, live controllers and BFF routes.
 
 ---
@@ -44,7 +44,7 @@ The **backend exposes a broad, staff-scoped REST surface** (website JWT + dashbo
 | Website OTP request/verify | Yes | `POST /auth/otp/request`, `POST /auth/otp/verify` | Public + rate limit | Website | **Complete** | Real API via `web/src/app/api/auth/*` | Create session | UAT needs dev OTP |
 | Website refresh/logout/me | Yes | `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me` | Website JWT | Website | **Complete** | BFF + cookies | Read session | D — live UAT |
 | Profile complete / patch | Yes | `POST /auth/profile/complete`, `PATCH /auth/profile` | Website JWT | Website | **Complete** | BFF | Update | D |
-| Dashboard login/refresh/logout/me | Yes | `POST /admin-auth/login`, `refresh`, `logout`, `GET /admin-auth/me` | Dashboard JWT | Dashboard | **Complete** | `dashboard/src/app/api/admin/auth/*` | Session | D |
+| Dashboard login/refresh/logout/me | Yes | `POST /admin-auth/login`, `refresh`, `logout`, `GET /admin-auth/me` | Dashboard JWT | Dashboard | **Complete** | `FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/api/admin/auth/*` | Session | D |
 | Staff identity | Yes | `GET /staff/me` | Staff (dashboard token) | Dashboard | **Complete** | `session.server.ts` | Read roles | Used on every load |
 
 ### 1.2 Users, staff & permissions
@@ -246,7 +246,7 @@ Dashboard settings, website redesign, new backend features.
 
 - API: `api/src/modules/**/*.controller.ts` (58 controller files), decorator grep (`StaffOnly`, `StaffDashboardOnly`, `WebsiteAudienceGuard`).
 - Website: `web/src/app/api/**` route handlers; spot-check portal pages.
-- Dashboard: `dashboard/src/app/[locale]/admin/**`, `dashboard/src/features/admin/actions/*.ts`, `platform.ts`, `workflows.ts`, `listings.ts`.
+- Dashboard: `FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/[locale]/admin/**`, `FarmExit_dashboard-v2_redesigned/dashboard-v2/src/features/admin/actions/*.ts`, `platform.ts`, `workflows.ts`, `listings.ts`.
 - No test suite re-run; no DB changes.
 
 ---

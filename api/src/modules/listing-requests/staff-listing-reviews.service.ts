@@ -1,5 +1,10 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, type FarmListingDetail, type Request, type RequestStaffAssignment } from '../../generated/prisma/client';
+import {
+  Prisma,
+  type FarmListingDetail,
+  type Request,
+  type RequestStaffAssignment,
+} from '../../generated/prisma/client';
 import {
   AccountStatus,
   RequestStaffAssignmentType,
@@ -139,7 +144,11 @@ export class StaffListingReviewsService {
     comment: string | null,
   ): Promise<void> {
     const admin = await tx.staffMembership.findFirst({
-      where: { userId: actorId, staffRole: StaffRole.admin, status: STAFF_STATUS_ACTIVE },
+      where: {
+        userId: actorId,
+        staffRole: { in: [StaffRole.admin, StaffRole.superAdmin] },
+        status: STAFF_STATUS_ACTIVE,
+      },
       select: { id: true },
     });
     const reviewer = admin
@@ -212,9 +221,7 @@ export class StaffListingReviewsService {
   ): Promise<void> {
     for (let attempt = 0; attempt < 5; attempt++) {
       try {
-        await this.prisma.$transaction((tx) =>
-          this.writeOnce(tx, actorId, requestId, assignmentType, assignedStaffId),
-        );
+        await this.prisma.$transaction((tx) => this.writeOnce(tx, actorId, requestId, assignmentType, assignedStaffId));
         return;
       } catch (error) {
         if (attempt < 4 && isRetryable(error)) continue;
@@ -233,16 +240,22 @@ export class StaffListingReviewsService {
     assignedStaffId: bigint,
   ): Promise<void> {
     const admin = await tx.staffMembership.findFirst({
-      where: { userId: actorId, staffRole: StaffRole.admin, status: STAFF_STATUS_ACTIVE },
+      where: {
+        userId: actorId,
+        staffRole: { in: [StaffRole.admin, StaffRole.superAdmin] },
+        status: STAFF_STATUS_ACTIVE,
+      },
       select: { id: true },
     });
     if (!admin) throw forbidden();
 
     const request = await tx.request.findFirst({
-      where: { id: requestId, requestType: RequestType.farmListing, status: LISTING_UNDER_REVIEW },
-      select: { id: true },
+      where: { id: requestId, requestType: RequestType.farmListing },
+      select: { id: true, status: true },
     });
-    if (!request) throw notFound();
+    if (!request || request.status === LISTING_DRAFT) throw notFound();
+    if (request.status !== LISTING_UNDER_REVIEW)
+      throw new ConflictException('Assignments are available only while the listing is under FarmExit review');
 
     const requiredRole =
       assignmentType === RequestStaffAssignmentType.reviewer ? StaffRole.reviewer : StaffRole.caseAgent;
@@ -337,7 +350,7 @@ export class StaffListingReviewsService {
 
   private async submitted(requestId: bigint): Promise<Request> {
     const request = await this.prisma.request.findFirst({
-      where: { id: requestId, requestType: RequestType.farmListing, status: LISTING_UNDER_REVIEW },
+      where: { id: requestId, requestType: RequestType.farmListing, status: { not: LISTING_DRAFT } },
     });
     if (!request?.farmId) throw notFound();
     return request;

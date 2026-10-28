@@ -80,7 +80,7 @@ export class AdminUsersService {
     pageSize: number,
     skip: number,
   ): Promise<AdminUsersListResponseDto> {
-    const adminRoles = [StaffRole.admin, StaffRole.superAdmin];
+    const adminRoles = [StaffRole.admin, StaffRole.superAdmin, StaffRole.reviewer, StaffRole.caseAgent];
     const where: Prisma.UserWhereInput = {
       staffMemberships: {
         some: { staffRole: { in: adminRoles }, status: 'active' },

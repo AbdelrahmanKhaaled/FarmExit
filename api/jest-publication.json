@@ -1,0 +1,30 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": "./src",
+  "testRegex": ".*\\.spec\\.ts$",
+  "testPathIgnorePatterns": [
+    "\\.integration-spec\\.ts$"
+  ],
+  "transform": {
+    "^.+[.](t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": "tsconfig.build.json"
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
+  "collectCoverageFrom": [
+    "**/*.(t|j)s",
+    "!generated/**",
+    "!main.ts"
+  ],
+  "coverageDirectory": "../coverage",
+  "testEnvironment": "node"
+}

@@ -1,4 +1,8 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { CurrentAuth } from '../auth/auth.decorators';
+import type { AuthContext } from '../auth/auth.types';
+import { AdminAccountActionsService } from './admin-account-actions.service';
+import { CreateDashboardStaffDto, UpdatePlatformUserStatusDto } from './dto/admin-account-actions.dto';
 import { ParseBigIntIdPipe } from '../../common/pipes/parse-bigint-id.pipe';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { StaffRole } from '../../generated/prisma/enums';
@@ -8,10 +12,7 @@ import { AdminAuditService } from './admin-audit.service';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { AdminAssignableStaffService } from './admin-assignable-staff.service';
 import { AdminFarmsService } from './admin-farms.service';
-import {
-  AdminAssignableStaffListResponseDto,
-  AdminAssignableStaffQueryDto,
-} from './dto/admin-assignable-staff.dto';
+import { AdminAssignableStaffListResponseDto, AdminAssignableStaffQueryDto } from './dto/admin-assignable-staff.dto';
 import { AdminUsersService } from './admin-users.service';
 import {
   AdminAnalyticsDistributionsDto,
@@ -24,10 +25,7 @@ import {
 import { AdminAuditLogListResponseDto, AdminAuditLogsQueryDto } from './dto/admin-audit.dto';
 import { AdminDashboardOverviewDto, AdminWorkQueueDto } from './dto/admin-dashboard.dto';
 import { AdminFarmDetailDto, AdminFarmListResponseDto, AdminListFarmsQueryDto } from './dto/admin-farms.dto';
-import {
-  AdminEvaluationListResponseDto,
-  AdminEvaluationsQueryDto,
-} from './dto/admin-evaluations.dto';
+import { AdminEvaluationListResponseDto, AdminEvaluationsQueryDto } from './dto/admin-evaluations.dto';
 import { AdminUserDetailDto } from './dto/admin-user-detail.dto';
 import { AdminEvaluationsService } from './admin-evaluations.service';
 import { AdminUsersListResponseDto, AdminUsersQueryDto } from './dto/admin-users.dto';
@@ -45,6 +43,7 @@ export class AdminDashboardController {
     private readonly users: AdminUsersService,
     private readonly evaluationsInbox: AdminEvaluationsService,
     private readonly audit: AdminAuditService,
+    private readonly accounts: AdminAccountActionsService,
   ) {}
 
   @Get('dashboard/overview')
@@ -118,6 +117,11 @@ export class AdminDashboardController {
     return this.assignableStaff.list(query);
   }
 
+  @Get('farm-filter-options')
+  farmFilterOptions() {
+    return this.farms.filterOptions();
+  }
+
   @Get('farms')
   @ApiOperation({ summary: 'Paginated farm directory for administrators (no private coordinates)' })
   @ApiOkResponse({ type: AdminFarmListResponseDto })
@@ -137,6 +141,21 @@ export class AdminDashboardController {
   @ApiOkResponse({ type: AdminUsersListResponseDto })
   listUsers(@Query() query: AdminUsersQueryDto): Promise<AdminUsersListResponseDto> {
     return this.users.list(query);
+  }
+
+  @Get('administrators/role-options')
+  roleOptions(@CurrentAuth() auth: AuthContext) {
+    return this.accounts.roleOptions(auth.userId);
+  }
+
+  @Post('administrators')
+  createAdministrator(@CurrentAuth() auth: AuthContext, @Body() dto: CreateDashboardStaffDto) {
+    return this.accounts.createStaff(auth.userId, dto);
+  }
+
+  @Patch('users/:id/status')
+  updateUserStatus(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint, @Body() dto: UpdatePlatformUserStatusDto) {
+    return this.accounts.updateUserStatus(auth.userId, id, dto);
   }
 
   @Get('users/:id')

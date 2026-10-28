@@ -29,7 +29,11 @@ type Props = {
   preview?: ConversationPreview;
 };
 
-export function ConversationView({
+export function ConversationView(props: Props) {
+  return <ConversationContent key={props.caseId} {...props} />;
+}
+
+function ConversationContent({
   caseId,
   userId,
   layout = 'embedded',
@@ -82,12 +86,6 @@ export function ConversationView({
       active = false;
     };
   }, [caseId, preview, t]);
-
-  useEffect(() => {
-    nearBottom.current = true;
-    forceLatest.current = true;
-    setUnread(false);
-  }, [caseId]);
 
   const { status: realtimeStatus } = useCommunicationSocket({
     caseId,

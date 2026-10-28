@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+
+export const LISTING_PUBLICATION_FILTERS = ['sale', 'rent', 'none', 'saleAndRent'] as const;
+export type ListingPublicationFilter = (typeof LISTING_PUBLICATION_FILTERS)[number];
 
 export class AdminListFarmsQueryDto {
   @ApiPropertyOptional({ default: 1 })
@@ -32,9 +35,21 @@ export class AdminListFarmsQueryDto {
   @IsOptional()
   @IsString()
   governorate?: string;
+
+  @ApiPropertyOptional({ enum: LISTING_PUBLICATION_FILTERS, description: 'Authorized published listing state; applied before pagination' })
+  @IsOptional()
+  @IsIn(LISTING_PUBLICATION_FILTERS)
+  listingPublication?: ListingPublicationFilter;
+}
+
+export class AdminPublishedListingDto {
+  @ApiProperty() id!: string;
+  @ApiProperty({ enum: ['sale', 'rent'] }) listingType!: string;
 }
 
 export class AdminFarmRowDto {
+  @ApiProperty({ type: [AdminPublishedListingDto] })
+  publishedListings!: { id: string; listingType: string }[];
   @ApiProperty()
   id!: string;
 
@@ -83,6 +98,8 @@ export class AdminFarmRequestSummaryDto {
 }
 
 export class AdminFarmDetailDto {
+  @ApiProperty({ type: [AdminPublishedListingDto] })
+  publishedListings!: { id: string; listingType: string }[];
   @ApiProperty()
   id!: string;
 

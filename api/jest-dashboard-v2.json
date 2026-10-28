@@ -1,0 +1,10 @@
+{
+  "rootDir": "./src",
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "testEnvironment": "node",
+  "testRegex": "(admin-analytics-range|admin-analytics.service|admin-users.service|admin-account-actions.service|admin-farms-publication|linked-request-applications.service|communication-case-status|staff-listing-detail|staff-permissions)\\.spec\\.ts$",
+  "transform": {
+    "^.+[.](t|j)s$": ["ts-jest", { "tsconfig": "tsconfig.build.json" }]
+  },
+  "moduleNameMapper": { "^(\\.{1,2}/.*)\\.js$": "$1" }
+}

@@ -79,9 +79,9 @@ describe('Listing review decisions (e2e)', () => {
     return { owner, id };
   }
 
-  it('lets an assigned reviewer request changes and the owner resubmit without publishing', async () => {
+  it.each(['admin', 'superAdmin'])('lets %s assign both slots and review without publishing', async (adminRole) => {
     const { owner, id } = await submitted();
-    const admin = await staff('admin');
+    const admin = await staff(adminRole);
     const reviewer = await staff('reviewer');
     const agent = await staff('caseAgent');
     const other = await staff('reviewer');
@@ -98,7 +98,9 @@ describe('Listing review decisions (e2e)', () => {
     await decision(reviewer, id, { decision: 'changesRequested', comment: '   ' }).expect(400);
     await decision(reviewer, id, { decision: 'approved', comment: 'Fine', status: 'published' }).expect(400);
 
-    const asked = json(await decision(reviewer, id, { decision: 'changesRequested', comment: ' Add the well depth ' }).expect(200));
+    const asked = json(
+      await decision(reviewer, id, { decision: 'changesRequested', comment: ' Add the well depth ' }).expect(200),
+    );
     expect(asked).toMatchObject({
       status: 'changesRequested',
       visibility: 'private',
@@ -118,7 +120,9 @@ describe('Listing review decisions (e2e)', () => {
       expect.objectContaining({ decision: 'changesRequested', comment: 'Add the well depth' }),
     ]);
     expect(JSON.stringify(ownerView.reviews)).not.toMatch(/reviewerId|@staff\.test/);
-    const edited = json(await as(owner).patch(`/api/v1/listing-requests/${id}`, { listingDescription: 'Oranges and a well' }).expect(200));
+    const edited = json(
+      await as(owner).patch(`/api/v1/listing-requests/${id}`, { listingDescription: 'Oranges and a well' }).expect(200),
+    );
     expect(edited).toMatchObject({ status: 'changesRequested', listingDescription: 'Oranges and a well' });
 
     const again = json(await as(owner).post(`/api/v1/listing-requests/${id}/submit`).expect(200));
@@ -142,14 +146,12 @@ describe('Listing review decisions (e2e)', () => {
     await decision(reviewer, id, { decision: 'rejected', comment: 'Too late' }).expect(409);
     expect(db.request.rows.find((row) => row.id === BigInt(id))?.publishedAt ?? null).toBeNull();
     expect(db.requestReview.rows).toHaveLength(2);
-    expect(db.requestStatusHistory.rows.filter((row) => row.requestId === BigInt(id)).map((row) => row.toStatus)).toEqual([
-      'draft',
-      'underFarmExitReview',
-      'changesRequested',
-      'underFarmExitReview',
-      'approved',
-    ]);
-    expect(db.requestStatusHistory.rows.find((row) => row.toStatus === 'changesRequested')?.reason).toBe('Add the well depth');
+    expect(
+      db.requestStatusHistory.rows.filter((row) => row.requestId === BigInt(id)).map((row) => row.toStatus),
+    ).toEqual(['draft', 'underFarmExitReview', 'changesRequested', 'underFarmExitReview', 'approved']);
+    expect(db.requestStatusHistory.rows.find((row) => row.toStatus === 'changesRequested')?.reason).toBe(
+      'Add the well depth',
+    );
   });
 
   it('rolls back a decision when the review row cannot be stored, and blocks closed listings', async () => {

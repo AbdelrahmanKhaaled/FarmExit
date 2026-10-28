@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { Prisma } from '../../generated/prisma/client';
-import { FarmRelationshipRole, FarmRelationshipStatus } from '../../generated/prisma/enums';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma/client';
+import { AccountStatus, FarmRelationshipRole, FarmRelationshipStatus, StaffRole } from '../../generated/prisma/enums';
+import type { AdminCreateFarmDto } from './dto/admin-farm.dto';
 import type { Farm } from '../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { forbidden } from '../authorization/authorization.errors';
@@ -34,6 +35,109 @@ export class FarmsService {
     private readonly farmAccess: FarmAccessService,
     private readonly staffAuth: StaffAuthorizationService,
   ) {}
+
+  private async requireSuperAdmin(actorId: bigint): Promise<void> {
+    const staff = await this.staffAuth.loadContext(actorId);
+    if (!staff?.roles.includes(StaffRole.superAdmin)) throw forbidden();
+  }
+
+  async getForStaffEdit(actorId: bigint, farmId: bigint): Promise<FarmResponseDto> {
+    await this.requireSuperAdmin(actorId);
+    const farm = await this.prisma.farm.findFirst({ where: { id: farmId, deletedAt: null } });
+    if (!farm) throw notFound();
+    return toResponse(farm, []);
+  }
+
+  async createByStaff(actorId: bigint, dto: AdminCreateFarmDto): Promise<FarmResponseDto> {
+    await this.requireSuperAdmin(actorId);
+    const ownerId = BigInt(dto.ownerUserId);
+    if (ownerId > 9223372036854775807n) throw new BadRequestException('Invalid owner user ID');
+    const farm = await this.prisma.$transaction(async (tx) => {
+      const owner = await tx.user.findFirst({
+        where: { id: ownerId, accountStatus: AccountStatus.active },
+        select: { id: true },
+      });
+      if (!owner) throw new BadRequestException('Owner must be an existing active user');
+      const created = await tx.farm.create({
+        data: { ...editableFields(dto), createdBy: actorId } as Prisma.FarmUncheckedCreateInput,
+      });
+      await tx.farmRelationship.create({
+        data: {
+          farmId: created.id,
+          userId: ownerId,
+          relationshipRole: FarmRelationshipRole.owner,
+          relationshipStatus: FarmRelationshipStatus.active,
+          startsAt: new Date(),
+        },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: actorId,
+          entityType: 'farm',
+          entityId: created.id,
+          action: 'created_by_staff',
+          changes: { ownerUserId: dto.ownerUserId },
+        },
+      });
+      return created;
+    });
+    return toResponse(farm, []);
+  }
+
+  async updateByStaff(actorId: bigint, farmId: bigint, dto: UpdateFarmDto): Promise<FarmResponseDto> {
+    await this.requireSuperAdmin(actorId);
+    const data = editableFields(dto);
+    if (!Object.keys(data).length) throw new BadRequestException('Nothing to update');
+    const farm = await this.prisma.$transaction(async (tx) => {
+      const current = await tx.farm.findFirst({ where: { id: farmId, deletedAt: null } });
+      if (!current) throw notFound();
+      const updated = await tx.farm.update({ where: { id: farmId }, data });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: actorId,
+          entityType: 'farm',
+          entityId: farmId,
+          action: 'updated_by_staff',
+          changes: { fields: Object.keys(data) },
+        },
+      });
+      return updated;
+    });
+    return toResponse(farm, []);
+  }
+
+  /** Conservative soft archive: no related workflow may disappear from operational queries. No cascades. */
+  async archiveByStaff(actorId: bigint, farmId: bigint): Promise<{ id: string; archived: true }> {
+    await this.requireSuperAdmin(actorId);
+    await this.prisma.$transaction(
+      async (tx) => {
+        const farm = await tx.farm.findFirst({ where: { id: farmId, deletedAt: null } });
+        if (!farm) throw notFound();
+        const linked = await Promise.all([
+          tx.request.count({ where: { farmId } }),
+          tx.farmEvaluation.count({ where: { farmId } }),
+          tx.agriculturalFacility.count({ where: { farmId } }),
+          tx.siteVisit.count({ where: { farmId } }),
+        ]);
+        if (linked.some((count) => count > 0))
+          throw new ConflictException(
+            'Farm has linked requests, evaluations, facilities or visits; archive is blocked',
+          );
+        await tx.farm.update({ where: { id: farmId }, data: { deletedAt: new Date() } });
+        await tx.auditLog.create({
+          data: {
+            actorUserId: actorId,
+            entityType: 'farm',
+            entityId: farmId,
+            action: 'archived',
+            changes: { softDelete: true },
+          },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+    return { id: farmId.toString(), archived: true };
+  }
 
   /**
    * Creates a NEW farm and the creator's `owner` relationship in one transaction. The owner is always the

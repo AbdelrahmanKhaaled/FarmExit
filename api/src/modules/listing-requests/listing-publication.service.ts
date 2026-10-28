@@ -9,6 +9,7 @@ import {
   StaffRole,
 } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
+import { staffHasAdminScope } from '../authorization/staff-permissions';
 import { forbidden } from '../authorization/authorization.errors';
 import { StaffAuthorizationService, STAFF_STATUS_ACTIVE } from '../authorization/staff-authorization.service';
 import { DEFAULT_PAGE_SIZE, type ListFarmsQueryDto } from '../farms/dto/list-farms-query.dto';
@@ -84,7 +85,7 @@ export class ListingPublicationService {
     publishedAt: Date,
   ): Promise<void> {
     const admin = await tx.staffMembership.findFirst({
-      where: { userId, staffRole: StaffRole.admin, status: STAFF_STATUS_ACTIVE },
+      where: { userId, staffRole: { in: [StaffRole.admin, StaffRole.superAdmin] }, status: STAFF_STATUS_ACTIVE },
       select: { id: true },
     });
     if (!admin) throw forbidden();
@@ -197,7 +198,7 @@ export class ListingPublicationService {
 
   private async requireAdmin(userId: bigint): Promise<void> {
     const staff = await this.staffAuth.loadContext(userId);
-    if (!staff?.roles.includes(StaffRole.admin)) throw forbidden();
+    if (!staff || !staffHasAdminScope(staff.roles)) throw forbidden();
   }
 
   private async present(rows: Request[]): Promise<PublicationListingDto[]> {

@@ -9,6 +9,7 @@ import { AdminAssignableStaffService } from './admin-assignable-staff.service';
 import { AdminEvaluationsService } from './admin-evaluations.service';
 import { AdminFarmsService } from './admin-farms.service';
 import { AdminUsersService } from './admin-users.service';
+import { AdminAccountActionsService } from './admin-account-actions.service';
 
 @Module({
   imports: [AuthorizationModule, AdminAuthModule],
@@ -20,6 +21,7 @@ import { AdminUsersService } from './admin-users.service';
     AdminEvaluationsService,
     AdminFarmsService,
     AdminUsersService,
+    AdminAccountActionsService,
     AdminAuditService,
   ],
 })

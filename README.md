@@ -3,7 +3,7 @@
 | Folder        | Application              | Purpose |
 | ------------- | ------------------------ | ------- |
 | `api/`        | NestJS REST API          | Auth, Prisma/MySQL, all business logic (`/api/v1`) |
-| `dashboard/`  | Next.js admin dashboard  | FarmExit **admin** staff only — operations, overview, future admin modules |
+| `FarmExit_dashboard-v2_redesigned/dashboard-v2/`  | Next.js admin dashboard  | FarmExit **admin** staff only — operations, overview, future admin modules |
 | `web/`        | Next.js public website   | Marketplace, EN/AR site, user-facing flows (not admin) |
 | `docs/`       | Documentation            | [BACKEND_RULES.md](docs/BACKEND_RULES.md), ERD |
 
@@ -14,7 +14,7 @@ Each app has its own `package.json` and `package-lock.json` (no npm workspaces).
 ```
 FarmExit/
 ├── api/           # NestJS backend
-├── dashboard/     # Admin Next.js app (port 3002)
+├── FarmExit_dashboard-v2_redesigned/dashboard-v2/     # Admin Next.js app (port 3003)
 ├── web/           # Public Next.js app (port 3000)
 ├── docs/
 ├── package.json   # Root orchestration scripts
@@ -26,7 +26,7 @@ FarmExit/
 ```bash
 npm run setup
 cp api/.env.example api/.env          # DATABASE_URL, secrets, CORS (see below)
-cp dashboard/.env.example dashboard/.env   # optional; FARMEXIT_API_URL
+cp FarmExit_dashboard-v2_redesigned/dashboard-v2/.env.example FarmExit_dashboard-v2_redesigned/dashboard-v2/.env   # optional; FARMEXIT_API_URL
 ```
 
 `api/.env` must exist before `npm --prefix api ci` / `prisma generate`.
@@ -43,18 +43,18 @@ cp dashboard/.env.example dashboard/.env   # optional; FARMEXIT_API_URL
 | Service            | URL |
 | ------------------ | --- |
 | Public website     | http://localhost:3000 |
-| Admin dashboard    | http://localhost:3002 (`/en/admin/login`) |
-| API                | http://localhost:4000/api/v1 |
-| API Swagger (dev)  | http://localhost:4000/api/docs |
+| Admin dashboard    | http://localhost:3003 (`/en/admin/login`) |
+| API                | http://localhost:4001/api/v1 |
+| API Swagger (dev)  | http://localhost:4001/api/docs |
 
-The API keeps the existing default **port 4000** (see `api/.env` `PORT`). Frontends call the API via `FARMEXIT_API_URL` (dashboard) or server integrations in `web` — never MySQL from the browser.
+The API keeps the existing local **port 4001** (see `api/.env` `PORT`). Frontends call the API via `FARMEXIT_API_URL` (dashboard) or server integrations in `web` — never MySQL from the browser.
 
 ### CORS
 
 Browser requests from the dashboard run on a separate origin. Include both frontends in `api/.env`:
 
 ```env
-CORS_ORIGINS=http://localhost:3000,http://localhost:3002
+CORS_ORIGINS=http://localhost:3000,http://localhost:3003
 ```
 
 ## Development
@@ -90,10 +90,10 @@ npm run test:dashboard
 
 ## API access
 
-- **Dashboard**: OTP/JWT via Next.js BFF routes under `dashboard/src/app/api/admin/auth/*`; only users with backend `admin` staff role.
+- **Dashboard**: OTP/JWT via Next.js BFF routes under `FarmExit_dashboard-v2_redesigned/dashboard-v2/src/app/api/admin/auth/*`; only users with backend `admin` staff role.
 - **Website**: public and user flows only; no admin console routes in `web/`.
 
-Health: `GET http://localhost:4000/api/v1/health`
+Health: `GET http://localhost:4001/api/v1/health`
 
 ### First local admin (development)
 
@@ -103,7 +103,7 @@ The seed creates demo users and a **case agent**, not an admin. Provision the fi
 npm run admin:bootstrap -- --mobile 01012345678 --name "FarmExit Admin"
 ```
 
-Then start `npm run dev:api` and `npm run dev:dashboard`, open http://localhost:3002/en/admin/login, request an OTP for that mobile.
+Then start `npm run dev:api` and `npm run dev:dashboard`, open http://localhost:3003/en/admin/login, request an OTP for that mobile.
 
 **OTP in development:** either read the code from the API console (`DEV ONLY: OTP for …` with `SMS_PROVIDER=development`), or enable fixed OTP in `api/.env` only:
 
@@ -114,3 +114,9 @@ DEV_FIXED_OTP_ALLOWED_MOBILES=+201012345678
 ```
 
 Fixed OTP still requires `POST /auth/otp/request` first; it is allowlisted-mobile only and is **blocked when `NODE_ENV=production`**.
+
+## Approved dashboard and deployment
+
+The only maintained admin app is `FarmExit_dashboard-v2_redesigned/dashboard-v2` (port 3003). Root dashboard commands target this directory. The former root dashboard applications are retired. Historical reports retain their original paths.
+
+For the dashboard Vercel project, set Root Directory to `FarmExit_dashboard-v2_redesigned/dashboard-v2`, use its package-lock with `npm ci`, and build with `npm run build`. Set `FARMEXIT_API_URL` and `NEXT_PUBLIC_FARMEXIT_API_URL` to `https://farmexit.nodeteam.site/api/v1`, and `NEXT_PUBLIC_FARMEXIT_REALTIME_ORIGIN` to `https://farmexit.nodeteam.site`. Redeploy after changing public environment variables. Keep the Website project rooted at `web`. No hosted project settings were changed by this repository consolidation.

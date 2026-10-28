@@ -17,6 +17,7 @@ import {
   fillSeries,
   monthKey,
   resolveAnalyticsRange,
+  sqlBucketExpr,
   type AnalyticsGranularity,
   type ResolvedAnalyticsRange,
 } from './admin-analytics-range';
@@ -35,7 +36,7 @@ export class AdminAnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async analytics(query: AdminAnalyticsQueryDto): Promise<AdminAnalyticsResponseDto> {
-    const ctx = resolveAnalyticsRange(query);
+    const ctx = await this.resolveRange(query);
     const [overview, timeseries, distributions, workflows] = await Promise.all([
       this.loadOverview(ctx),
       this.loadTimeseries(ctx),
@@ -69,19 +70,32 @@ export class AdminAnalyticsService {
   }
 
   async overview(query: AdminAnalyticsQueryDto): Promise<AdminAnalyticsOverviewDto> {
-    return this.loadOverview(resolveAnalyticsRange(query));
+    return this.loadOverview(await this.resolveRange(query));
   }
 
   async timeseries(query: AdminAnalyticsQueryDto): Promise<AdminAnalyticsTimeseriesDto> {
-    return this.loadTimeseries(resolveAnalyticsRange(query));
+    return this.loadTimeseries(await this.resolveRange(query));
   }
 
   async distributions(query: AdminAnalyticsQueryDto): Promise<AdminAnalyticsDistributionsDto> {
-    return this.loadDistributions(resolveAnalyticsRange(query));
+    return this.loadDistributions(await this.resolveRange(query));
   }
 
   async workflows(query: AdminAnalyticsQueryDto): Promise<AdminAnalyticsWorkflowsDto> {
-    return this.loadWorkflows(resolveAnalyticsRange(query));
+    return this.loadWorkflows(await this.resolveRange(query));
+  }
+
+  private async resolveRange(query: AdminAnalyticsQueryDto): Promise<ResolvedAnalyticsRange> {
+    if (query.range !== 'all' || query.from) return resolveAnalyticsRange(query);
+    const rows = await this.prisma.$queryRawUnsafe<{ earliest: Date | string | null }[]>(`
+      SELECT MIN(first_date) AS earliest FROM (
+        SELECT MIN(created_at) AS first_date FROM users
+        UNION ALL SELECT MIN(created_at) FROM farms WHERE deleted_at IS NULL
+        UNION ALL SELECT MIN(created_at) FROM requests
+        UNION ALL SELECT MIN(published_at) FROM requests
+        UNION ALL SELECT MIN(created_at) FROM communication_cases
+      ) dates`);
+    return resolveAnalyticsRange(query, rows[0]?.earliest ? new Date(rows[0].earliest) : undefined);
   }
 
   private publishedListingRangeWhere(ctx: ResolvedAnalyticsRange) {
@@ -346,7 +360,7 @@ export class AdminAnalyticsService {
     fromClause: string,
     extraSql: string,
   ): Promise<{ bucket: Date | string; count: bigint }[]> {
-    const expr = this.bucketSql(ctx.granularity, colRef);
+    const expr = sqlBucketExpr(ctx.granularity, colRef);
     return this.prisma.$queryRawUnsafe<{ bucket: Date | string; count: bigint }[]>(
       `SELECT ${expr} AS bucket, COUNT(*) AS count
        FROM ${fromClause}
@@ -357,12 +371,6 @@ export class AdminAnalyticsService {
       ctx.from,
       ctx.toExclusive,
     );
-  }
-
-  private bucketSql(granularity: AnalyticsGranularity, colRef: string): string {
-    if (granularity === 'month') return `DATE_FORMAT(${colRef}, '%Y-%m')`;
-    if (granularity === 'week') return `DATE(DATE_SUB(${colRef}, INTERVAL WEEKDAY(${colRef}) DAY))`;
-    return `DATE(${colRef})`;
   }
 
   private normalizeBucket(bucket: Date | string, granularity: AnalyticsGranularity): string {

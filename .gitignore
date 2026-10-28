@@ -68,3 +68,14 @@ api/prisma/.dashboard-demo-manifest.json
 /web/web/
  
 dashboard/.visual-qa/
+
+# Imported dashboard QA artifacts and local handoff archives
+**/.visual-qa/
+/dashboard.zip
+/dashboard-v2.zip
+.dashboard-adoption-backup-path.tmp
+**/.npm-cache-adoption/
+/FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/artifacts/
+/FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/batch-one-qa/
+/FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/*.log
+/FarmExit_dashboard-v2_redesigned/dashboard-v2/docs/*-readonly.json

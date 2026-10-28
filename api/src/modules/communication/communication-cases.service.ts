@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type CommunicationCase } from '../../generated/prisma/client';
 import { CommunicationCaseStatus } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -119,7 +119,9 @@ export class CommunicationCasesService {
 
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? DEFAULT_PAGE_SIZE;
-    const where: Prisma.CommunicationCaseWhereInput = staffHasAdminScope(staff.roles) ? {} : { assignedStaffId: userId };
+    const where: Prisma.CommunicationCaseWhereInput = staffHasAdminScope(staff.roles)
+      ? {}
+      : { assignedStaffId: userId };
     if (query.status) where.status = query.status as never;
     if (query.requestId) where.requestId = BigInt(query.requestId);
     const [total, rows] = await Promise.all([
@@ -165,22 +167,22 @@ export class CommunicationCasesService {
     const caseRow = await this.prisma.communicationCase.findUnique({ where: { id: caseId } });
     if (!caseRow) throw notFound();
     await this.access.assertStaffCaseAccess(userId, caseRow);
-    if (caseRow.status === CommunicationCaseStatus.closed && dto.status !== CommunicationCaseStatus.closed) {
-      throw new ConflictException('Reopening a closed case is not supported');
-    }
-    const closedAt = dto.status === CommunicationCaseStatus.closed ? new Date() : null;
-    const updated = await this.prisma.communicationCase.update({
-      where: { id: caseId },
-      data: { status: dto.status, closedAt },
-    });
-    await this.prisma.auditLog.create({
-      data: {
-        actorUserId: userId,
-        entityType: 'communication_case',
-        entityId: caseId,
-        action: 'case_status_updated',
-        changes: { status: dto.status },
-      },
+    const closedAt = dto.status === CommunicationCaseStatus.closed ? (caseRow.closedAt ?? new Date()) : null;
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const saved = await tx.communicationCase.update({
+        where: { id: caseId },
+        data: { status: dto.status, closedAt },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorUserId: userId,
+          entityType: 'communication_case',
+          entityId: caseId,
+          action: 'case_status_updated',
+          changes: { fromStatus: caseRow.status, status: dto.status },
+        },
+      });
+      return saved;
     });
     return toCase(updated);
   }

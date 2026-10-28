@@ -15,9 +15,11 @@ export type ResolvedAnalyticsRange = {
 const MS_DAY = 24 * 60 * 60 * 1000;
 const MAX_CUSTOM_DAYS = 730;
 
-export function resolveAnalyticsRange(query: AdminAnalyticsQueryDto): ResolvedAnalyticsRange {
+export function resolveAnalyticsRange(query: AdminAnalyticsQueryDto, earliestRecord?: Date): ResolvedAnalyticsRange {
   const now = new Date();
-  let toInclusive = query.to ? endOfUtcDay(new Date(query.to)) : now;
+  const toInclusive = query.to ? endOfUtcDay(new Date(query.to)) : now;
+  if (Number.isNaN(toInclusive.getTime())) throw new BadRequestException('Invalid to date');
+  if (query.from && !query.to) throw new BadRequestException('Custom ranges require both from and to');
   let from: Date;
 
   if (query.from) {
@@ -46,7 +48,7 @@ export function resolveAnalyticsRange(query: AdminAnalyticsQueryDto): ResolvedAn
         from.setUTCDate(from.getUTCDate() + 1);
         break;
       case 'all':
-        from = startOfUtcDay(new Date('2020-01-01T00:00:00.000Z'));
+        from = startOfUtcDay(earliestRecord ?? toInclusive);
         break;
       default:
         from.setUTCDate(from.getUTCDate() - 29);
@@ -56,7 +58,7 @@ export function resolveAnalyticsRange(query: AdminAnalyticsQueryDto): ResolvedAn
 
   const toExclusive = new Date(toInclusive.getTime() + 1);
   const spanDays = Math.max(1, Math.ceil((toExclusive.getTime() - from.getTime()) / MS_DAY));
-  const granularity = pickGranularity(query.range, spanDays);
+  const granularity = pickGranularity(query.from ? undefined : query.range, spanDays);
 
   return { from, toInclusive, toExclusive, granularity };
 }
@@ -78,6 +80,9 @@ export function endOfUtcDay(d: Date): Date {
 export function bucketKeys(from: Date, toExclusive: Date, granularity: AnalyticsGranularity): string[] {
   const keys: string[] = [];
   const cursor = startOfUtcDay(from);
+  // Match SQL calendar buckets, including the partial first/last bucket.
+  if (granularity === 'month') cursor.setUTCDate(1);
+  if (granularity === 'week') cursor.setUTCDate(cursor.getUTCDate() - ((cursor.getUTCDay() + 6) % 7));
   const end = toExclusive.getTime();
 
   while (cursor.getTime() < end) {
@@ -113,11 +118,12 @@ export function monthKey(d: Date): string {
 
 export function weekKey(d: Date): string {
   const start = startOfUtcDay(d);
+  start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7));
   return dayKey(start);
 }
 
 export function sqlBucketExpr(granularity: AnalyticsGranularity, column: string): string {
   if (granularity === 'month') return `DATE_FORMAT(${column}, '%Y-%m')`;
-  if (granularity === 'week') return `DATE(DATE_SUB(${column}, INTERVAL WEEKDAY(${column}) DAY))`;
-  return `DATE(${column})`;
+  if (granularity === 'week') return `DATE_FORMAT(DATE_SUB(${column}, INTERVAL WEEKDAY(${column}) DAY), '%Y-%m-%d')`;
+  return `DATE_FORMAT(${column}, '%Y-%m-%d')`;
 }

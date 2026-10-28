@@ -1,0 +1,84 @@
+/* FarmExit V2 — Emerald Atelier: distinct CRM visual system, 2026 */
+:root {
+  --admin-brand-primary: #147347;
+  --admin-brand-primary-hover: #0c5d39;
+  --admin-brand-secondary: #249e69;
+  --admin-brand-deep: #0c2b25;
+  --admin-brand-gold: #d8b164;
+  --admin-brand-white: #ffffff;
+
+  --admin-bg-canvas: #f3f6f6;
+  --admin-bg-subtle: #e8eeed;
+  --admin-text-primary: #182d2a;
+  --admin-text-secondary: #415551;
+  --admin-text-muted: #7c918d;
+  --admin-border-subtle: #e3ece9;
+  --admin-border-strong: #c9d8d3;
+  --admin-border-focus: #15875b;
+
+  --admin-surface: #ffffff;
+  --admin-surface-elevated: #ffffff;
+  --admin-surface-muted: #f7faf9;
+  --admin-surface-sunken: #f1f6f4;
+
+  --admin-sidebar-bg: #102d28;
+  --admin-sidebar-bg-elevated: #194037;
+  --admin-sidebar-text: #eefaf4;
+  --admin-sidebar-muted: #98b4a9;
+  --admin-sidebar-hover: rgba(255,255,255,.075);
+  --admin-sidebar-active: #e6f9ef;
+  --admin-sidebar-active-border: #5ed9a0;
+  --admin-sidebar-border: rgba(255,255,255,.10);
+
+  --admin-topbar-bg: #ffffff;
+  --admin-topbar-text: #1a302c;
+  --admin-topbar-muted: #7b8e8b;
+  --admin-topbar-border: #e4ebe9;
+
+  --admin-focus-ring: #38b880;
+  --admin-status-warning: #ab751e;
+  --admin-status-warning-bg: #fff9ec;
+  --admin-status-danger: #c13b43;
+  --admin-status-danger-bg: #fff1f0;
+  --admin-status-info: #2f6d91;
+  --admin-status-success-bg: #ebf9f0;
+
+  --admin-chart-1: #167647;
+  --admin-chart-2: #52b88a;
+  --admin-chart-3: #d8b164;
+  --admin-chart-4: #74a3b6;
+
+  --admin-shadow-xs: 0 1px 2px rgba(14, 40, 34, .035);
+  --admin-shadow-soft: 0 5px 24px rgba(15, 48, 39, .045);
+  --admin-shadow-card: 0 4px 20px rgba(15, 48, 39, .045);
+  --admin-shadow-sidebar: 14px 0 35px rgba(7, 37, 26, .17);
+  --admin-shadow-topbar: 0 1px 2px rgba(16, 47, 39, .02);
+
+  --admin-radius-xs: .375rem;
+  --admin-radius-sm: .5rem;
+  --admin-radius-md: .75rem;
+  --admin-radius-lg: .9rem;
+  --admin-radius-xl: 1.1rem;
+
+  --admin-space-1: .25rem;
+  --admin-space-2: .5rem;
+  --admin-space-3: .75rem;
+  --admin-space-4: 1rem;
+  --admin-space-5: 1.25rem;
+  --admin-space-6: 1.5rem;
+  --admin-space-8: 2rem;
+
+  --admin-text-xs: .72rem;
+  --admin-text-sm: .82rem;
+  --admin-text-base: .875rem;
+  --admin-text-lg: 1.08rem;
+  --admin-text-xl: 1.25rem;
+  --admin-text-2xl: 1.75rem;
+  --admin-text-3xl: 2.25rem;
+
+  --admin-sidebar-width: 16.5rem;
+  --admin-sidebar-collapsed: 4.9rem;
+  --admin-topbar-height: 4.65rem;
+  --admin-content-max: 104rem;
+  --admin-kpi-icon-bg: #e5f6ed;
+}

@@ -22,7 +22,12 @@ export default defineConfig(
     },
   },
   {
-    files: ['scripts/*client-demo*.cjs'],
+    files: [
+      'scripts/*client-demo*.cjs',
+      'scripts/verify-dashboard-v2-batch2.cjs',
+      'scripts/verify-farm-publication-filters.cjs',
+      'scripts/verify-linked-request-applications.cjs',
+    ],
     extends: [tseslint.configs.disableTypeChecked],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },

@@ -78,4 +78,13 @@ Current public dashboard login URL: https://farm-exit-xcmz.vercel.app/en/admin/l
 - LIVE LOCAL PRODUCTION BROWSER VERIFIED: patched next start on loopback port 3105, EN/AR at 1440/390, all four pages HTTP 200, three actual management cards, no horizontal overflow or page errors. Legacy unique-farm metrics display dashes; real opportunities/governorates display 50/10. Evidence: web/artifacts/release-20261031/results.json and screenshots (ignored local artifacts).
 - Initial browser networkidle wait timed out on background traffic; element-based readiness then passed all four cases. This is not described as an API outage or hidden as a passing initial run.
 - Narrow secret-pattern scan of 88 candidate changed files found no private-key headers, GitHub tokens, JWT literals or password-bearing MySQL URLs. This is a scoped scan, not a universal secrecy guarantee.
-- Main remains af8e5de remotely; source delivery is exclusively on the release branch with Git auto-deployment gates. Final commit SHA/push verification is added after commit.
+- Main remains af8e5de remotely; source delivery is exclusively on the release branch with Git auto-deployment gates. Source commit e8bcf0661138bd7af504d317ead673efa9b08384 was pushed successfully and git ls-remote confirmed the exact SHA. Remote main still resolves to af8e5dee810d6600f0e73a82ed72be8269c46589.
+
+### Delivery result
+
+- Safety: eb9f762, pushed first. Source: e8bcf0661138bd7af504d317ead673efa9b08384, pushed to release/2026-10-31-verified-source only.
+- GitHub compare: https://github.com/AbdelrahmanKhaaled/FarmExit/compare/main...release/2026-10-31-verified-source . This is a comparison/create-PR link, not a claim that a PR was opened or merged.
+- Original main checkout and all user work remain preserved; release worktree is C:/Users/PC/AppData/Local/Temp/FarmExit-release-20261031. The worktree is retained for review. Its released source is based on current remote main.
+- Latest source gate verification: both project-root vercel.json files contain git.deploymentEnabled=false. No manual Vercel deploy/promote or server restart was run.
+- Production Super Admin verification/provisioning/login remain BLOCKED, not successful. No final account-write approval is requested until a real database dry-run and verified backup/schema can be shown.
+- Post-source-push GitHub API checks returned no release-branch Actions, no deployments for the source SHA and no check-runs; seed workflow remains disabled_manually. Vercel account-console visibility remains blocked, so no stronger platform-side observation is claimed.

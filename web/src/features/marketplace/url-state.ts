@@ -40,9 +40,10 @@ function range(min: string | null, max: string | null, bounds: { min: number; ma
 
 export function parseState(params: Params): MarketplaceState {
   const activity = params.get('activity');
-  const farmTypeList = list(params.get('type'), farmTypes);
+  const farmTypeList = list(params.get('type') ?? params.get('activity'), farmTypes);
   const cropList = list(params.get('crop'), cropTypes);
-  if (activity === 'vegetables' && !farmTypeList.includes('vegetable')) farmTypeList.push('vegetable');
+  if ((activity === 'vegetables' || activity === 'vegetable') && !farmTypeList.includes('vegetable'))
+    farmTypeList.push('vegetable');
   if (activity === 'fieldCrops' && !cropList.includes('fieldCrops')) cropList.push('fieldCrops');
 
   const governorate = one<GovernorateKey>(params.get('gov') ?? params.get('location'), governorates);
@@ -50,6 +51,7 @@ export function parseState(params: Params): MarketplaceState {
 
   return {
     filters: {
+      quickSale: params.get('quickSale') === 'true',
       saleMethods: list(params.get('saleMethods'), ['installment', 'exchange'] as const),
       exchangeAssetTypes: list(params.get('exchangeAssetTypes'), ['factory', 'villa', 'apartment', 'car'] as const),
       purpose: params.get('listing') === 'rent' ? 'rent' : 'sale',
@@ -70,6 +72,17 @@ export function parseState(params: Params): MarketplaceState {
 
 export function toSearchParams({ filters: f, sort, page }: MarketplaceState): Record<string, string> {
   const q: Record<string, string> = {};
+  if (f.quickSale) q.quickSale = 'true';
+  for (const [key, param] of Object.entries({
+    farmTypes: 'type',
+    waterSources: 'water',
+    irrigationMethods: 'irrigation',
+    energySources: 'energy',
+    cropTypes: 'crop',
+  })) {
+    const v = f[key as keyof typeof f];
+    if (Array.isArray(v) && v.length) q[param] = v.join(',');
+  }
   if (f.saleMethods?.length) q.saleMethods = f.saleMethods.join(',');
   if (f.exchangeAssetTypes?.length) q.exchangeAssetTypes = f.exchangeAssetTypes.join(',');
   if (f.purpose === 'rent') q.listing = 'rent';
@@ -93,6 +106,12 @@ export function appliedCount(f: MarketplaceFilters): number {
 export function supportedAppliedCount(f: MarketplaceFilters): number {
   return (
     1 +
+    Number(!!f.quickSale) +
+    f.farmTypes.length +
+    f.waterSources.length +
+    f.irrigationMethods.length +
+    f.energySources.length +
+    f.cropTypes.length +
     Number(f.size[0] !== FARM_SIZE_RANGE.min || f.size[1] !== FARM_SIZE_RANGE.max) +
     Number(f.governorate !== null) +
     Number(f.area !== null) +

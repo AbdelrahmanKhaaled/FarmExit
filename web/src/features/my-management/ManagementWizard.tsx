@@ -1,4 +1,6 @@
 'use client';
+import { BilingualFields } from '@/components/content/BilingualFields';
+import { contentText, type LocalizedContent } from '@/lib/content/localized';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -10,7 +12,6 @@ import { Dialog } from '@/components/overlay/Dialog';
 import { TaskFrame, Choice } from '@/features/phase7/TaskFrame';
 import { useFormReady } from '@/features/phase7/useFormReady';
 import { WizardCard } from '@/features/my-farms/WizardCard';
-import { WizardDisclosure } from '@/features/my-farms/WizardDisclosure';
 import { RequestDocumentsPanel } from '@/features/my-farms/RequestDocumentsPanel';
 import { FarmFacilitiesPanel } from '@/features/my-farms/FarmFacilitiesPanel';
 import { PortalStatus } from '@/features/my-farmexit/PortalUI';
@@ -37,6 +38,7 @@ export function ManagementWizard({
     w = useTranslations('workspace.phase7'),
     locale = useLocale(),
     router = useRouter();
+  const [localizedContent, setLocalizedContent] = useState<LocalizedContent>(initial?.localizedContent ?? {});
   const [req, setReq] = useState(initial),
     [step, setStep] = useState(Math.max(1, Math.min(7, initialStep))),
     [pending, setPending] = useState(false),
@@ -105,11 +107,16 @@ export function ManagementWizard({
   async function persist() {
     if (!farmId || !data.professionalNeed) throw new Error('validation');
     const body = {
+      localizedContent,
       ...data,
-      term: data.term.trim(),
-      currentSituation: data.currentSituation.trim(),
-      outcomes: data.outcomes.trim(),
-      additionalInformation: data.additionalInformation.trim(),
+      term: localizedContent.en?.term || localizedContent.ar?.term || data.term.trim(),
+      currentSituation:
+        localizedContent.en?.currentSituation || localizedContent.ar?.currentSituation || data.currentSituation.trim(),
+      outcomes: localizedContent.en?.outcomes || localizedContent.ar?.outcomes || data.outcomes.trim(),
+      additionalInformation:
+        localizedContent.en?.additionalInformation ||
+        localizedContent.ar?.additionalInformation ||
+        data.additionalInformation.trim(),
       goals: data.goals
         .split('\n')
         .map((g) => g.trim())
@@ -251,6 +258,25 @@ export function ManagementWizard({
         <fieldset disabled={pending || !ready} className="min-w-0">
           <div hidden={step !== 1}>
             <WizardCard icon="tree" title={steps[0]!} description={w('selectFarmNote')}>
+              <BilingualFields
+                value={localizedContent}
+                onChange={(v) => {
+                  setLocalizedContent(v);
+                  setDirty(true);
+                  setData((d) => ({
+                    ...d,
+                    currentSituation: v.en?.currentSituation || v.ar?.currentSituation || d.currentSituation,
+                    outcomes: v.en?.outcomes || v.ar?.outcomes || d.outcomes,
+                    additionalInformation:
+                      v.en?.additionalInformation || v.ar?.additionalInformation || d.additionalInformation,
+                  }));
+                }}
+                fields={[
+                  { key: 'currentSituation', label: t('currentSituation') },
+                  { key: 'outcomes', label: t('outcomes') },
+                  { key: 'additionalInformation', label: t('additionalInformation') },
+                ]}
+              />
               <div className="flex flex-col gap-12">
                 {farms.map((f) => (
                   <Choice
@@ -356,14 +382,22 @@ export function ManagementWizard({
           </div>
           <div hidden={step !== 3} className="flex flex-col gap-24">
             <WizardCard icon="building" title={t('currentSituation')}>
-              <TextArea
-                label={t('currentSituation')}
-                name="currentSituation"
-                rows={5}
-                maxLength={8000}
-                value={data.currentSituation}
-                onChange={(e) => update('currentSituation', e.target.value)}
-                fieldStyle="form"
+              <BilingualFields
+                value={localizedContent}
+                legacy={{ currentSituation: data.currentSituation, outcomes: data.outcomes }}
+                fields={[
+                  { key: 'currentSituation', label: t('currentSituation'), maxLength: 8000 },
+                  { key: 'outcomes', label: w('outcomes'), maxLength: 8000 },
+                ]}
+                onChange={(v) => {
+                  setLocalizedContent(v);
+                  setData((d) => ({
+                    ...d,
+                    currentSituation: v.en?.currentSituation || v.ar?.currentSituation || d.currentSituation,
+                    outcomes: v.en?.outcomes || v.ar?.outcomes || d.outcomes,
+                  }));
+                  setDirty(true);
+                }}
               />
               <fieldset className="flex flex-col gap-12">
                 <legend className="mb-12 type-label-small-strong">{t('challenges')}</legend>
@@ -441,17 +475,6 @@ export function ManagementWizard({
                 fieldStyle="form"
               />
             </WizardCard>
-            <WizardDisclosure icon="verify-filled" title={w('outcomes')} description={w('optionalNote')}>
-              <TextArea
-                label={w('outcomes')}
-                name="outcomes"
-                value={data.outcomes}
-                maxLength={8000}
-                rows={4}
-                onChange={(e) => update('outcomes', e.target.value)}
-                fieldStyle="form"
-              />
-            </WizardDisclosure>
           </div>
           <div hidden={step !== 4}>
             <WizardCard icon="clipboard-tick" title={steps[3]!}>
@@ -479,14 +502,19 @@ export function ManagementWizard({
           </div>
           <div hidden={step !== 6}>
             <WizardCard icon="messages" title={w('additional')}>
-              <TextArea
-                label={w('additional')}
-                name="additionalInformation"
-                value={data.additionalInformation}
-                maxLength={8000}
-                rows={4}
-                onChange={(e) => update('additionalInformation', e.target.value)}
-                fieldStyle="form"
+              <BilingualFields
+                value={localizedContent}
+                legacy={{ additionalInformation: data.additionalInformation }}
+                fields={[{ key: 'additionalInformation', label: w('additional'), maxLength: 8000 }]}
+                onChange={(v) => {
+                  setLocalizedContent(v);
+                  setData((d) => ({
+                    ...d,
+                    additionalInformation:
+                      v.en?.additionalInformation || v.ar?.additionalInformation || d.additionalInformation,
+                  }));
+                  setDirty(true);
+                }}
               />
             </WizardCard>
           </div>
@@ -517,11 +545,37 @@ export function ManagementWizard({
                           [t('term'), data.term],
                         ]
                       : [
-                          [t('currentSituation'), data.currentSituation],
-                          [w('goalsTitle'), formatManagementChoices(goals, managementGoals, [t('goalOptions.g0'), t('goalOptions.g1'), t('goalOptions.g2')])],
-                          [t('challenges'), formatManagementChoices(data.challenges, managementChallenges, [t('challengeOptions.c0'), t('challengeOptions.c1'), t('challengeOptions.c2'), t('challengeOptions.c3')])],
-                          [w('outcomes'), data.outcomes],
-                          [w('additional'), data.additionalInformation],
+                          [
+                            t('currentSituation'),
+                            contentText(localizedContent, locale, 'currentSituation', data.currentSituation),
+                          ],
+                          [
+                            w('goalsTitle'),
+                            formatManagementChoices(goals, managementGoals, [
+                              t('goalOptions.g0'),
+                              t('goalOptions.g1'),
+                              t('goalOptions.g2'),
+                            ]),
+                          ],
+                          [
+                            t('challenges'),
+                            formatManagementChoices(data.challenges, managementChallenges, [
+                              t('challengeOptions.c0'),
+                              t('challengeOptions.c1'),
+                              t('challengeOptions.c2'),
+                              t('challengeOptions.c3'),
+                            ]),
+                          ],
+                          [w('outcomes'), contentText(localizedContent, locale, 'outcomes', data.outcomes)],
+                          [
+                            w('additional'),
+                            contentText(
+                              localizedContent,
+                              locale,
+                              'additionalInformation',
+                              data.additionalInformation,
+                            ),
+                          ],
                         ]
                   ).map(([label, value]) => (
                     <div

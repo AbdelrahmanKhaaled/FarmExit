@@ -1,3 +1,6 @@
+import { Type as ContentType } from 'class-transformer';
+import { ValidateNested as ContentNested } from 'class-validator';
+import { LocalizedContentDto } from '../../../common/dto/localized-content.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsArray, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
@@ -5,6 +8,7 @@ import { ProfessionalNeed } from '../../../generated/prisma/enums';
 import { trim } from '../../farms/dto/create-farm.dto';
 
 export class CreateFarmManagementRequestDto {
+  @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiProperty({ enum: ProfessionalNeed })
   @IsEnum(ProfessionalNeed)
   professionalNeed!: ProfessionalNeed;
@@ -57,6 +61,7 @@ export class CreateFarmManagementRequestDto {
 }
 
 export class UpdateFarmManagementRequestDto {
+  @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiPropertyOptional({ enum: ProfessionalNeed })
   @IsOptional()
   @IsEnum(ProfessionalNeed)
@@ -116,6 +121,7 @@ export class FarmManagementReviewFeedbackDto {
 }
 
 export class FarmManagementRequestResponseDto {
+  @ApiProperty({ nullable: true }) localizedContent?: unknown;
   @ApiProperty() id!: string;
   @ApiProperty() requestNumber!: string;
   @ApiProperty() farmId!: string;

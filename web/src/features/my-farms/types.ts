@@ -6,6 +6,7 @@ export type PrivateFarmLocation = {
   roadDistanceKm: number | null;
 };
 export type Farm = {
+  localizedContent?: import('@/lib/content/localized').LocalizedContent;
   id: string;
   name: string;
   farmType: string;
@@ -23,6 +24,7 @@ export type Farm = {
   updatedAt?: string | null;
 };
 export type ListingDraft = {
+  localizedContent?: import('@/lib/content/localized').LocalizedContent;
   id: string;
   farmId: string;
   farmName: string;

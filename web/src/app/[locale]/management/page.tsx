@@ -1,5 +1,9 @@
 import { ManagementMarketplace } from '@/features/opportunity-marketplace/ManagementMarketplace';
-import { fetchPublicOpportunities, parseOpportunityFilters } from '@/lib/opportunities/public-opportunity';
+import {
+  fetchPublicOpportunities,
+  fetchPublicOpportunity,
+  parseOpportunityFilters,
+} from '@/lib/opportunities/public-opportunity';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
@@ -25,8 +29,15 @@ export default async function ManagementMarketplacePage({ params, searchParams }
   setRequestLocale(locale);
   const query = await searchParams;
   const filters = parseOpportunityFilters(query as Record<string, string | string[] | undefined>);
-  const data =
-    (await fetchPublicOpportunities('management', filters)) ?? { items: [], page: 1, pageSize: 20, total: 0 };
+  const initialId = typeof query.id === 'string' ? query.id : undefined;
+
+  const [response, selectedDirect] = await Promise.all([
+    fetchPublicOpportunities('management', filters, locale),
+    initialId ? fetchPublicOpportunity('management', initialId, locale) : Promise.resolve(null),
+  ]);
+
+  const data = response ?? { items: [], page: 1, pageSize: 20, total: 0 };
+  const initialSelected = (initialId ? data.items.find((x) => x.id === initialId) : null) ?? selectedDirect;
   const t = await getTranslations('managementPage');
 
   return (
@@ -59,7 +70,20 @@ export default async function ManagementMarketplacePage({ params, searchParams }
         </section>
 
         <Container size="app" className="flex flex-col gap-24 pt-24 pb-72 tablet:gap-32 tablet:pt-40 tablet:pb-96">
-          <ManagementMarketplace locale={locale} initial={data} filters={filters} />
+          {!response && (
+            <p role="alert" className="rounded-xl border border-border-default p-24">
+              {locale === 'ar'
+                ? 'تعذر تحميل الفرص الآن. حاول مرة أخرى.'
+                : 'Opportunities could not be loaded. Please try again.'}
+            </p>
+          )}
+          <ManagementMarketplace
+            locale={locale}
+            initial={data}
+            filters={filters}
+            unavailable={!response}
+            initialSelected={initialSelected}
+          />
         </Container>
       </main>
       <Footer />

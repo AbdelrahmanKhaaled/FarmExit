@@ -1,3 +1,4 @@
+import { mergeLocalizedContent } from '../../common/localized-content';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { AccountStatus, FarmRelationshipRole, FarmRelationshipStatus, StaffRole } from '../../generated/prisma/enums';
@@ -91,6 +92,8 @@ export class FarmsService {
     const farm = await this.prisma.$transaction(async (tx) => {
       const current = await tx.farm.findFirst({ where: { id: farmId, deletedAt: null } });
       if (!current) throw notFound();
+      if (dto.localizedContent)
+        data.localizedContent = mergeLocalizedContent(current.localizedContent, dto.localizedContent);
       const updated = await tx.farm.update({ where: { id: farmId }, data });
       await tx.auditLog.create({
         data: {
@@ -188,6 +191,8 @@ export class FarmsService {
     if (!roles.some((role) => FARM_EDIT_ROLES.includes(role))) throw forbidden();
 
     const data = editableFields(dto);
+    if (dto.localizedContent)
+      data.localizedContent = mergeLocalizedContent(farm.localizedContent, dto.localizedContent);
     if (Object.keys(data).length === 0) throw new BadRequestException('Nothing to update');
     const updated = await this.prisma.farm.update({ where: { id: farm.id }, data });
     return toResponse(updated, roles);
@@ -209,6 +214,7 @@ export class FarmsService {
 function editableFields(dto: CreateFarmDto | UpdateFarmDto): Prisma.FarmUncheckedUpdateInput {
   const out: Record<string, unknown> = {};
   const keys = [
+    'localizedContent',
     'name',
     'description',
     'farmType',
@@ -221,7 +227,8 @@ function editableFields(dto: CreateFarmDto | UpdateFarmDto): Prisma.FarmUnchecke
     'energySource',
     'soilType',
   ] as const;
-  for (const key of keys) if (dto[key] !== undefined) out[key] = dto[key];
+  for (const key of keys)
+    if (dto[key] !== undefined) out[key] = key === 'localizedContent' ? JSON.parse(JSON.stringify(dto[key])) : dto[key];
   return out;
 }
 
@@ -229,6 +236,7 @@ function toResponse(farm: Farm, myRoles: FarmRelationshipRole[]): FarmResponseDt
   return {
     id: farm.id.toString(),
     name: farm.name,
+    localizedContent: farm.localizedContent,
     description: farm.description ?? null,
     farmType: farm.farmType,
     mainActivity: farm.mainActivity ?? null,

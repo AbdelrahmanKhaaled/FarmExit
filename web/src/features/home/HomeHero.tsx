@@ -1,5 +1,6 @@
+import type { HomeData } from './home-data';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/cn';
 import { figureDir } from '@/lib/figures';
 import { Icon, type IconName } from '@/components/icons/Icon';
@@ -16,7 +17,7 @@ import { HeroSearch } from './HeroSearch';
  * "Own a farm?" strip, then the Search Bar and the Proof Panel.
  * Padding 112/48 · 96/40 · 56/24; copy gap 28 · 24 · 20; search gap 44 · 40 · 32; proof gap 40 · 32 · 24.
  */
-export function HomeHero() {
+export function HomeHero({ data }: { data: HomeData | null }) {
   const t = useTranslations('home.hero');
 
   return (
@@ -28,10 +29,10 @@ export function HomeHero() {
         <div className="flex max-w-1040 flex-col items-start gap-20 tablet:gap-24 desktop:gap-28">
           <HeroPill>{t('pill')}</HeroPill>
           <h1 id="hero-title" className="type-display-hero text-text-on-dark tablet:whitespace-pre-line">
-            {t('headline')}
+            {data?.editorial?.heroHeadline || t('headline')}
           </h1>
           <p className="max-w-640 type-body-lead text-overlay-on-dark-body tablet:max-w-600 desktop:max-w-640">
-            {t('subhead')}
+            {data?.editorial?.heroSubhead || t('subhead')}
           </p>
 
           <div
@@ -55,7 +56,7 @@ export function HomeHero() {
           <HeroSearch />
         </div>
 
-        <ProofPanel />
+        <ProofPanel data={data} />
       </Container>
     </section>
   );
@@ -81,8 +82,9 @@ const CELL = [
  * Figma: Components → Proof Panel (Layout = Row · Grid). Deep glass, Glass/Hero Panel, r24. Gold-hairline icon tiles,
  * Display/Proof figures, Label/Proof labels. Row 4-up on desktop and tablet, 2 × 2 grid on mobile. Sample figures.
  */
-function ProofPanel() {
+function ProofPanel({ data }: { data: HomeData | null }) {
   const t = useTranslations('home.hero.proof');
+  const locale = useLocale();
   return (
     <div
       className={cn(
@@ -104,7 +106,9 @@ function ProofPanel() {
               <Icon name={item.icon} size={20} />
             </span>
             <p className="mt-22 type-display-proof text-text-on-dark">
-              <bdi dir={figureDir(t(`${item.key}.value`))}>{t(`${item.key}.value`)}</bdi>
+              <bdi dir={figureDir(String(data?.metrics[item.key] ?? ''))}>
+                {data?.metrics[item.key] != null ? new Intl.NumberFormat(locale).format(data.metrics[item.key]!) : '—'}
+              </bdi>
             </p>
             <p className="mt-10 type-label-proof text-overlay-on-dark-muted">{t(`${item.key}.label`)}</p>
           </div>

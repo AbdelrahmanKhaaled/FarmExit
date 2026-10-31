@@ -45,18 +45,18 @@
       }
     },
     "proof": {
-      "header": "FarmExit in numbers · sample figures",
+      "header": "FarmExit in numbers",
       "farms": {
         "value": "340+",
-        "label": "Listed farms"
+        "label": "Farms with published listings"
       },
       "feddans": {
         "value": "28,500",
-        "label": "Listed feddans"
+        "label": "Feddans in published listings"
       },
       "opportunities": {
         "value": "120",
-        "label": "Available opportunities"
+        "label": "Published opportunities"
       },
       "governorates": {
         "value": "14",
@@ -95,7 +95,7 @@
       },
       "review": {
         "value": "3 days",
-        "label": "Working-day review"
+        "label": "Reviewed before publishing"
       }
     },
     "pillars": {
@@ -373,8 +373,8 @@
   "insights": {
     "eyebrow": "Market insights",
     "title": "Farmland prices by governorate",
-    "subtitle": "Sample averages — to be replaced with live FarmExit data.",
-    "caption": "Sample average farmland prices by governorate",
+    "subtitle": "Average asking prices from published listings.",
+    "caption": "Average asking prices per feddan by governorate",
     "columns": {
       "governorate": "Governorate",
       "sale": "Avg. sale / feddan",

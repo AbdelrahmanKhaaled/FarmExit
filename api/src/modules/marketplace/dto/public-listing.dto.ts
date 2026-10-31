@@ -10,6 +10,14 @@ export class PublicSaleEligibilityDto {
   @ApiProperty({ type: [String] }) exchangeAssetTypes: string[];
 }
 export class PublicListingDto {
+  @ApiProperty({ nullable: true }) localizedContent?: unknown;
+  @ApiProperty({ nullable: true }) listingLocalizedContent?: unknown;
+  @ApiProperty({ nullable: true }) farmType?: string | null;
+  @ApiProperty({ nullable: true }) mainActivity?: string | null;
+  @ApiProperty({ nullable: true }) waterSource?: string | null;
+  @ApiProperty({ nullable: true }) irrigationMethod?: string | null;
+  @ApiProperty({ nullable: true }) energySource?: string | null;
+  @ApiProperty({ type: [String] }) cropTypes?: string[];
   @ApiProperty({ type: PublicSaleEligibilityDto, nullable: true }) saleEligibility: PublicSaleEligibilityDto | null;
   @ApiProperty({ example: '4' }) id: string;
   @ApiProperty() slug: string;

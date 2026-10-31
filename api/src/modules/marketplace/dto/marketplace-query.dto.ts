@@ -41,6 +41,43 @@ function IsAreaFeddan(): PropertyDecorator {
 }
 
 export class MarketplaceQueryDto {
+  @IsOptional() @IsIn(['true', 'false']) quickSale?: 'true' | 'false';
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.split(',') : value))
+  @IsArray()
+  @ArrayMaxSize(4)
+  @ArrayUnique()
+  @IsIn(['vegetable', 'fruit', 'livestock', 'mixed'], { each: true })
+  farmTypes?: string[];
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.split(',') : value))
+  @IsArray()
+  @ArrayMaxSize(2)
+  @ArrayUnique()
+  @IsIn(['well', 'canal'], { each: true })
+  waterSources?: string[];
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.split(',') : value))
+  @IsArray()
+  @ArrayMaxSize(3)
+  @ArrayUnique()
+  @IsIn(['drip', 'sprinkler', 'gravity'], { each: true })
+  irrigationMethods?: string[];
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.split(',') : value))
+  @IsArray()
+  @ArrayMaxSize(3)
+  @ArrayUnique()
+  @IsIn(['electricity', 'solar', 'diesel'], { each: true })
+  energySources?: string[];
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.split(',') : value))
+  @IsArray()
+  @ArrayMaxSize(5)
+  @ArrayUnique()
+  @IsIn(['fruits', 'citrus', 'fieldCrops', 'palms', 'exportCrops'], { each: true })
+  cropTypes?: string[];
+
   @ApiPropertyOptional({ description: 'Comma-separated installment,exchange. OR within group; AND with asset group.' })
   @IsOptional()
   @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.split(',') : value))

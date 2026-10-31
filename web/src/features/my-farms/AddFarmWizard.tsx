@@ -1,11 +1,13 @@
 'use client';
+import { BilingualFields } from '@/components/content/BilingualFields';
+import type { LocalizedContent } from '@/lib/content/localized';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Logo } from '@/components/brand/Logo';
 import { Icon } from '@/components/icons/Icon';
 import { Button, ButtonLink } from '@/components/ui/Button';
-import { TextInput, Select, TextArea } from '@/components/ui/Field';
+import { TextInput, Select } from '@/components/ui/Field';
 import { Card } from '@/components/ui/Surface';
 import { Avatar } from '@/components/ui/Avatar';
 import { Dialog } from '@/components/overlay/Dialog';
@@ -79,6 +81,8 @@ export function AddFarmWizard({
   );
   const [step, setStep] = useState(Math.max(1, Math.min(7, initialStep)));
   const [visited, setVisited] = useState<number[]>([initialStep]);
+  const [localizedContent, setLocalizedContent] = useState<LocalizedContent>(initialFarm?.localizedContent ?? {});
+  const [listingContent, setListingContent] = useState<LocalizedContent>(initialListing?.localizedContent ?? {});
   const [farm, setFarm] = useState(initialFarm);
   const [listing, setListing] = useState(initialListing);
   const [submitting, setSubmitting] = useState(false);
@@ -247,6 +251,7 @@ export function AddFarmWizard({
       throw new Error('price');
     }
     const farmBody = {
+      localizedContent,
       name: data.name.trim(),
       farmType: data.farmType,
       mainActivity: data.mainActivity.trim() || null,
@@ -295,6 +300,7 @@ export function AddFarmWizard({
     let request = listing;
     if (includeListing && (!listing || listingDirty)) {
       const body = {
+        localizedContent: listingContent,
         listingType: data.listingType,
         askingPrice: data.listingType === 'sale' && data.askingPrice ? Number(data.askingPrice) : null,
         statedSalePricePerFeddan:
@@ -407,7 +413,7 @@ export function AddFarmWizard({
       setSubmitting(false);
     }
   }
-  const text = (
+  const originalText = (
     key: keyof typeof data,
     props: {
       required?: boolean;
@@ -441,6 +447,29 @@ export function AddFarmWizard({
       {...props}
     />
   );
+  const text = (...args: Parameters<typeof originalText>) => {
+    const key = args[0];
+    if (['areaName', 'soilType', 'currentProduction', 'harvestSeasons', 'notes'].includes(key))
+      return (
+        <BilingualFields
+          key={key}
+          value={localizedContent}
+          legacy={{ [key]: data[key] }}
+          fields={[
+            {
+              key,
+              label: t(`fields.${key as Exclude<keyof typeof data, 'listingType'>}`),
+              maxLength: ['areaName', 'soilType'].includes(key) ? 120 : 5000,
+            },
+          ]}
+          onChange={(v) => {
+            setLocalizedContent(v);
+            update(key, v.en?.[key] || v.ar?.[key] || '');
+          }}
+        />
+      );
+    return originalText(...args);
+  };
   const displayValue = (key: keyof typeof data) => {
     if (initialFarm && initialSpecification === null && ['currentProduction', 'harvestSeasons', 'notes'].includes(key))
       return t('productionUnavailable');
@@ -681,7 +710,26 @@ export function AddFarmWizard({
                 <div hidden={step !== 1}>
                   <div className="flex flex-col gap-24">
                     <WizardCard icon="tree" title={t('about')} description={t('aboutNote')}>
-                      {text('name', { required: true, maxLength: 200 })}
+                      <BilingualFields
+                        value={localizedContent}
+                        legacy={{ name: data.name, description: data.farmDescription, mainActivity: data.mainActivity }}
+                        fields={[
+                          { key: 'name', label: t('fields.name'), maxLength: 200 },
+                          { key: 'mainActivity', label: t('fields.mainActivity'), maxLength: 255 },
+                          { key: 'description', label: t('fields.farmDescription') },
+                        ]}
+                        onChange={(v) => {
+                          setLocalizedContent(v);
+                          setSaved(false);
+                          setData((d) => ({
+                            ...d,
+                            name: v.en?.name || v.ar?.name || d.name,
+                            mainActivity: v.en?.mainActivity || v.ar?.mainActivity || d.mainActivity,
+                            farmDescription: v.en?.description || v.ar?.description || d.farmDescription,
+                          }));
+                          setDirty(true);
+                        }}
+                      />
                       <fieldset>
                         <legend className="mb-8 type-label-form">{t('fields.farmType')}</legend>
                         <div className="grid grid-cols-2 gap-12">
@@ -706,7 +754,6 @@ export function AddFarmWizard({
                           ))}
                         </div>
                       </fieldset>
-                      {text('mainActivity', { maxLength: 255 })}
                     </WizardCard>
                     <WizardCard icon="area" title={t('size')} description={t('sizeNote')}>
                       {text('areaFeddan', {
@@ -805,15 +852,6 @@ export function AddFarmWizard({
                     </WizardCard>
                     <WizardDisclosure icon="layer" title={t('land')} description={t('landNote')}>
                       {text('soilType', { maxLength: 120 })}
-                      <TextArea
-                        label={t('fields.farmDescription')}
-                        name="farmDescription"
-                        value={data.farmDescription}
-                        onChange={(event) => update('farmDescription', event.target.value)}
-                        maxLength={5000}
-                        rows={4}
-                        fieldStyle="form"
-                      />
                     </WizardDisclosure>
                   </div>
                 </div>
@@ -1017,14 +1055,15 @@ export function AddFarmWizard({
                       </fieldset>
                     </WizardCard>
                     <WizardCard icon="document-text" title={t('description')}>
-                      <TextArea
-                        label={t('fields.listingDescription')}
-                        name="listingDescription"
-                        value={data.listingDescription}
-                        onChange={(event) => update('listingDescription', event.target.value)}
-                        rows={5}
-                        maxLength={8000}
-                        fieldStyle="form"
+                      <BilingualFields
+                        value={listingContent}
+                        fields={[{ key: 'listingDescription', label: t('fields.listingDescription') }]}
+                        legacy={{ listingDescription: data.listingDescription }}
+                        onChange={(v) => {
+                          setListingContent(v);
+                          update('listingDescription', v.en?.listingDescription || v.ar?.listingDescription || '');
+                          setListingDirty(true);
+                        }}
                       />
                     </WizardCard>
                   </div>

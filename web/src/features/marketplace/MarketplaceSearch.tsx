@@ -1,4 +1,8 @@
 'use client';
+import { SearchRange } from '@/features/search/SearchRange';
+import { useLocale } from 'next-intl';
+import { FARM_SIZE_RANGE, PRICE_RANGE } from '@/lib/data/marketplace';
+import { farmTypes, type FarmType } from '@/lib/domain/enums';
 
 import type { FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
@@ -22,6 +26,7 @@ export function MarketplaceSearchView({
   setState: (state: MarketplaceState) => void;
 }) {
   const t = useTranslations('marketplace');
+  const ar = useLocale() === 'ar';
   const f = state.filters;
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -35,7 +40,9 @@ export function MarketplaceSearchView({
         ...f,
         governorate: gov,
         area: gov === f.governorate ? f.area : null,
-        farmTypes: [],
+        farmTypes: data.get('farmType') ? [String(data.get('farmType')) as FarmType] : [],
+        size: [Number(data.get('sizeMin') || FARM_SIZE_RANGE.min), Number(data.get('sizeMax') || FARM_SIZE_RANGE.max)],
+        price: [Number(data.get('priceMin') || PRICE_RANGE.min), Number(data.get('priceMax') || PRICE_RANGE.max)],
       },
     });
   }
@@ -47,12 +54,22 @@ export function MarketplaceSearchView({
       onSubmit={onSubmit}
       className="flex flex-col"
       // Remount when the applied values change so the uncontrolled selects show them.
-      key={`${f.governorate}-${f.purpose}`}
+      key={JSON.stringify([f.governorate, f.purpose, f.farmTypes, f.size, f.price])}
     >
       <SearchTabs
         label={t('search.modesLabel')}
         value={f.purpose}
-        onChange={(purpose) => setState({ ...state, page: 1, filters: { ...f, purpose } })}
+        onChange={(purpose) =>
+          setState({
+            ...state,
+            page: 1,
+            filters: {
+              ...f,
+              purpose,
+              ...(purpose === 'rent' ? { quickSale: false, saleMethods: [], exchangeAssetTypes: [] } : {}),
+            },
+          })
+        }
         options={listingPurposes.map((p) => ({ value: p, label: t(`options.purpose.${p}`) }))}
       />
       <SearchPanel>
@@ -64,15 +81,34 @@ export function MarketplaceSearchView({
             </option>
           ))}
         </SearchField>
-        <p className="type-body-caption text-overlay-on-dark-muted tablet:col-span-2">
-          {t('filters.unavailableSection')}: {t('search.farmType.label')}
-        </p>
-        <SearchField label={t('search.area.label')} name="size" defaultValue="" disabled>
-          <option value="">{t('search.area.any')}</option>
+        <SearchField label={t('search.farmType.label')} name="farmType" defaultValue={f.farmTypes[0] ?? ''}>
+          <option value="">{ar ? 'كل الأنشطة' : 'All activities'}</option>
+          {farmTypes.map((v) => (
+            <option key={v} value={v}>
+              {t(`options.farmTypes.${v}`)}
+            </option>
+          ))}
         </SearchField>
-        <SearchField label={t('search.price.label')} name="price" defaultValue="" disabled>
-          <option value="">{t('search.price.any')}</option>
-        </SearchField>
+        <SearchRange
+          label={t('search.area.label')}
+          prefix="size"
+          bounds={FARM_SIZE_RANGE}
+          ar={ar}
+          value={[
+            f.size[0] === FARM_SIZE_RANGE.min ? undefined : f.size[0],
+            f.size[1] === FARM_SIZE_RANGE.max ? undefined : f.size[1],
+          ]}
+        />
+        <SearchRange
+          label={t('search.price.label')}
+          prefix="price"
+          bounds={PRICE_RANGE}
+          ar={ar}
+          value={[
+            f.price[0] === PRICE_RANGE.min ? undefined : f.price[0],
+            f.price[1] === PRICE_RANGE.max ? undefined : f.price[1],
+          ]}
+        />
         <SearchSubmit>{t('search.submit')}</SearchSubmit>
       </SearchPanel>
     </form>

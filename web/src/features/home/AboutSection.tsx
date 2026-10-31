@@ -1,5 +1,6 @@
+import type { HomeData } from './home-data';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { figureDir } from '@/lib/figures';
 import { GlassPanel } from '@/components/ui/Surface';
 import { Container } from '@/components/layout/Container';
@@ -15,8 +16,9 @@ import { homeImages } from './data';
 const PILLARS = ['one', 'two', 'three'] as const;
 const STATS = ['farms', 'governorates', 'review'] as const;
 
-export function AboutSection() {
+export function AboutSection({ data }: { data: HomeData | null }) {
   const t = useTranslations('home.about');
+  const locale = useLocale();
 
   return (
     <section aria-labelledby="about-title" className="bg-bg-ivory py-r-section-gap">
@@ -25,11 +27,11 @@ export function AboutSection() {
           <div className="flex flex-col gap-20 tablet:gap-24 desktop:max-w-760 desktop:rtl:max-w-783">
             <p className="type-overline-section text-text-accent">{t('eyebrow')}</p>
             <h2 id="about-title" className="type-display-statement text-text-brand">
-              {t('statement')}
+              {data?.editorial?.aboutStatement || t('statement')}
             </h2>
           </div>
           <p className="type-body-default text-text-body tablet:max-w-640 tablet:type-body-editorial desktop:w-376 desktop:shrink-0">
-            {t('lead')}
+            {data?.editorial?.aboutLead || t('lead')}
           </p>
         </div>
 
@@ -55,7 +57,13 @@ export function AboutSection() {
               {STATS.map((key) => (
                 <div key={key} className="flex flex-1 flex-col gap-4">
                   <p className="type-heading-h4 text-text-on-dark">
-                    <bdi dir={figureDir(t(`card.${key}.value`))}>{t(`card.${key}.value`)}</bdi>
+                    <bdi dir={figureDir(key === 'review' ? '✓' : String(data?.metrics[key] ?? ''))}>
+                      {key === 'review'
+                        ? '✓'
+                        : data?.metrics[key] != null
+                          ? new Intl.NumberFormat(locale).format(data!.metrics[key]!)
+                          : '—'}
+                    </bdi>
                   </p>
                   <p className="type-label-caption text-overlay-on-dark-muted">{t(`card.${key}.label`)}</p>
                 </div>

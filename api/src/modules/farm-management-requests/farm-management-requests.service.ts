@@ -1,3 +1,5 @@
+import { mergeLocalizedContent } from '../../common/localized-content';
+import { loadPublicOpportunityFacets } from '../marketplace/public-opportunity-query';
 import type { PublicOpportunityListDto } from '../marketplace/dto/public-opportunity.dto';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Farm, type FarmManagementDetail, type Request } from '../../generated/prisma/client';
@@ -53,7 +55,13 @@ export class FarmManagementRequestsService {
         select: publicOpportunityListSelect,
       }),
     ]);
-    return { items: rows.map(toPublicOpportunityDto), page, pageSize, total };
+    return {
+      items: rows.map(toPublicOpportunityDto),
+      page,
+      pageSize,
+      total,
+      filterOptions: await loadPublicOpportunityFacets(this.prisma, 'farmManagement'),
+    };
   }
 
   async getPublic(id: bigint) {
@@ -131,13 +139,16 @@ export class FarmManagementRequestsService {
     requestId: bigint,
     dto: UpdateFarmManagementRequestDto,
   ): Promise<FarmManagementRequestResponseDto> {
-    const { request, farm } = await this.owned(userId, requestId);
+    const { request, farm, detail } = await this.owned(userId, requestId);
     if (!OWNER_EDITABLE_STATUSES.has(request.status)) {
       throw new ConflictException('Only a draft or a request with requested changes can be updated');
     }
     const updatedDetail = await this.prisma.farmManagementDetail.update({
       where: { requestId: request.id },
       data: {
+        ...(dto.localizedContent !== undefined
+          ? { localizedContent: mergeLocalizedContent(detail.localizedContent, dto.localizedContent) }
+          : {}),
         ...(dto.professionalNeed !== undefined ? { professionalNeed: dto.professionalNeed } : {}),
         ...(dto.managementTypes !== undefined ? { managementTypes: dto.managementTypes } : {}),
         ...(dto.term !== undefined ? { term: dto.term ?? null } : {}),
@@ -252,6 +263,7 @@ export class FarmManagementRequestsService {
           const detail = await tx.farmManagementDetail.create({
             data: {
               requestId: request.id,
+              localizedContent: dto.localizedContent ? JSON.parse(JSON.stringify(dto.localizedContent)) : undefined,
               professionalNeed: dto.professionalNeed,
               managementTypes: dto.managementTypes ?? undefined,
               term: dto.term ?? null,
@@ -313,6 +325,7 @@ function toResponse(
     requestNumber: request.requestNumber,
     farmId: farm.id.toString(),
     farmName: farm.name,
+    localizedContent: detail.localizedContent,
     professionalNeed: detail.professionalNeed,
     status: request.status,
     visibility: request.visibility,

@@ -1,3 +1,4 @@
+import { publicContent } from './public-localized-content';
 import type { Prisma } from '../../generated/prisma/client';
 import type { PublicOpportunityDto } from './dto/public-opportunity.dto';
 import { publicOpportunityListSelect } from './public-opportunity-query';
@@ -15,6 +16,21 @@ export function toPublicOpportunityDto(row: PublicOpportunityRow): PublicOpportu
   return {
     id: row.id.toString(),
     farmName: farm.name,
+    localizedContent: publicContent(farm.localizedContent, ['name', 'mainActivity', 'areaName']),
+    opportunityLocalizedContent: publicContent(
+      row.managementDetail?.localizedContent ?? row.partnershipDetail?.localizedContent,
+      [
+        'description',
+        'term',
+        'currentSituation',
+        'outcomes',
+        'additionalInformation',
+        'contributionDetails',
+        'operations',
+        'salesChannel',
+        'extraInformation',
+      ],
+    ),
     governorate: farm.governorate,
     areaName: farm.areaName,
     areaFeddan: Number(farm.areaFeddan),

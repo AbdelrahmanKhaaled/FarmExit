@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+import { loadHome } from '@/features/home/home-data';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
@@ -38,17 +40,34 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
     <>
       <PublicNavbar />
       <main id="main" data-testid="locale-root">
-        <HomeHero />
-        <AboutSection />
-        <JourneysSection />
-        <FeaturedFarms />
-        <ManagementSection />
-        <HowItWorks />
-        <MarketInsights />
-        <Testimonials />
-        <CtaSection />
+        <Suspense
+          fallback={
+            <p role="status" className="p-24">
+              {locale === 'ar' ? 'جارٍ التحميل…' : 'Loading…'}
+            </p>
+          }
+        >
+          <HomeContent locale={locale} />
+        </Suspense>
       </main>
       <Footer />
+    </>
+  );
+}
+
+async function HomeContent({ locale }: { locale: string }) {
+  const data = await loadHome(locale);
+  return (
+    <>
+      <HomeHero data={data} />
+      <AboutSection data={data} />
+      <JourneysSection />
+      <FeaturedFarms data={data} />
+      <ManagementSection data={data} />
+      <HowItWorks />
+      <MarketInsights data={data} />
+      <Testimonials records={data?.editorial?.testimonials ?? []} />
+      <CtaSection />
     </>
   );
 }

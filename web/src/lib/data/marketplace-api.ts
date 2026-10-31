@@ -1,3 +1,4 @@
+import { contentText } from '@/lib/content/localized';
 import type { PublicListingDto, PublicListingListDto } from '@/lib/api/public-listing';
 import type { GovernorateKey, MarketplaceListing } from './marketplace';
 import type { MarketplaceState } from '@/features/marketplace/url-state';
@@ -16,6 +17,18 @@ export const GOVERNORATE_API_LABEL: Record<GovernorateKey, string> = {
   beniSuef: 'Beni Suef',
   minya: 'Minya',
   fayoum: 'Fayoum',
+};
+
+export const GOVERNORATE_AR_LABEL: Record<GovernorateKey, string> = {
+  beheira: 'البحيرة',
+  ismailia: 'الإسماعيلية',
+  menoufia: 'المنوفية',
+  qalyubia: 'القليوبية',
+  giza: 'الجيزة',
+  sharqia: 'الشرقية',
+  beniSuef: 'بني سويف',
+  minya: 'المنيا',
+  fayoum: 'الفيوم',
 };
 
 function governorateKey(raw: string): GovernorateKey {
@@ -39,32 +52,51 @@ export function publicListingToMarketplaceListing(dto: PublicListingDto): Market
   const areaKey = (dto.areaName ?? dto.slug).slice(0, 48);
   const publishedRank = dto.publishedAt ? Date.parse(dto.publishedAt) : 0;
   const desc = dto.listingDescription?.trim() ?? '';
-  const activityText = desc || dto.highlights[0] || '';
+  const activityText = dto.mainActivity || '';
   const name = dto.farmName;
+  const govKey = governorateKey(dto.governorate);
+  const arabicGov = GOVERNORATE_AR_LABEL[govKey] ?? dto.governorate;
   return {
     slug: dto.slug,
+    listingLocalizedContent: dto.listingLocalizedContent,
     saleEligibility: dto.saleEligibility,
     purpose,
-    name: { en: name, ar: name },
-    governorate: governorateKey(dto.governorate),
-    governorateDisplay: { en: dto.governorate, ar: dto.governorate },
+    name: {
+      en: contentText(dto.localizedContent, 'en', 'name', name),
+      ar: contentText(dto.localizedContent, 'ar', 'name', name),
+    },
+    governorate: govKey,
+    governorateDisplay: { en: dto.governorate, ar: arabicGov },
     area: {
       key: areaKey,
-      label: { en: dto.areaName ?? dto.governorate, ar: dto.areaName ?? dto.governorate },
+      label: {
+        en: dto.areaName ?? dto.governorate,
+        ar: contentText(dto.localizedContent, 'ar', 'areaName', dto.areaName) || arabicGov,
+      },
     },
     areaFeddan: dto.areaFeddan,
-    activity: activityText ? { en: activityText, ar: activityText } : { en: '—', ar: '—' },
-    farmType: null,
-    cropTypes: [],
-    waterSources: [],
+    activity: activityText
+      ? {
+          en: contentText(dto.localizedContent, 'en', 'mainActivity', activityText),
+          ar: contentText(dto.localizedContent, 'ar', 'mainActivity', activityText),
+        }
+      : { en: '—', ar: '—' },
+    farmType: (dto.farmType as MarketplaceListing['farmType']) ?? null,
+    cropTypes: (dto.cropTypes ?? []) as MarketplaceListing['cropTypes'],
+    waterSources: (dto.waterSource ? [dto.waterSource] : []) as MarketplaceListing['waterSources'],
     waterSourceText: null,
-    irrigationMethod: null,
-    energySource: null,
+    irrigationMethod: (dto.irrigationMethod as MarketplaceListing['irrigationMethod']) ?? null,
+    energySource: (dto.energySource as MarketplaceListing['energySource']) ?? null,
     askingPrice: dto.askingPrice,
     pricePerFeddan: dto.statedSalePricePerFeddan,
     annualRentPerFeddan: dto.annualRentPerFeddan,
     image: {
-      src: LISTING_PLACEHOLDER_SRC,
+      src:
+        '/images/home/' +
+        ['farm-wadi-el-natrun', 'farm-nubaria', 'farm-mallawi'][
+          Array.from(dto.id).reduce((sum, c) => sum + c.charCodeAt(0), 0) % 3
+        ] +
+        '.jpg',
       alt: { en: name, ar: name },
       isIllustrative: true,
     },
@@ -78,14 +110,7 @@ export function publicListingToMarketplaceListing(dto: PublicListingDto): Market
 }
 
 export function hasUnsupportedPublicFilters(state: MarketplaceState): boolean {
-  const f = state.filters;
-  return (
-    f.farmTypes.length > 0 ||
-    f.waterSources.length > 0 ||
-    f.irrigationMethods.length > 0 ||
-    f.energySources.length > 0 ||
-    f.cropTypes.length > 0
-  );
+  return !state;
 }
 
 /** Maps UI state to public marketplace query params (server-side filters only). */
@@ -98,6 +123,9 @@ export function marketplaceStateToApiQuery(state: MarketplaceState, pageSize: nu
   };
   if (f.purpose === 'rent') q.listingType = 'rent';
   else q.listingType = 'sale';
+  if (f.quickSale) q.quickSale = 'true';
+  for (const key of ['farmTypes', 'waterSources', 'irrigationMethods', 'energySources', 'cropTypes'] as const)
+    if (f[key].length) q[key] = f[key].join(',');
   if (f.governorate) q.governorate = GOVERNORATE_API_LABEL[f.governorate as GovernorateKey];
   if (f.area) q.area = f.area;
   if (f.saleMethods?.length) q.saleMethods = f.saleMethods.join(',');

@@ -44,22 +44,15 @@ type Props = {
   className?: string;
 };
 
-function UnavailableSection({ title, children, gap }: { title: string; children: ReactNode; gap: 'none' | 'sm' | 'md' }) {
-  const t = useTranslations('marketplace.filters');
-  return (
-    <section className="border-t border-border-subtle py-20 opacity-70">
-      <div className="flex flex-col gap-4 pb-4">
-        <span className="type-label-medium text-text-primary">{title}</span>
-        <p className="type-body-caption text-text-muted">{t('unavailableSection')}</p>
-      </div>
-      <div className={cn('pointer-events-none flex flex-col select-none', gap === 'sm' && 'mt-12', gap === 'md' && 'mt-14 gap-14')}>
-        {children}
-      </div>
-    </section>
-  );
-}
-
-function Section({ title, children, gap }: { title: string; children: ReactNode; gap: 'none' | 'sm' | 'md' }) {
+export function FilterSection({
+  title,
+  children,
+  gap,
+}: {
+  title: string;
+  children: ReactNode;
+  gap: 'none' | 'sm' | 'md';
+}) {
   const t = useTranslations('marketplace.filters');
   const [open, setOpen] = useState(true);
   return (
@@ -113,21 +106,31 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
 
   const body = (
     <>
-      <Section title={t('filters.sections.transaction')} gap="none">
+      <FilterSection title={t('filters.sections.transaction')} gap="none">
         {listingPurposes.map((purpose) => (
           <ChoiceOption
             key={purpose}
             type="radio"
             name={`purpose-${surface}`}
             checked={f.purpose === purpose}
-            onChange={() => set({ purpose })}
+            onChange={() =>
+              set({
+                purpose,
+                ...(purpose === 'rent' ? { quickSale: false, saleMethods: [], exchangeAssetTypes: [] } : {}),
+              })
+            }
           >
             {t(`options.purpose.${purpose}`)}
           </ChoiceOption>
         ))}
-      </Section>
+        {f.purpose === 'sale' && (
+          <ChoiceOption type="checkbox" checked={!!f.quickSale} onChange={() => set({ quickSale: !f.quickSale })}>
+            {locale === 'ar' ? 'بيع سريع' : 'Quick Sale'}
+          </ChoiceOption>
+        )}
+      </FilterSection>
 
-      <Section title={t('filters.sections.size')} gap="sm">
+      <FilterSection title={t('filters.sections.size')} gap="sm">
         <RangeSlider
           {...FARM_SIZE_RANGE}
           value={f.size}
@@ -138,13 +141,13 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
           minLabel={t('filters.minFor', { section: t('filters.sections.size') })}
           maxLabel={t('filters.maxFor', { section: t('filters.sections.size') })}
         />
-      </Section>
+      </FilterSection>
 
-      <UnavailableSection title={t('filters.sections.farmType')} gap="none">
+      <FilterSection title={t('filters.sections.farmType')} gap="none">
         {checkboxes(farmTypes, f.farmTypes, 'farmTypes', 'farmTypes')}
-      </UnavailableSection>
+      </FilterSection>
 
-      <Section title={t('filters.sections.location')} gap="md">
+      <FilterSection title={t('filters.sections.location')} gap="md">
         <Select
           fieldStyle="filter"
           label={t('filters.governorate.label')}
@@ -171,9 +174,9 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
             </option>
           ))}
         </Select>
-      </Section>
+      </FilterSection>
 
-      <Section title={sc.title} gap="none">
+      <FilterSection title={sc.title} gap="none">
         {(['installment', 'exchange'] as const).map((value) => (
           <ChoiceOption
             key={value}
@@ -200,24 +203,24 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
             {sc.assets[i]}
           </ChoiceOption>
         ))}
-      </Section>
-      <UnavailableSection title={t('filters.sections.water')} gap="none">
+      </FilterSection>
+      <FilterSection title={t('filters.sections.water')} gap="none">
         {checkboxes(waterSources, f.waterSources, 'waterSources', 'waterSources')}
-      </UnavailableSection>
+      </FilterSection>
 
-      <UnavailableSection title={t('filters.sections.irrigation')} gap="none">
+      <FilterSection title={t('filters.sections.irrigation')} gap="none">
         {checkboxes(irrigationMethods, f.irrigationMethods, 'irrigationMethods', 'irrigationMethods')}
-      </UnavailableSection>
+      </FilterSection>
 
-      <UnavailableSection title={t('filters.sections.energy')} gap="none">
+      <FilterSection title={t('filters.sections.energy')} gap="none">
         {checkboxes(energySources, f.energySources, 'energySources', 'energySources')}
-      </UnavailableSection>
+      </FilterSection>
 
-      <UnavailableSection title={t('filters.sections.crop')} gap="none">
+      <FilterSection title={t('filters.sections.crop')} gap="none">
         {checkboxes(cropTypes, f.cropTypes, 'cropTypes', 'cropTypes')}
-      </UnavailableSection>
+      </FilterSection>
 
-      <Section title={t('filters.sections.price')} gap="sm">
+      <FilterSection title={t('filters.sections.price')} gap="sm">
         <RangeSlider
           {...PRICE_RANGE}
           value={f.price}
@@ -228,7 +231,7 @@ export function FilterPanel({ filters: f, onChange, onClearAll, source, surface,
           minLabel={t('filters.minFor', { section: t('filters.sections.price') })}
           maxLabel={t('filters.maxFor', { section: t('filters.sections.price') })}
         />
-      </Section>
+      </FilterSection>
     </>
   );
 

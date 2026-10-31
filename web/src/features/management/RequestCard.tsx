@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/Surface';
  */
 export type RequestCardData = {
   title: string;
+  ctaLabel?: string;
   location: string;
   specs: { area: string; activity: string; term: string };
   scope: string;
@@ -83,7 +84,7 @@ export function RequestCard({ request }: { request: RequestCardData }) {
           aria-label={t('applyFor', { title: request.title })}
           className={buttonClasses({ variant: 'primary', size: 'md' })}
         >
-          {t('apply')}
+          {request.ctaLabel ?? t('apply')}
         </Link>
       </div>
     </Card>

@@ -51,13 +51,13 @@ export function buildPublicOpportunityWhere(
     if (query.professionalNeed) detail.professionalNeed = query.professionalNeed;
     if (query.experienceLevel) detail.experienceLevel = query.experienceLevel;
     if (query.managementType) {
-      detail.managementTypes = { string_contains: query.managementType };
+      detail.managementTypes = { array_contains: [query.managementType] };
     }
     if (Object.keys(detail).length > 0) where.managementDetail = { is: detail };
   } else {
     const detail: Prisma.PartnershipDetailWhereInput = {};
-    if (query.objective) detail.objective = { string_contains: query.objective };
-    if (query.partnerType) detail.acceptedPartnerTypes = { string_contains: query.partnerType };
+    if (query.objective) detail.objective = { array_contains: [query.objective] };
+    if (query.partnerType) detail.acceptedPartnerTypes = { array_contains: [query.partnerType] };
     if (Object.keys(detail).length > 0) where.partnershipDetail = { is: detail };
   }
 
@@ -78,6 +78,7 @@ export const publicOpportunityListSelect = {
   farm: {
     select: {
       name: true,
+      localizedContent: true,
       governorate: true,
       areaName: true,
       areaFeddan: true,
@@ -88,6 +89,7 @@ export const publicOpportunityListSelect = {
   },
   managementDetail: {
     select: {
+      localizedContent: true,
       professionalNeed: true,
       managementTypes: true,
       goals: true,
@@ -102,6 +104,7 @@ export const publicOpportunityListSelect = {
   },
   partnershipDetail: {
     select: {
+      localizedContent: true,
       description: true,
       objective: true,
       acceptedPartnerTypes: true,
@@ -115,3 +118,34 @@ export const publicOpportunityListSelect = {
     },
   },
 } satisfies Prisma.RequestSelect;
+
+/** Facets come from the entire eligible dataset, never the current page. */
+export async function loadPublicOpportunityFacets(
+  prisma: import('../../prisma/prisma.service').PrismaService,
+  kind: 'farmManagement' | 'partnership',
+) {
+  const rows = await prisma.request.findMany({
+    where: buildPublicOpportunityWhere(kind, {}),
+    select: publicOpportunityListSelect,
+  });
+  const out: Record<string, string[]> = {
+    governorate: [],
+    area: [],
+    managementType: [],
+    objective: [],
+    partnerType: [],
+  };
+  const add = (key: string, value: unknown) => {
+    const values = Array.isArray(value) ? value : [value];
+    for (const v of values) if (typeof v === 'string' && v.trim() && !out[key].includes(v)) out[key].push(v);
+  };
+  for (const r of rows) {
+    add('governorate', r.farm?.governorate);
+    add('area', r.farm?.areaName);
+    add('managementType', r.managementDetail?.managementTypes);
+    add('objective', r.partnershipDetail?.objective);
+    add('partnerType', r.partnershipDetail?.acceptedPartnerTypes);
+  }
+  for (const key of Object.keys(out)) out[key].sort();
+  return out;
+}

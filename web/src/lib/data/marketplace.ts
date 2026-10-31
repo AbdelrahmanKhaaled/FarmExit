@@ -17,6 +17,7 @@ import type { Egp, Localized } from '@/lib/domain/types';
  * Nothing is computed for display: price per feddan is shown only when the listing states it.
  */
 export interface MarketplaceListing {
+  listingLocalizedContent?: unknown;
   saleEligibility?: import('@/lib/api/public-listing').PublicListingDto['saleEligibility'];
   slug: string;
   purpose: ListingPurpose;
@@ -76,10 +77,11 @@ export const marketplaceSorts = ['newest', 'priceAsc', 'priceDesc'] as const;
 export type MarketplaceSort = (typeof marketplaceSorts)[number];
 
 /** Approved ranges (Source of Truth 4o / 4p and the Figma Filter Panel). */
-export const FARM_SIZE_RANGE = { min: 10, max: 500, step: 5 } as const;
-export const PRICE_RANGE = { min: 5_000_000, max: 100_000_000, step: 500_000 } as const;
+export const FARM_SIZE_RANGE = { min: 0, max: 500, step: 5 } as const;
+export const PRICE_RANGE = { min: 0, max: 100_000_000, step: 500_000 } as const;
 
 export interface MarketplaceFilters {
+  quickSale?: boolean;
   saleMethods?: ('installment' | 'exchange')[];
   exchangeAssetTypes?: ('factory' | 'villa' | 'apartment' | 'car')[];
   purpose: ListingPurpose;

@@ -1,4 +1,6 @@
 'use client';
+import { BilingualFields } from '@/components/content/BilingualFields';
+import { contentText, type LocalizedContent } from '@/lib/content/localized';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useLocale } from 'next-intl';
@@ -16,6 +18,7 @@ import { RequestDocumentsPanel } from '@/features/my-farms/RequestDocumentsPanel
 import { content } from './content';
 
 export type PartnershipRecord = {
+  localizedContent?: LocalizedContent;
   id: string;
   requestNumber: string;
   status: string;
@@ -95,6 +98,7 @@ export function PartnershipWizard({
   const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   const c = content[locale === 'ar' ? 'ar' : 'en'];
   const router = useRouter();
+  const [localizedContent, setLocalizedContent] = useState<LocalizedContent>(initial?.localizedContent ?? {});
   const [record, setRecord] = useState(initial);
   const [step, setStep] = useState(initial ? 2 : 1);
   const [values, setValues] = useState<Values>(
@@ -163,6 +167,7 @@ export function PartnershipWizard({
         if (!farmId) throw new Error(c.required);
         current = await request(`/api/farms/${farmId}/partnership-requests`, 'POST', {
           description: values.description,
+          localizedContent,
           objective: objectives,
         });
       }
@@ -188,6 +193,7 @@ export function PartnershipWizard({
         if (!values[key] && !current[key as keyof PartnershipRecord]) delete body[key];
       }
     if (!application) {
+      body.localizedContent = localizedContent;
       body.objective = objectives;
       body.acceptedPartnerTypes = accepted;
     }
@@ -324,15 +330,15 @@ export function PartnershipWizard({
     : [
         [c.farm, record?.farmName ?? farms.find((f) => f.id === farmId)?.name ?? null],
         [c.objective, objectives.join('\n')],
-        [c.description, values.description],
+        [c.description, contentText(record?.localizedContent, locale, 'description', values.description)],
         [
           c.accepted,
           accepted.map((k) => (k === 'individual' ? c.individual : k === 'company' ? c.company : k)).join(' · '),
         ],
-        [c.contributionDetails, values.contributionDetails],
-        [c.operations, values.operations],
-        [c.salesChannel, values.salesChannel],
-        [c.extra, values.extraInformation],
+        [c.contributionDetails, contentText(record?.localizedContent, locale, 'contributionDetails', values.contributionDetails)],
+        [c.operations, contentText(record?.localizedContent, locale, 'operations', values.operations)],
+        [c.salesChannel, contentText(record?.localizedContent, locale, 'salesChannel', values.salesChannel)],
+        [c.extra, contentText(record?.localizedContent, locale, 'extraInformation', values.extraInformation)],
       ];
 
   if (record && !canEdit && !complete)
@@ -463,7 +469,33 @@ export function PartnershipWizard({
                     )}
                   </div>
                   {objectives.length > 1 && <p className="type-body-caption">{objectives.join(' · ')}</p>}
-                  {input('description', c.description)}
+                  <BilingualFields
+                    value={localizedContent}
+                    legacy={Object.fromEntries(ownerFields.map((key) => [key, values[key] ?? '']))}
+                    onChange={(v) => {
+                      setLocalizedContent(v);
+                      setDirty(true);
+                      setValues((d) => ({
+                        ...d,
+                        ...Object.fromEntries(
+                          ownerFields.map((key) => [key, v.en?.[key] || v.ar?.[key] || d[key] || '']),
+                        ),
+                      }));
+                    }}
+                    fields={ownerFields.map((key) => ({
+                      key,
+                      label:
+                        (
+                          {
+                            description: c.description,
+                            contributionDetails: c.contributionDetails,
+                            operations: c.operations,
+                            salesChannel: c.salesChannel,
+                            extraInformation: c.extra,
+                          } as Record<string, string>
+                        )[key] ?? key,
+                    }))}
+                  />
                 </WizardCard>
               )}
               {!application && step === 3 && (

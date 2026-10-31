@@ -1,3 +1,4 @@
+import { publicContent } from './public-localized-content';
 import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { ListingType, RequestType, RequestVisibility } from '../../generated/prisma/enums';
@@ -8,6 +9,12 @@ import type { PublicListingDto } from './dto/public-listing.dto';
 export type MarketplaceFilters = {
   saleMethods?: ('installment' | 'exchange')[];
   exchangeAssetTypes?: ('factory' | 'villa' | 'apartment' | 'car')[];
+  quickSale?: 'true' | 'false';
+  farmTypes?: string[];
+  waterSources?: string[];
+  irrigationMethods?: string[];
+  energySources?: string[];
+  cropTypes?: string[];
   q?: string;
   listingType?: 'sale' | 'rent';
   governorate?: string;
@@ -32,12 +39,20 @@ export type PublicListingSource = {
   publishedAt: Date | null;
   farm: {
     id: bigint;
+    localizedContent?: unknown;
+    farmType?: string;
+    mainActivity?: string | null;
+    waterSource?: string | null;
+    irrigationMethod?: string | null;
+    energySource?: string | null;
+    cropTypes?: { cropType: string }[];
     name: string;
     governorate: string;
     areaName: string | null;
     areaFeddan: { toString(): string } | number | string;
   } | null;
   listingDetail: {
+    localizedContent?: unknown;
     saleTerms?: {
       saleMode: string;
       acceptsCashProposals: boolean;
@@ -62,9 +77,25 @@ export type PublicListingSource = {
 export const publicListingSelect = {
   id: true,
   publishedAt: true,
-  farm: { select: { id: true, name: true, governorate: true, areaName: true, areaFeddan: true } },
+  farm: {
+    select: {
+      id: true,
+      name: true,
+      localizedContent: true,
+      farmType: true,
+      mainActivity: true,
+      waterSource: true,
+      irrigationMethod: true,
+      energySource: true,
+      cropTypes: { select: { cropType: true } },
+      governorate: true,
+      areaName: true,
+      areaFeddan: true,
+    },
+  },
   listingDetail: {
     select: {
+      localizedContent: true,
       saleTerms: {
         select: {
           saleMode: true,
@@ -89,6 +120,11 @@ export const publicListingSelect = {
 } as const;
 
 export function assertMarketplaceRanges(query: MarketplaceFilters): void {
+  if (
+    query.listingType === 'rent' &&
+    (query.quickSale === 'true' || query.saleMethods?.length || query.exchangeAssetTypes?.length)
+  )
+    throw new BadRequestException('Sale criteria cannot be combined with rent');
   if (query.minPrice !== undefined && query.maxPrice !== undefined && query.minPrice > query.maxPrice) {
     throw new BadRequestException('minPrice must not be greater than maxPrice');
   }
@@ -103,6 +139,11 @@ export function assertMarketplaceRanges(query: MarketplaceFilters): void {
  */
 export function buildMarketplaceWhere(query: MarketplaceFilters): Prisma.RequestWhereInput {
   const farm: Prisma.FarmWhereInput = { deletedAt: null };
+  if (query.farmTypes?.length) farm.farmType = { in: query.farmTypes as Prisma.EnumFarmTypeFilter['in'] };
+  if (query.waterSources?.length) farm.waterSource = { in: query.waterSources };
+  if (query.irrigationMethods?.length) farm.irrigationMethod = { in: query.irrigationMethods };
+  if (query.energySources?.length) farm.energySource = { in: query.energySources };
+  if (query.cropTypes?.length) farm.cropTypes = { some: { cropType: { in: query.cropTypes } } };
   if (query.governorate !== undefined) farm.governorate = query.governorate;
   if (query.area !== undefined) farm.areaName = query.area;
   if (query.minArea !== undefined || query.maxArea !== undefined) {
@@ -142,6 +183,10 @@ export function buildMarketplaceWhere(query: MarketplaceFilters): Prisma.Request
     }
   }
 
+  if (query.quickSale === 'true')
+    and.push({
+      listingDetail: { is: { listingType: ListingType.sale, saleTerms: { is: { saleMode: 'quickSale' } } } },
+    });
   if (query.saleMethods?.length)
     and.push({
       listingDetail: {
@@ -252,6 +297,14 @@ export function toPublicListing(
     id: source.id.toString(),
     slug: detail.slug,
     farmName: farm.name,
+    localizedContent: publicContent(farm.localizedContent, ['name', 'mainActivity', 'areaName']),
+    listingLocalizedContent: publicContent(detail.localizedContent, ['listingDescription']),
+    farmType: farm.farmType ?? null,
+    mainActivity: farm.mainActivity ?? null,
+    waterSource: farm.waterSource ?? null,
+    irrigationMethod: farm.irrigationMethod ?? null,
+    energySource: farm.energySource ?? null,
+    cropTypes: farm.cropTypes?.map((c) => c.cropType) ?? [],
     governorate: farm.governorate,
     areaName: farm.areaName,
     areaFeddan: Number(typeof farm.areaFeddan === 'number' ? farm.areaFeddan : farm.areaFeddan.toString()),

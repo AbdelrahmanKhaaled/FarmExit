@@ -21,7 +21,7 @@ export default async function PartnershipOpportunityPage({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations('opportunityMarketplace');
-  const item = await fetchPublicOpportunity('partnerships', id);
+  const item = await fetchPublicOpportunity('partnerships', id, locale);
   if (!item) notFound();
   const session = await getWebsiteSession();
   const applyHref = session
@@ -33,15 +33,24 @@ export default async function PartnershipOpportunityPage({
       <PublicNavbar />
       <main id="main">
         <Container size="app" className="py-32 tablet:py-48">
-          <Link href="/partnerships" className="type-label-small-strong text-text-brand">{t('detail.back')}</Link>
+          <Link href="/partnerships" className="type-label-small-strong text-text-brand">
+            {t('detail.back')}
+          </Link>
           <div className="mt-24 grid gap-32 desktop:grid-cols-[minmax(0,1fr)_320px]">
             <div>
               <h1 className="type-heading-h2 text-text-primary">{item.farmName}</h1>
               <p className="mt-8 type-body-caption text-text-muted">
-                {[item.governorate, item.areaName].filter(Boolean).join(' · ')} · {item.areaFeddan.toLocaleString(locale)} {t('feddans')}
+                {[item.governorate, item.areaName].filter(Boolean).join(' · ')} ·{' '}
+                {item.areaFeddan.toLocaleString(locale)} {t('feddans')}
               </p>
               <div className="relative mt-20 aspect-[16/10] overflow-hidden rounded-card">
-                <Image src={OPPORTUNITY_PLACEHOLDER_IMAGE} alt={item.farmName} fill className="object-cover" sizes="80vw" />
+                <Image
+                  src={OPPORTUNITY_PLACEHOLDER_IMAGE}
+                  alt={item.farmName}
+                  fill
+                  className="object-cover"
+                  sizes="80vw"
+                />
                 <span className="absolute bottom-12 inset-inline-start-12 rounded-md bg-bg-surface/90 px-8 py-4 text-[0.65rem] text-text-muted">
                   {t('illustrativeImage')}
                 </span>
@@ -61,7 +70,9 @@ export default async function PartnershipOpportunityPage({
               {item.operations || item.salesChannel ? (
                 <section className="mt-24">
                   <h2 className="type-label-large">{t('detail.sections.expertise')}</h2>
-                  {item.operations ? <p className="mt-10 whitespace-pre-wrap type-body-small">{item.operations}</p> : null}
+                  {item.operations ? (
+                    <p className="mt-10 whitespace-pre-wrap type-body-small">{item.operations}</p>
+                  ) : null}
                   {item.salesChannel ? <p className="mt-8 type-body-caption">{item.salesChannel}</p> : null}
                 </section>
               ) : null}
@@ -69,7 +80,9 @@ export default async function PartnershipOpportunityPage({
                 <section className="mt-24">
                   <h2 className="type-label-large">{t('detail.sections.requirements')}</h2>
                   <ul className="mt-10 list-inside list-disc type-body-small">
-                    {item.acceptedPartnerTypes.map((x) => <li key={x}>{x}</li>)}
+                    {item.acceptedPartnerTypes.map((x) => (
+                      <li key={x}>{x}</li>
+                    ))}
                   </ul>
                 </section>
               ) : null}

@@ -1,3 +1,6 @@
+import { Type as ContentType } from 'class-transformer';
+import { ValidateNested as ContentNested } from 'class-validator';
+import { LocalizedContentDto } from '../../../common/dto/localized-content.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
@@ -35,6 +38,7 @@ const toPounds = ({ value }: { value: unknown }): unknown =>
  * farm id, sale terms, exchange, installments, or anything that would publish the listing.
  */
 export class CreateListingRequestDto {
+  @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiProperty({ enum: LISTING_TYPES, example: 'sale' })
   @IsIn(LISTING_TYPES)
   listingType: (typeof LISTING_TYPES)[number];
@@ -106,6 +110,7 @@ export class CreateListingRequestDto {
 export class SubmitListingRequestDto {}
 
 export class UpdateListingRequestDto {
+  @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiPropertyOptional({ enum: LISTING_TYPES })
   @IsOptional()
   @IsIn(LISTING_TYPES)
@@ -171,6 +176,7 @@ export class ListingReviewFeedbackDto {
 }
 
 export class ListingRequestResponseDto {
+  @ApiProperty({ nullable: true }) localizedContent?: unknown;
   @ApiProperty({ example: '4' }) id: string;
   @ApiProperty({ example: 'FL1A2B3C4D5E6F' }) requestNumber: string;
   @ApiProperty({ example: '12' }) farmId: string;
@@ -196,7 +202,8 @@ export class ListingRequestResponseDto {
   @ApiProperty({ type: String, format: 'date-time', nullable: true }) updatedAt: string | null;
   @ApiProperty({
     type: () => [ListingReviewFeedbackDto],
-    description: 'FarmExit review comments for the owner. Empty until a reviewer records a decision. No staff contact details.',
+    description:
+      'FarmExit review comments for the owner. Empty until a reviewer records a decision. No staff contact details.',
   })
   reviews: ListingReviewFeedbackDto[];
 }

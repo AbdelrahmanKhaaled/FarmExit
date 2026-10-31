@@ -8,6 +8,7 @@ import { ENERGY_SOURCES, FARM_TYPES, IRRIGATION_METHODS, WATER_SOURCES } from '.
  * FarmExit Score claim.
  */
 export class FarmResponseDto {
+  @ApiProperty({ nullable: true }) localizedContent?: unknown;
   @ApiProperty({ example: '12', description: 'Farm id (decimal string).' })
   id: string;
 

@@ -1,3 +1,6 @@
+import { HomepageEditorialService } from './homepage-editorial.service';
+import { HomepageService } from './homepage.service';
+import { HomepageController, HomepageAdminController } from './homepage.controller';
 import { Module } from '@nestjs/common';
 import { AuthorizationModule } from '../authorization/authorization.module';
 import { MarketplaceController } from './marketplace.controller';
@@ -6,7 +9,7 @@ import { SavedListingsService } from './saved-listings.service';
 
 @Module({
   imports: [AuthorizationModule],
-  controllers: [MarketplaceController],
-  providers: [MarketplaceService, SavedListingsService],
+  controllers: [HomepageController, HomepageAdminController, MarketplaceController],
+  providers: [HomepageEditorialService, HomepageService, MarketplaceService, SavedListingsService],
 })
 export class MarketplaceModule {}

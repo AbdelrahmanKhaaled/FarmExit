@@ -1,4 +1,5 @@
 'use client';
+import type { LocalizedContent } from '@/lib/content/localized';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -6,6 +7,7 @@ import { saveFarmAction } from '@/features/admin/actions/farms';
 import { ActionIcon } from '@/features/admin/workspace/ActionIcon';
 
 export type EditableFarm = {
+  localizedContent?: LocalizedContent;
   id?: string;
   name: string;
   description?: string | null;
@@ -42,6 +44,27 @@ export function FarmWizard({ initial, governorates }: { initial?: EditableFarm; 
     [error, setError] = useState<string | null>(null),
     [dirty, setDirty] = useState(false),
     [confirmed, setConfirmed] = useState(false);
+  const [contentLanguage, setContentLanguage] = useState<'en' | 'ar'>('en');
+  const translated = ['name', 'description', 'mainActivity', 'areaName', 'soilType'];
+  const [localizedContent, setLocalizedContent] = useState<LocalizedContent>(() => {
+    const existing = initial?.localizedContent ?? {};
+    return {
+      en: {
+        name: existing.en?.name ?? initial?.name ?? '',
+        description: existing.en?.description ?? initial?.description ?? '',
+        mainActivity: existing.en?.mainActivity ?? initial?.mainActivity ?? '',
+        areaName: existing.en?.areaName ?? initial?.areaName ?? '',
+        soilType: existing.en?.soilType ?? initial?.soilType ?? '',
+      },
+      ar: {
+        name: existing.ar?.name ?? '',
+        description: existing.ar?.description ?? '',
+        mainActivity: existing.ar?.mainActivity ?? '',
+        areaName: existing.ar?.areaName ?? '',
+        soilType: existing.ar?.soilType ?? '',
+      },
+    };
+  });
   const [values, setValues] = useState<Record<FarmField, string>>({
     name: initial?.name ?? '',
     description: initial?.description ?? '',
@@ -78,18 +101,33 @@ export function FarmWizard({ initial, governorates }: { initial?: EditableFarm; 
     };
   }, [dirty, t]);
   function change(key: FarmField, value: string) {
-    setValues((v) => ({ ...v, [key]: value }));
+    if (translated.includes(key)) {
+      setLocalizedContent((v) => ({ ...v, [contentLanguage]: { ...v[contentLanguage], [key]: value } }));
+      if (contentLanguage === 'en') {
+        setValues((v) => ({ ...v, [key]: value }));
+      }
+    } else {
+      setValues((v) => ({ ...v, [key]: value }));
+    }
     setDirty(true);
     setError(null);
   }
   function input(key: FarmField, label: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) {
+    const isTrans = translated.includes(key);
     return (
       <label>
-        {t(label)}
+        {t(label)} {isTrans && <span className="workflow-help">({contentLanguage === 'en' ? 'EN' : 'العربية'})</span>}
         <input
           {...props}
+          required={props.required && (!isTrans || contentLanguage === 'en' || !values.name)}
           name={key}
-          value={values[key]}
+          dir={isTrans ? (contentLanguage === 'ar' ? 'rtl' : 'ltr') : undefined}
+          lang={isTrans ? contentLanguage : undefined}
+          value={
+            isTrans
+              ? (localizedContent[contentLanguage]?.[key] ?? '')
+              : values[key]
+          }
           onChange={(e) => change(key, e.target.value)}
           disabled={pending}
         />
@@ -118,8 +156,9 @@ export function FarmWizard({ initial, governorates }: { initial?: EditableFarm; 
   function save() {
     if (!confirmed) return;
     const area = Number(values.areaFeddan);
+    const resolvedName = localizedContent.en?.name?.trim() || localizedContent.ar?.name?.trim() || values.name.trim();
     if (
-      !values.name.trim() ||
+      !resolvedName ||
       !values.governorate.trim() ||
       area < 0.01 ||
       area > 9999999999.99 ||
@@ -129,13 +168,16 @@ export function FarmWizard({ initial, governorates }: { initial?: EditableFarm; 
       setError(t('fieldError'));
       return;
     }
-    const body: Record<string, unknown> = {};
+    const body: Record<string, unknown> = { localizedContent };
     for (const [key, value] of Object.entries(values)) {
       if (key === 'ownerUserId') {
         if (!initial) body[key] = value;
         continue;
       }
       body[key] = key === 'areaFeddan' ? area : value.trim() || null;
+    }
+    for (const key of translated) {
+      body[key] = localizedContent.en?.[key]?.trim() || localizedContent.ar?.[key]?.trim() || values[key as FarmField] || null;
     }
     start(async () => {
       const res = await saveFarmAction(initial?.id ?? null, body);
@@ -173,6 +215,19 @@ export function FarmWizard({ initial, governorates }: { initial?: EditableFarm; 
             <h2>{t(STEPS[step]!)}</h2>
           </div>
         </header>
+        <div className="workflow-grid" role="group" aria-label="Content language">
+          {(['en', 'ar'] as const).map((lang) => (
+            <button
+              type="button"
+              key={lang}
+              aria-pressed={contentLanguage === lang}
+              onClick={() => setContentLanguage(lang)}
+            >
+              {lang === 'en' ? 'English' : 'العربية'} ·{' '}
+              {translated.filter((key) => localizedContent[lang]?.[key]?.trim()).length}/{translated.length}
+            </button>
+          ))}
+        </div>
         {error && (
           <p role="alert" className="form-error">
             {error}
@@ -185,11 +240,13 @@ export function FarmWizard({ initial, governorates }: { initial?: EditableFarm; 
               {select('farmType', 'farmType', ['vegetable', 'fruit', 'livestock', 'mixed'])}
             </div>
             <label>
-              {t('description')}
+              {t('description')} <span className="workflow-help">({contentLanguage === 'en' ? 'EN' : 'العربية'})</span>
               <textarea
                 rows={4}
                 maxLength={5000}
-                value={values.description}
+                dir={contentLanguage === 'ar' ? 'rtl' : 'ltr'}
+                lang={contentLanguage}
+                value={localizedContent[contentLanguage]?.description ?? ''}
                 onChange={(e) => change('description', e.target.value)}
                 disabled={pending}
               />

@@ -1,9 +1,11 @@
 'use client';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { contentText } from '@/lib/content/localized';
 import { ManagementWizard, type ManagementFarmOption } from './ManagementWizard';
 import { RequestTracking } from '@/features/phase7/RequestTracking';
 import { managementGoals, managementChallenges, formatManagementChoices } from '@/features/phase7/reference-options';
 export type ManagementRequest = {
+  localizedContent?: import('@/lib/content/localized').LocalizedContent;
   id: string;
   requestNumber: string;
   farmId: string;
@@ -33,6 +35,7 @@ export function ManagementRequestDetail({
   farm?: ManagementFarmOption;
 }) {
   const t = useTranslations('workspace.management');
+  const locale = useLocale();
   return ['draft', 'changesRequested'].includes(initial.status) ? (
     <ManagementWizard
       initial={initial}
@@ -50,12 +53,33 @@ export function ManagementRequestDetail({
       fields={[
         [t('farm'), initial.farmName],
         [t('need'), (t as (key: string) => string)(`needs.${initial.professionalNeed}`)],
-        [t('term'), initial.term],
-        [t('currentSituation'), initial.currentSituation],
-        [t('goals'), formatManagementChoices(initial.goals, managementGoals, [t('goalOptions.g0'), t('goalOptions.g1'), t('goalOptions.g2')])],
-        [t('challenges'), formatManagementChoices(initial.challenges, managementChallenges, [t('challengeOptions.c0'), t('challengeOptions.c1'), t('challengeOptions.c2'), t('challengeOptions.c3')])],
-        [t('outcomes'), initial.outcomes ?? null],
-        [t('additionalInformation'), initial.additionalInformation ?? null],
+        [t('term'), contentText(initial.localizedContent, locale, 'term', initial.term)],
+        [
+          t('currentSituation'),
+          contentText(initial.localizedContent, locale, 'currentSituation', initial.currentSituation),
+        ],
+        [
+          t('goals'),
+          formatManagementChoices(initial.goals, managementGoals, [
+            t('goalOptions.g0'),
+            t('goalOptions.g1'),
+            t('goalOptions.g2'),
+          ]),
+        ],
+        [
+          t('challenges'),
+          formatManagementChoices(initial.challenges, managementChallenges, [
+            t('challengeOptions.c0'),
+            t('challengeOptions.c1'),
+            t('challengeOptions.c2'),
+            t('challengeOptions.c3'),
+          ]),
+        ],
+        [t('outcomes'), contentText(initial.localizedContent, locale, 'outcomes', initial.outcomes ?? null)],
+        [
+          t('additionalInformation'),
+          contentText(initial.localizedContent, locale, 'additionalInformation', initial.additionalInformation ?? null),
+        ],
       ]}
     />
   );

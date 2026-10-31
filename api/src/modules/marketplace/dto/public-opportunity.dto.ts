@@ -2,6 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /** Public allowlist only; no owner identity, contacts, coordinates, documents or staff feedback. */
 export class PublicOpportunityDto {
+  @ApiProperty({ nullable: true }) localizedContent?: unknown;
+  @ApiProperty({ nullable: true }) opportunityLocalizedContent?: unknown;
   @ApiProperty() id!: string;
   @ApiProperty() farmName!: string;
   @ApiProperty() governorate!: string;
@@ -34,6 +36,7 @@ export class PublicOpportunityDto {
 }
 
 export class PublicOpportunityListDto {
+  @ApiPropertyOptional() filterOptions?: Record<string, string[]>;
   @ApiProperty({ type: [PublicOpportunityDto] }) items!: PublicOpportunityDto[];
   @ApiProperty() page!: number;
   @ApiProperty() pageSize!: number;

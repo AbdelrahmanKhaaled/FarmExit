@@ -20,14 +20,17 @@ export async function generateMetadata({ params }: PageProps<'/[locale]/partners
   return { title: t('metaTitle'), description: t('metaDescription') };
 }
 
-export default async function PartnershipMarketplacePage({ params, searchParams }: PageProps<'/[locale]/partnerships'>) {
+export default async function PartnershipMarketplacePage({
+  params,
+  searchParams,
+}: PageProps<'/[locale]/partnerships'>) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const query = await searchParams;
   const filters = parseOpportunityFilters(query as Record<string, string | string[] | undefined>);
-  const data =
-    (await fetchPublicOpportunities('partnerships', filters)) ?? { items: [], page: 1, pageSize: 20, total: 0 };
+  const response = await fetchPublicOpportunities('partnerships', filters, locale);
+  const data = response ?? { items: [], page: 1, pageSize: 20, total: 0 };
   const t = await getTranslations('partnership');
 
   return (
@@ -56,12 +59,19 @@ export default async function PartnershipMarketplacePage({ params, searchParams 
               </h1>
               <p className="type-body-lead text-overlay-on-dark-body">{t('description')}</p>
             </div>
-            <PartnershipHeroSearch filters={filters} />
+            <PartnershipHeroSearch filters={filters} options={data.filterOptions} />
           </Container>
         </section>
 
         <Container size="app" className="flex flex-col gap-24 pt-24 pb-72 tablet:gap-32 tablet:pt-40 tablet:pb-96">
-          <PartnershipMarketplace locale={locale} initial={data} filters={filters} />
+          {!response && (
+            <p role="alert" className="rounded-xl border border-border-default p-24">
+              {locale === 'ar'
+                ? 'تعذر تحميل الفرص الآن. حاول مرة أخرى.'
+                : 'Opportunities could not be loaded. Please try again.'}
+            </p>
+          )}
+          <PartnershipMarketplace locale={locale} initial={data} filters={filters} unavailable={!response} />
         </Container>
       </main>
       <Footer />

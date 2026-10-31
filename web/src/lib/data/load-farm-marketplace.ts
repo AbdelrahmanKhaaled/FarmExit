@@ -18,6 +18,7 @@ export async function loadFarmMarketplacePage(
     const res = await fetch(`${getApiBaseUrl()}/marketplace/farms?${params}`, {
       headers: { accept: 'application/json' },
       cache: 'no-store',
+      signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) {
       return { items: [], total: 0, page: state.page, pageSize, unavailable: true };

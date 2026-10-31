@@ -1,6 +1,13 @@
+import { mergeLocalizedContent } from '../../common/localized-content';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
-import { Prisma, type Farm, type FarmListingDetail, type Request, type RequestReview } from '../../generated/prisma/client';
+import {
+  Prisma,
+  type Farm,
+  type FarmListingDetail,
+  type Request,
+  type RequestReview,
+} from '../../generated/prisma/client';
 import {
   FarmRelationshipRole,
   RequestType,
@@ -132,6 +139,8 @@ export class ListingRequestsService {
       annualRentPerFeddan: pounds(prices.annualRentPerFeddan),
       statedSalePricePerFeddan: pounds(prices.statedSalePricePerFeddan),
     };
+    if (dto.localizedContent !== undefined)
+      data.localizedContent = mergeLocalizedContent(detail.localizedContent, dto.localizedContent);
     if (dto.availability !== undefined) data.availability = dto.availability;
     if (dto.listingDescription !== undefined) data.listingDescription = dto.listingDescription;
     if (dto.highlights !== undefined) data.highlights = dto.highlights;
@@ -141,7 +150,8 @@ export class ListingRequestsService {
         where: { id: request.id, createdBy: userId, status: request.status, requestType: RequestType.farmListing },
         data: { status: request.status },
       });
-      if (locked.count !== 1) throw new ConflictException('Only a draft or a listing with requested changes can be updated');
+      if (locked.count !== 1)
+        throw new ConflictException('Only a draft or a listing with requested changes can be updated');
       await tx.farmListingDetail.update({ where: { requestId: request.id }, data });
     });
 
@@ -197,11 +207,7 @@ export class ListingRequestsService {
     return this.respond(refreshed, detail, farm);
   }
 
-  private async respond(
-    request: Request,
-    detail: FarmListingDetail,
-    farm: Farm,
-  ): Promise<ListingRequestResponseDto> {
+  private async respond(request: Request, detail: FarmListingDetail, farm: Farm): Promise<ListingRequestResponseDto> {
     const reviews = await this.ownerReviews([request.id]);
     return toResponse(request, detail, farm, reviews.get(request.id) ?? []);
   }
@@ -295,6 +301,7 @@ export class ListingRequestsService {
               requestId: request.id,
               slug,
               listingType: dto.listingType,
+              localizedContent: dto.localizedContent ? JSON.parse(JSON.stringify(dto.localizedContent)) : undefined,
               askingPrice: pounds(prices.askingPrice),
               annualRentPerFeddan: pounds(prices.annualRentPerFeddan),
               statedSalePricePerFeddan: pounds(prices.statedSalePricePerFeddan),
@@ -355,6 +362,7 @@ function toResponse(
     requestNumber: request.requestNumber,
     farmId: farm.id.toString(),
     farmName: farm.name,
+    localizedContent: detail.localizedContent,
     areaFeddan: Number(farm.areaFeddan.toString()),
     listingType: detail.listingType,
     status: request.status,

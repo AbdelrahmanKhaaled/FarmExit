@@ -1,5 +1,13 @@
 /** Mirrors `api` PublicListingDto (marketplace card fields only). */
 export type PublicListingDto = {
+  localizedContent?: unknown;
+  listingLocalizedContent?: unknown;
+  farmType?: string | null;
+  mainActivity?: string | null;
+  waterSource?: string | null;
+  irrigationMethod?: string | null;
+  energySource?: string | null;
+  cropTypes?: string[];
   saleEligibility?: {
     saleMode: string;
     acceptsCashProposals: boolean;

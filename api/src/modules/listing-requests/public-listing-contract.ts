@@ -4,6 +4,14 @@
  * No image is included: every current upload stays `pending_confirmation`, and no licence-approval workflow exists.
  */
 export const PUBLIC_LISTING_FIELDS = [
+  'localizedContent',
+  'listingLocalizedContent',
+  'farmType',
+  'mainActivity',
+  'waterSource',
+  'irrigationMethod',
+  'energySource',
+  'cropTypes',
   'id',
   'slug',
   'farmName',
@@ -51,9 +59,6 @@ export const PUBLIC_LISTING_FORBIDDEN = [
   'nearestMainRoad',
   'roadDistanceKm',
   'description',
-  'waterSource',
-  'irrigationMethod',
-  'energySource',
   'soilType',
   'farmStatus',
   'myRoles',

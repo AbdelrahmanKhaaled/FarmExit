@@ -1,3 +1,7 @@
+import { optionLabel } from '@/features/opportunity-marketplace/option-labels';
+import type { HomeData } from './home-data';
+import { useLocale } from 'next-intl';
+import { localizeOpportunity } from '@/lib/opportunities/public-opportunity';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -8,7 +12,7 @@ import { Card } from '@/components/ui/Surface';
 import { Container } from '@/components/layout/Container';
 import { SectionHeader } from '@/components/layout/Section';
 import { RequestCard } from '@/features/management/RequestCard';
-import { homeImages, homeLinks, managementRequests } from './data';
+import { homeImages, homeLinks } from './data';
 
 /*
  * Figma: Homepage › Section / Management Marketplace — white band with border/nav rules, band padding 128 · 96 · 72.
@@ -61,9 +65,10 @@ function RoleCard({ role, href }: { role: 'owners' | 'managers'; href: string })
   );
 }
 
-export function ManagementSection() {
+export function ManagementSection({ data }: { data: HomeData | null }) {
   const t = useTranslations('home.management');
-  const ts = useTranslations('home');
+  const locale = useLocale();
+  const notStated = locale === 'ar' ? 'غير مذكور' : 'Not stated';
 
   return (
     <section aria-labelledby="management-title" className="border-y border-border-nav bg-bg-surface py-r-band-padding">
@@ -95,31 +100,39 @@ export function ManagementSection() {
           </Link>
         </div>
 
-        <p className="mt-16 type-body-caption text-text-muted">{ts('sampleContentNote')}</p>
+        {!data && <p role="status">{locale === 'ar' ? 'تعذر تحميل الفرص' : 'Opportunities unavailable'}</p>}
+        {data && data.management.length === 0 && (
+          <p role="status" className="mt-24 type-body-caption text-text-muted">
+            {locale === 'ar' ? 'لا توجد طلبات إدارة منشورة حاليًا' : 'No published management requests at this time'}
+          </p>
+        )}
         <ul className="mt-24 grid grid-cols-1 gap-16 tablet:grid-cols-2 tablet:gap-24 desktop:grid-cols-3">
-          {managementRequests.map(({ key, services }) => (
-            <li key={key}>
-              <RequestCard
-                request={{
-                  title: t(`requests.items.${key}.title`),
-                  location: t(`requests.items.${key}.location`),
-                  specs: {
-                    area: t(`requests.items.${key}.area`),
-                    activity: t(`requests.items.${key}.activity`),
-                    term: t(`requests.items.${key}.term`),
-                  },
-                  scope: t(`requests.items.${key}.scope`),
-                  // Only the olive request has a fourth service; the keys come from data.ts.
-                  services: services.map((s) =>
-                    t(`requests.items.${key}.services.${s}` as 'requests.items.olive.services.one'),
-                  ),
-                  requirements: t(`requests.items.${key}.requirements`),
-                  applicants: t(`requests.items.${key}.applicants`),
-                  href: homeLinks.management,
-                }}
-              />
-            </li>
-          ))}
+          {data?.management.slice(0, 3).map((raw) => {
+            const item = localizeOpportunity(raw, locale);
+            return (
+              <li key={item.id}>
+                <RequestCard
+                  request={{
+                    title: item.farmName,
+                    location: [item.governorate, item.areaName].filter(Boolean).join(' · '),
+                    specs: {
+                      area:
+                        new Intl.NumberFormat(locale).format(item.areaFeddan) +
+                        (locale === 'ar' ? ' فدان' : ' feddans'),
+                      activity: item.mainActivity || notStated,
+                      term: item.term || notStated,
+                    },
+                    scope: item.managementTypes?.map((v) => optionLabel(v, locale)).join(' · ') || notStated,
+                    services: [],
+                    requirements: item.currentSituation || notStated,
+                    applicants: '',
+                    ctaLabel: locale === 'ar' ? 'عرض الفرصة' : 'View opportunity',
+                    href: `${homeLinks.management}?id=${item.id}`,
+                  }}
+                />
+              </li>
+            );
+          })}
         </ul>
       </Container>
     </section>

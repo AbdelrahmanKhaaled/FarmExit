@@ -1,4 +1,5 @@
 'use client';
+import type { HomeData } from './home-data';
 
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -25,7 +26,7 @@ type Sort = 'newest' | 'priceAsc' | 'priceDesc';
 const FILTERS: Filter[] = ['all', 'sale', 'rent'];
 const SORTS: Sort[] = ['newest', 'priceAsc', 'priceDesc'];
 
-export function FeaturedFarms() {
+export function FeaturedFarms({ data }: { data?: HomeData | null }) {
   const t = useTranslations('home.farms');
   const tc = useTranslations('farm.card');
   const tm = useTranslations('marketplace');
@@ -34,12 +35,15 @@ export function FeaturedFarms() {
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<Sort>('newest');
 
-  const [counts, setCounts] = useState({ all: 0, sale: 0, rent: 0 });
+  const [counts, setCounts] = useState<{ all: number; sale: number; rent: number } | null>(
+    data ? { all: data.sale.total + data.rent.total, sale: data.sale.total, rent: data.rent.total } : null,
+  );
   const [farms, setFarms] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
 
   useEffect(() => {
+    if (data) return;
     let active = true;
     void Promise.all(
       ['sale', 'rent'].map((listingType) => fetchPublicMarketplace({ listingType, page: '1', pageSize: '1' })),
@@ -51,9 +55,10 @@ export function FeaturedFarms() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [data]);
 
   useEffect(() => {
+    if (data && filter === 'all' && sort === 'newest') return;
     let active = true;
     const query: Record<string, string> = { page: '1', pageSize: '6', sort };
     if (filter !== 'all') query.listingType = filter;
@@ -75,8 +80,15 @@ export function FeaturedFarms() {
     return () => {
       active = false;
     };
-  }, [filter, sort]);
+  }, [filter, sort, data]);
 
+  const visibleFarms =
+    data && filter === 'all' && sort === 'newest'
+      ? [...data.sale.items, ...data.rent.items]
+          .sort((a, b) => Date.parse(b.publishedAt ?? '') - Date.parse(a.publishedAt ?? ''))
+          .slice(0, 6)
+          .map(publicListingToMarketplaceListing)
+      : farms;
   return (
     <section aria-labelledby="farms-title" className="py-r-section-gap">
       <Container className="flex flex-col">
@@ -85,7 +97,12 @@ export function FeaturedFarms() {
         <div className="mt-28 hidden items-center justify-between gap-16 rounded-2xl border border-border-default bg-bg-surface p-10 tablet:mt-40 tablet:flex">
           <div role="group" aria-label={t('filtersLabel')} className="flex gap-4">
             {FILTERS.map((f) => (
-              <FilterChip key={f} active={filter === f} count={counts[f]} onClick={() => setFilter(f)}>
+              <FilterChip
+                key={f}
+                active={filter === f}
+                count={data || counts?.all ? counts?.[f] : undefined}
+                onClick={() => setFilter(f)}
+              >
                 {t(`filters.${f}`)}
               </FilterChip>
             ))}
@@ -99,13 +116,13 @@ export function FeaturedFarms() {
           />
         </div>
 
-        {(loading || unavailable || farms.length === 0) && (
+        {((!data && loading) || unavailable || visibleFarms.length === 0) && (
           <p role="status" className="mt-24 type-body-caption text-text-muted">
             {loading ? tm('results.loading') : unavailable ? tm('results.apiUnavailable') : tm('empty.title')}
           </p>
         )}
         <ul className="mt-28 grid grid-cols-1 gap-16 tablet:mt-24 tablet:grid-cols-2 tablet:gap-24 desktop:grid-cols-3">
-          {farms.map((farm) => (
+          {visibleFarms.map((farm) => (
             <li key={farm.slug}>
               <FarmCard
                 sizes="(min-width: 1280px) 366px, (min-width: 768px) 50vw, 100vw"

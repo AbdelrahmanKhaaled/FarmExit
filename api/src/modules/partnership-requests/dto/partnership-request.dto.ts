@@ -1,9 +1,13 @@
+import { Type as ContentType } from 'class-transformer';
+import { ValidateNested as ContentNested } from 'class-validator';
+import { LocalizedContentDto } from '../../../common/dto/localized-content.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsArray, IsOptional, IsString, MaxLength } from 'class-validator';
 import { trim } from '../../farms/dto/create-farm.dto';
 
 export class CreatePartnershipRequestDto {
+  @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiPropertyOptional()
   @IsOptional()
   @Transform(trim)
@@ -19,6 +23,7 @@ export class CreatePartnershipRequestDto {
 }
 
 export class UpdatePartnershipRequestDto {
+  @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiPropertyOptional()
   @IsOptional()
   @Transform(trim)
@@ -74,6 +79,7 @@ export class PartnershipReviewFeedbackDto {
 }
 
 export class PartnershipRequestResponseDto {
+  @ApiProperty({ nullable: true }) localizedContent?: unknown;
   @ApiProperty() id!: string;
   @ApiProperty() requestNumber!: string;
   @ApiProperty() farmId!: string;

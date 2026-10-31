@@ -1,4 +1,6 @@
 'use client';
+import { BilingualFields } from '@/components/content/BilingualFields';
+import type { LocalizedContent } from '@/lib/content/localized';
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -14,6 +16,7 @@ import { FarmMediaPanel } from './FarmMediaPanel';
 import { ListingTracking, type ListingRequestHistory } from './ListingTracking';
 
 type Farm = {
+  localizedContent?: LocalizedContent;
   id: string;
   name: string;
   governorate: string;
@@ -36,6 +39,7 @@ export function FarmWorkspace({
   const t = useTranslations('workspace.farmWorkspace');
   const wizard = useTranslations('workspace.wizard');
   const router = useRouter();
+  const [localizedContent, setLocalizedContent] = useState<LocalizedContent>(initial.localizedContent ?? {});
   const [farm, setFarm] = useState(initial);
   const [listingType, setListingType] = useState<'sale' | 'rent'>('sale');
   const [message, setMessage] = useState<string | null>(null);
@@ -51,10 +55,11 @@ export function FarmWorkspace({
     setMessage(null);
     const form = new FormData(e.currentTarget);
     const body = {
-      name: String(form.get('name') ?? '').trim(),
+      localizedContent,
+      name: localizedContent.en?.name || localizedContent.ar?.name || farm.name,
       governorate: String(form.get('governorate') ?? '').trim(),
-      areaName: String(form.get('areaName') ?? '').trim() || null,
-      description: String(form.get('description') ?? '').trim() || null,
+      areaName: localizedContent.en?.areaName || localizedContent.ar?.areaName || farm.areaName,
+      description: localizedContent.en?.description || localizedContent.ar?.description || farm.description,
     };
     const res = await fetch(`/api/farms/${farm.id}`, {
       method: 'PATCH',
@@ -178,7 +183,16 @@ export function FarmWorkspace({
           <h3 className="type-heading-h4">{t('editTitle')}</h3>
           <form onSubmit={saveFarm} className="mt-16 flex flex-col gap-12">
             <fieldset disabled={!canEditFarmDetails} className="flex flex-col gap-12">
-              <TextInput label={t('name')} name="name" defaultValue={farm.name} required fieldStyle="form" />
+              <BilingualFields
+                value={localizedContent}
+                onChange={setLocalizedContent}
+                legacy={{ name: farm.name, description: farm.description ?? '' }}
+                fields={[
+                  { key: 'name', label: t('name'), maxLength: 200 },
+                  { key: 'description', label: t('description') },
+                  { key: 'areaName', label: t('areaName'), maxLength: 120 },
+                ]}
+              />
               <TextInput
                 label={t('governorate')}
                 name="governorate"
@@ -186,13 +200,7 @@ export function FarmWorkspace({
                 required
                 fieldStyle="form"
               />
-              <TextInput label={t('areaName')} name="areaName" defaultValue={farm.areaName ?? ''} fieldStyle="form" />
-              <TextInput
-                label={t('description')}
-                name="description"
-                defaultValue={farm.description ?? ''}
-                fieldStyle="form"
-              />
+
               <Button type="submit" variant="primary" size="sm">
                 {t('save')}
               </Button>

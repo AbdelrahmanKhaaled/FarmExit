@@ -1,3 +1,4 @@
+import { contentText } from '@/lib/content/localized';
 import { LISTING_PLACEHOLDER_SRC } from './marketplace-api';
 import type { FarmDetails } from './farm-details';
 import type { MarketplaceListing } from './marketplace';
@@ -7,7 +8,10 @@ export function farmDetailsFromPublicListing(listing: MarketplaceListing): FarmD
   const listed = listing.publishedRank ? new Date(listing.publishedRank) : null;
   const highlights = (listing.highlights ?? []).map((h) => ({ en: h, ar: h }));
   const description = listing.listingDescription?.trim()
-    ? { en: listing.listingDescription, ar: listing.listingDescription }
+    ? {
+        en: contentText(listing.listingLocalizedContent, 'en', 'listingDescription', listing.listingDescription),
+        ar: contentText(listing.listingLocalizedContent, 'ar', 'listingDescription', listing.listingDescription),
+      }
     : null;
 
   return {

@@ -1,3 +1,6 @@
+import { Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
+import { LocalizedContentDto } from '../../../common/dto/localized-content.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min, ValidateIf } from 'class-validator';
@@ -15,6 +18,7 @@ import {
 const present = (_: unknown, value: unknown): boolean => value !== undefined;
 
 export class UpdateFarmDto {
+  @IsOptional() @ValidateNested() @Type(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiPropertyOptional({ maxLength: 200 })
   @ValidateIf(present)
   @Transform(trim)

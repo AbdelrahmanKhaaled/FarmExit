@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsIn, IsInt, IsNumber, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { FarmType, ProfessionalNeed } from '../../../generated/prisma/enums';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../../farms/dto/list-farms-query.dto';
 import { PUBLIC_OPPORTUNITY_SORTS } from '../public-opportunity-query';
@@ -32,11 +32,17 @@ export class PublicOpportunityQueryDto {
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false })
+  @Min(0)
+  @Max(9999999999.99)
   minArea?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2, allowNaN: false, allowInfinity: false })
+  @Min(0)
+  @Max(9999999999.99)
   maxArea?: number;
 
   @ApiPropertyOptional({ enum: ProfessionalNeed })
@@ -57,7 +63,7 @@ export class PublicOpportunityQueryDto {
   @IsIn(['entryLevel', 'experienced', 'expert'])
   experienceLevel?: string;
 
-  @ApiPropertyOptional({ description: 'Substring match against partnership objective JSON.' })
+  @ApiPropertyOptional({ description: 'Exact member of partnership objective JSON.' })
   @IsOptional()
   @Transform(trim)
   @IsString()
@@ -65,7 +71,7 @@ export class PublicOpportunityQueryDto {
   @MaxLength(120)
   objective?: string;
 
-  @ApiPropertyOptional({ description: 'Substring match against accepted_partner_types JSON.' })
+  @ApiPropertyOptional({ description: 'Exact member of accepted_partner_types JSON.' })
   @IsOptional()
   @Transform(trim)
   @IsString()

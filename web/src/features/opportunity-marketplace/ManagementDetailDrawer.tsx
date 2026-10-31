@@ -1,4 +1,5 @@
 'use client';
+import { optionLabel } from './option-labels';
 
 import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
@@ -32,7 +33,9 @@ export function ManagementDetailDrawer({ item, locale, onClose }: Props) {
       <button type="button" className="om-drawer-backdrop" aria-label={t('drawer.close')} onClick={onClose} />
       <div className="om-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="mgmt-drawer-title">
         <header className="flex shrink-0 items-center justify-between border-b border-border-hairline px-20 py-16">
-          <h2 id="mgmt-drawer-title" className="type-label-large text-text-primary">{item.farmName}</h2>
+          <h2 id="mgmt-drawer-title" className="type-label-large text-text-primary">
+            {item.farmName}
+          </h2>
           <button ref={closeRef} type="button" className="type-label-small-strong text-text-brand" onClick={onClose}>
             {t('drawer.close')}
           </button>
@@ -40,7 +43,8 @@ export function ManagementDetailDrawer({ item, locale, onClose }: Props) {
         <div className="min-h-0 flex-1 overflow-y-auto px-20 py-16">
           <VerifiedBadge />
           <p className="mt-12 type-body-caption text-text-muted">
-            {[item.governorate, item.areaName].filter(Boolean).join(' · ')} · {item.areaFeddan.toLocaleString(locale)} {t('feddans')}
+            {[item.governorate, item.areaName].filter(Boolean).join(' · ')} · {item.areaFeddan.toLocaleString(locale)}{' '}
+            {t('feddans')}
           </p>
           {item.professionalNeed ? (
             <div className="om-highlight-box mt-16">
@@ -51,21 +55,27 @@ export function ManagementDetailDrawer({ item, locale, onClose }: Props) {
             <section className="mt-20">
               <h3 className="type-label-small-strong text-text-primary">{t('drawer.managementTypes')}</h3>
               <ul className="mt-8 list-inside list-disc type-body-caption text-text-secondary">
-                {item.managementTypes.map((x) => <li key={x}>{x}</li>)}
+                {item.managementTypes.map((x) => (
+                  <li key={x}>{optionLabel(x, locale)}</li>
+                ))}
               </ul>
             </section>
           ) : null}
           {item.experienceLevel ? (
             <section className="mt-16">
               <h3 className="type-label-small-strong text-text-primary">{t('drawer.experience')}</h3>
-              <p className="mt-6 type-body-caption">{t(`experience.${item.experienceLevel}` as 'experience.entryLevel')}</p>
+              <p className="mt-6 type-body-caption">
+                {t(`experience.${item.experienceLevel}` as 'experience.entryLevel')}
+              </p>
             </section>
           ) : null}
           {item.goals?.length ? (
             <section className="mt-16">
               <h3 className="type-label-small-strong text-text-primary">{t('drawer.goals')}</h3>
               <ul className="mt-8 list-inside list-disc type-body-caption">
-                {item.goals.map((g) => <li key={g}>{g}</li>)}
+                {item.goals.map((g) => (
+                  <li key={g}>{g}</li>
+                ))}
               </ul>
             </section>
           ) : null}
@@ -73,7 +83,9 @@ export function ManagementDetailDrawer({ item, locale, onClose }: Props) {
             <section className="mt-16">
               <h3 className="type-label-small-strong text-text-primary">{t('drawer.responsibilities')}</h3>
               <ul className="mt-8 list-inside list-disc type-body-caption">
-                {item.responsibilities.map((r) => <li key={r}>{r}</li>)}
+                {item.responsibilities.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
               </ul>
             </section>
           ) : null}
@@ -81,7 +93,9 @@ export function ManagementDetailDrawer({ item, locale, onClose }: Props) {
             <section className="mt-16">
               <h3 className="type-label-small-strong text-text-primary">{t('drawer.facilities')}</h3>
               <ul className="mt-8 list-inside list-disc type-body-caption">
-                {item.resourcesAndFacilities.map((r) => <li key={r}>{r}</li>)}
+                {item.resourcesAndFacilities.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
               </ul>
             </section>
           ) : null}

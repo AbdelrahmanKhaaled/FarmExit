@@ -1,3 +1,6 @@
+import { Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
+import { LocalizedContentDto } from '../../../common/dto/localized-content.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
@@ -17,6 +20,7 @@ export const trim = ({ value }: { value: unknown }): unknown => (typeof value ==
  * precise location and public-map coordinates are never accepted (the global pipe rejects unknown fields).
  */
 export class CreateFarmDto {
+  @IsOptional() @ValidateNested() @Type(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiProperty({ example: 'Wadi El Natrun Orchard', maxLength: 200 })
   @Transform(trim)
   @IsString()

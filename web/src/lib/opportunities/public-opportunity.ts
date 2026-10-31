@@ -1,6 +1,9 @@
+import { contentText } from '@/lib/content/localized';
 import { getApiBaseUrl } from '@/lib/api/config';
 
 export type PublicOpportunity = {
+  localizedContent?: unknown;
+  opportunityLocalizedContent?: unknown;
   id: string;
   farmName: string;
   governorate: string;
@@ -33,6 +36,7 @@ export type PublicOpportunity = {
 };
 
 export type PublicOpportunityList = {
+  filterOptions?: Record<string, string[]>;
   items: PublicOpportunity[];
   page: number;
   pageSize: number;
@@ -55,9 +59,7 @@ export type OpportunityFilters = {
   sort?: 'newest' | 'areaAsc' | 'areaDesc';
 };
 
-export function parseOpportunityFilters(
-  query: Record<string, string | string[] | undefined>,
-): OpportunityFilters {
+export function parseOpportunityFilters(query: Record<string, string | string[] | undefined>): OpportunityFilters {
   const page = Number(query.page);
   const num = (key: string) => {
     const v = query[key];
@@ -113,13 +115,16 @@ export function filtersToSearchParams(filters: OpportunityFilters): URLSearchPar
 export async function fetchPublicOpportunities(
   kind: 'management' | 'partnerships',
   filters: OpportunityFilters,
+  locale = 'en',
 ): Promise<PublicOpportunityList | null> {
   const params = filtersToSearchParams(filters);
   const url = `${getApiBaseUrl()}/public/${kind}?${params.toString()}`;
   try {
-    const res = await fetch(url, { cache: 'no-store' });
+    const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
     if (!res.ok) return null;
-    return (await res.json()) as PublicOpportunityList;
+    const data = (await res.json()) as PublicOpportunityList;
+    if (!data.filterOptions) data.filterOptions = await loadLegacyPublicFacets(kind);
+    return { ...data, items: data.items.map((item) => localizeOpportunity(item, locale)) };
   } catch {
     return null;
   }
@@ -128,14 +133,78 @@ export async function fetchPublicOpportunities(
 export async function fetchPublicOpportunity(
   kind: 'management' | 'partnerships',
   id: string,
+  locale = 'en',
 ): Promise<PublicOpportunity | null> {
   try {
     const res = await fetch(`${getApiBaseUrl()}/public/${kind}/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
-    return (await res.json()) as PublicOpportunity;
+    return localizeOpportunity((await res.json()) as PublicOpportunity, locale);
   } catch {
     return null;
   }
 }
 
 export const OPPORTUNITY_PLACEHOLDER_IMAGE = '/images/marketplace/listing-placeholder.svg';
+
+export function localizeOpportunity(item: PublicOpportunity, locale: string): PublicOpportunity {
+  return {
+    ...item,
+    farmName: contentText(item.localizedContent, locale, 'name', item.farmName),
+    mainActivity: contentText(item.localizedContent, locale, 'mainActivity', item.mainActivity),
+    areaName: contentText(item.localizedContent, locale, 'areaName', item.areaName),
+    ...Object.fromEntries(
+      [
+        'description',
+        'term',
+        'currentSituation',
+        'outcomes',
+        'additionalInformation',
+        'contributionDetails',
+        'operations',
+        'salesChannel',
+        'extraInformation',
+      ].map((key) => [
+        key,
+        contentText(item.opportunityLocalizedContent, locale, key, (item as unknown as Record<string, string>)[key]),
+      ]),
+    ),
+  };
+}
+
+/** Read-only compatibility for older public APIs: facets use every published page, never just the loaded page. */
+async function loadLegacyPublicFacets(kind: 'management' | 'partnerships'): Promise<Record<string, string[]>> {
+  const out: Record<string, string[]> = {
+    governorate: [],
+    area: [],
+    managementType: [],
+    objective: [],
+    partnerType: [],
+  };
+  let page = 1,
+    total = 1;
+  while ((page - 1) * 50 < total) {
+    const res = await fetch(getApiBaseUrl() + '/public/' + kind + '?pageSize=50&page=' + page, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) throw new Error('Public filter options unavailable');
+    const data = (await res.json()) as PublicOpportunityList;
+    total = data.total;
+    if (!data.items.length) break;
+    for (const item of data.items) {
+      for (const [key, value] of Object.entries({
+        governorate: item.governorate,
+        area: item.areaName,
+        managementType: item.managementTypes,
+        objective: item.objective,
+        partnerType: item.acceptedPartnerTypes,
+      })) {
+        const bucket = out[key] ?? (out[key] = []);
+        for (const v of Array.isArray(value) ? value : [value])
+          if (typeof v === 'string' && v && !bucket.includes(v)) bucket.push(v);
+      }
+    }
+    page++;
+  }
+  return out;
+}

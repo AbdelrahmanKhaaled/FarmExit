@@ -23,7 +23,11 @@ export function SearchTabs<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div role="group" aria-label={label} className="flex gap-4">
+    <div
+      role="group"
+      aria-label={label}
+      className={cn('gap-4', options.length === 4 ? 'grid grid-cols-4 tablet:flex' : 'flex')}
+    >
       {options.map((option) => (
         <button
           key={option.value}
@@ -31,7 +35,7 @@ export function SearchTabs<T extends string>({
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            'h-50 rounded-t-xl px-18 type-label-medium effect-hero-glass transition-colors duration-150 tablet:px-24',
+            'min-w-0 h-50 rounded-t-xl px-8 tablet:px-18 type-label-medium effect-hero-glass transition-colors duration-150 tablet:px-24',
             value === option.value
               ? 'bg-bg-surface text-text-brand'
               : 'bg-overlay-glass-strong text-text-on-dark hover:bg-overlay-glass-border',

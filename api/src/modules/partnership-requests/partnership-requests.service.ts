@@ -1,3 +1,5 @@
+import { mergeLocalizedContent } from '../../common/localized-content';
+import { loadPublicOpportunityFacets } from '../marketplace/public-opportunity-query';
 import type { PublicOpportunityListDto } from '../marketplace/dto/public-opportunity.dto';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Farm, type PartnershipDetail, type Request } from '../../generated/prisma/client';
@@ -54,7 +56,13 @@ export class PartnershipRequestsService {
         select: publicOpportunityListSelect,
       }),
     ]);
-    return { items: rows.map(toPublicOpportunityDto), page, pageSize, total };
+    return {
+      items: rows.map(toPublicOpportunityDto),
+      page,
+      pageSize,
+      total,
+      filterOptions: await loadPublicOpportunityFacets(this.prisma, 'partnership'),
+    };
   }
 
   async getPublic(id: bigint) {
@@ -132,13 +140,16 @@ export class PartnershipRequestsService {
     requestId: bigint,
     dto: UpdatePartnershipRequestDto,
   ): Promise<PartnershipRequestResponseDto> {
-    const { request, farm } = await this.owned(userId, requestId);
+    const { request, farm, detail } = await this.owned(userId, requestId);
     if (!OWNER_EDITABLE_STATUSES.has(request.status)) {
       throw new ConflictException('Only a draft or a request with requested changes can be updated');
     }
     const updatedDetail = await this.prisma.partnershipDetail.update({
       where: { requestId: request.id },
       data: {
+        ...(dto.localizedContent !== undefined
+          ? { localizedContent: mergeLocalizedContent(detail.localizedContent, dto.localizedContent) }
+          : {}),
         ...(dto.description !== undefined ? { description: dto.description ?? null } : {}),
         ...(dto.objective !== undefined ? { objective: dto.objective } : {}),
         ...(dto.acceptedPartnerTypes !== undefined ? { acceptedPartnerTypes: dto.acceptedPartnerTypes } : {}),
@@ -266,6 +277,7 @@ export class PartnershipRequestsService {
           const detail = await tx.partnershipDetail.create({
             data: {
               requestId: request.id,
+              localizedContent: dto.localizedContent ? JSON.parse(JSON.stringify(dto.localizedContent)) : undefined,
               description: dto.description ?? null,
               objective: dto.objective ?? undefined,
             },
@@ -321,6 +333,7 @@ function toResponse(
     requestNumber: request.requestNumber,
     farmId: farm.id.toString(),
     farmName: farm.name,
+    localizedContent: detail.localizedContent,
     status: request.status,
     visibility: request.visibility,
     publishedAt: request.publishedAt?.toISOString() ?? null,

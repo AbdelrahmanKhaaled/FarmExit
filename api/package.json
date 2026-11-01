@@ -25,6 +25,7 @@
     "prisma:validate": "prisma validate",
     "prisma:seed": "prisma db seed",
     "admin:bootstrap": "npx -y tsx prisma/admin-bootstrap.ts",
+    "seed:super-admin": "npx -y tsx scripts/seed-super-admin.ts",
     "admin:bootstrap-super": "npx -y tsx prisma/super-admin-bootstrap.ts",
     "admin:provision-super": "npx -y tsx prisma/provision-super-admin.ts",
     "dev:fix-mobiles": "npx -y tsx prisma/fix-mobiles.ts",

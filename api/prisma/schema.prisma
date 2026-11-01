@@ -399,6 +399,7 @@ model Farm {
   id                  BigInt    @id @default(autoincrement())
   name                String    @db.VarChar(200)
   description         String?   @db.Text
+  localizedContent    Json?     @map("localized_content")
   farmType            FarmType  @map("farm_type")
   mainActivity        String?   @map("main_activity") @db.VarChar(255)
   areaFeddan          Decimal   @map("area_feddan") @db.Decimal(12, 2)
@@ -561,6 +562,7 @@ model FarmListingDetail {
   currency                 String      @default("EGP") @db.Char(3)
   availability             String?     @db.VarChar(60)
   listingDescription       String?     @map("listing_description") @db.Text
+  localizedContent         Json?       @map("localized_content")
   highlights               Json?
   extraDetails             Json?       @map("extra_details")
 
@@ -576,6 +578,7 @@ model FarmListingDetail {
 model FarmManagementDetail {
   requestId              BigInt           @id @map("request_id")
   professionalNeed       ProfessionalNeed @map("professional_need")
+  localizedContent       Json?            @map("localized_content")
   managementTypes        Json?            @map("management_types")
   term                   String?          @db.VarChar(100)
   currentTeam            Json?            @map("current_team")
@@ -599,6 +602,7 @@ model FarmManagementDetail {
 /// No ROI, financial-return percentages or guarantees are stored.
 model PartnershipDetail {
   requestId              BigInt  @id @map("request_id")
+  localizedContent       Json?   @map("localized_content")
   objective              Json?
   description            String? @db.Text
   acceptedPartnerTypes   Json?   @map("accepted_partner_types")
@@ -1226,6 +1230,20 @@ model FacilityMedia {
   uploader User                 @relation(fields: [uploadedBy], references: [id])
 
   @@map("facility_media")
+}
+
+// =========================
+// HOMEPAGE CONTENT
+// =========================
+
+model HomepageContent {
+  locale      String    @id @db.Char(2)
+  draft       Json
+  published   Json?
+  publishedAt DateTime? @map("published_at") @db.DateTime(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@map("homepage_content")
 }
 
 // =========================

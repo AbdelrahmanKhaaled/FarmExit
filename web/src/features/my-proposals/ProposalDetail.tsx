@@ -1,5 +1,7 @@
 'use client';
 
+import { BilingualFields } from '@/components/content/BilingualFields';
+import { authoredText, contentText, type LocalizedContent } from '@/lib/content/localized';
 import { useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { SaleTerms } from '@/features/my-farms/SaleTermsEditor';
@@ -17,6 +19,7 @@ export type PurchaseProposal = {
   proposedTotalValue: number | null;
   requestedSharePercent: string | null;
   proposalNotes: string | null;
+  localizedContent?: LocalizedContent;
   status: string;
   submittedAt: string | null;
   components: {
@@ -35,6 +38,7 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
   const t = useTranslations('workspace.proposals');
   const locale = useLocale();
   const [proposal, setProposal] = useState(initial);
+  const [localizedContent, setLocalizedContent] = useState<LocalizedContent>(initial.localizedContent ?? {});
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -72,7 +76,7 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
     setMessage(null);
     const form = new FormData(e.currentTarget);
     const kind = proposal.proposalKind;
-    const notes = String(form.get('notes') ?? '').trim();
+    const notes = authoredText(localizedContent, 'proposalNotes', proposal.proposalNotes ?? '');
     const components: Record<string, unknown>[] = [];
     let proposedTotalValue: number | undefined;
     let requestedSharePercent: number | undefined;
@@ -96,7 +100,8 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
         componentType: 'exchangeAsset',
         proposedValue: assetValue,
         assetType: String(form.get('assetType')),
-        assetDescription: String(form.get('assetDescription') ?? '').trim() || undefined,
+        assetDescription:
+          authoredText(localizedContent, 'assetDescription', asset?.assetDescription ?? '') || undefined,
       });
       proposedTotalValue = assetValue;
     } else if (kind === 'mixed') {
@@ -107,7 +112,8 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
         componentType: 'exchangeAsset',
         proposedValue: assetValue,
         assetType: String(form.get('assetType')),
-        assetDescription: String(form.get('assetDescription') ?? '').trim() || undefined,
+        assetDescription:
+          authoredText(localizedContent, 'assetDescription', asset?.assetDescription ?? '') || undefined,
       });
       proposedTotalValue = cashAmt + assetValue;
     } else if (kind === 'coPurchase') {
@@ -132,6 +138,7 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
           proposalKind: kind,
           proposedTotalValue,
           requestedSharePercent,
+          localizedContent,
           proposalNotes: notes,
           components,
         }),
@@ -264,19 +271,19 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
                     defaultValue={asset?.proposedValue ?? undefined}
                     fieldStyle="form"
                   />
-                  <TextInput
-                    label={t('assetDescription')}
-                    name="assetDescription"
-                    defaultValue={asset?.assetDescription ?? ''}
-                    fieldStyle="form"
+                  <BilingualFields
+                    value={localizedContent}
+                    onChange={setLocalizedContent}
+                    legacy={{ assetDescription: asset?.assetDescription ?? '' }}
+                    fields={[{ key: 'assetDescription', label: t('assetDescription'), maxLength: 2000 }]}
                   />
                 </>
               )}
-              <TextInput
-                label={t('notes')}
-                name="notes"
-                defaultValue={proposal.proposalNotes ?? ''}
-                fieldStyle="form"
+              <BilingualFields
+                value={localizedContent}
+                onChange={setLocalizedContent}
+                legacy={{ proposalNotes: proposal.proposalNotes ?? '' }}
+                fields={[{ key: 'proposalNotes', label: t('notes'), maxLength: 4000 }]}
               />
               <div className="flex gap-12">
                 <Button type="submit" variant="primary">
@@ -322,7 +329,11 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
               <span className="type-body-caption text-text-muted"> — {t('coPurchaseDisclaimer')}</span>
             </p>
           )}
-          {proposal.proposalNotes && <p className="type-body-caption text-text-secondary">{proposal.proposalNotes}</p>}
+          {proposal.proposalNotes && (
+            <p className="type-body-caption text-text-secondary">
+              {contentText(proposal.localizedContent, locale, 'proposalNotes', proposal.proposalNotes)}
+            </p>
+          )}
         </Surface>
       )}
       {message && <p className="type-body-caption text-text-brand">{message}</p>}
@@ -340,7 +351,9 @@ export function ProposalDetail({ proposal: initial }: { proposal: PurchasePropos
                 {c.assetType ? ` (${(t as (k: string) => string)(`assetTypes.${c.assetType}`)})` : ''}:{' '}
                 {c.proposedValue != null ? `EGP ${c.proposedValue.toLocaleString()}` : '—'}
                 {c.installmentCount != null ? ` · ${t('installmentCount')}: ${c.installmentCount}` : ''}
-                {c.assetDescription ? ` · ${c.assetDescription}` : ''}
+                {c.assetDescription
+                  ? ` · ${contentText(proposal.localizedContent, locale, 'assetDescription', c.assetDescription)}`
+                  : ''}
               </li>
             ))}
           </ul>

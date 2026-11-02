@@ -36,7 +36,7 @@ async function postDecide(
     body: { decision, ...(comment ? { comment } : {}) },
   });
   if (!res.ok) return { ok: false, message: res.message ?? `Error ${res.status}` };
-  revalidateAdminPages(...revalidate);
+  revalidateAdminPages('/admin/requests', ...revalidate);
   return { ok: true };
 }
 

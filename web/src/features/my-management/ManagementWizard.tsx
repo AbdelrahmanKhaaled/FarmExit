@@ -1,11 +1,12 @@
 'use client';
+import { ManagementRequirements } from './ManagementRequirements';
 import { BilingualFields } from '@/components/content/BilingualFields';
-import { contentText, type LocalizedContent } from '@/lib/content/localized';
+import { authoredText, contentText, type LocalizedContent } from '@/lib/content/localized';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button, ButtonLink } from '@/components/ui/Button';
-import { Select, TextArea, TextInput } from '@/components/ui/Field';
+import { Select, TextInput } from '@/components/ui/Field';
 import { Card } from '@/components/ui/Surface';
 import { Icon } from '@/components/icons/Icon';
 import { Dialog } from '@/components/overlay/Dialog';
@@ -54,6 +55,11 @@ export function ManagementWizard({
     initial?.farmId ?? (farms.some((f) => f.id === initialFarmId) ? initialFarmId! : (farms[0]?.id ?? '')),
   );
   const [data, setData] = useState({
+    responsibilities: initial?.responsibilities ?? ([] as string[]),
+    experienceLevel: initial?.experienceLevel ?? '',
+    onSitePresence: initial?.onSitePresence ?? '',
+    currentTeam: Array.isArray(initial?.currentTeam) ? initial.currentTeam : [],
+    resourcesAndFacilities: Array.isArray(initial?.resourcesAndFacilities) ? initial.resourcesAndFacilities : [],
     professionalNeed: initial?.professionalNeed ?? '',
     managementTypes: initial?.managementTypes ?? ([] as string[]),
     term: initial?.term ?? '',
@@ -68,6 +74,7 @@ export function ManagementWizard({
   const farmContext = farms.find((f) => f.id === farmId);
   const ready = useFormReady();
   const options = useTranslations('marketplace.options');
+  const facilitiesT = useTranslations('workspace.facilities');
   const farmFields: [string, string | undefined][] = [
     [w('location'), [farmContext?.areaName, farmContext?.governorate].filter(Boolean).join(', ') || undefined],
     [w('area'), farmContext?.areaFeddan != null ? `${farmContext.areaFeddan} ${w('areaUnit')}` : undefined],
@@ -109,14 +116,11 @@ export function ManagementWizard({
     const body = {
       localizedContent,
       ...data,
-      term: localizedContent.en?.term || localizedContent.ar?.term || data.term.trim(),
-      currentSituation:
-        localizedContent.en?.currentSituation || localizedContent.ar?.currentSituation || data.currentSituation.trim(),
-      outcomes: localizedContent.en?.outcomes || localizedContent.ar?.outcomes || data.outcomes.trim(),
+      term: authoredText(localizedContent, 'term', data.term.trim()),
+      currentSituation: authoredText(localizedContent, 'currentSituation', data.currentSituation.trim()),
+      outcomes: authoredText(localizedContent, 'outcomes', data.outcomes.trim()),
       additionalInformation:
-        localizedContent.en?.additionalInformation ||
-        localizedContent.ar?.additionalInformation ||
-        data.additionalInformation.trim(),
+        authoredText(localizedContent, 'additionalInformation', data.additionalInformation.trim()),
       goals: data.goals
         .split('\n')
         .map((g) => g.trim())
@@ -155,7 +159,13 @@ export function ManagementWizard({
     try {
       const updated = await persist();
       if (action === 'submit') {
-        if (!data.currentSituation.trim()) {
+        if (
+          !(
+            localizedContent.en?.currentSituation ||
+            localizedContent.ar?.currentSituation ||
+            data.currentSituation
+          ).trim()
+        ) {
           go(3);
           throw new Error('situation');
         }
@@ -258,25 +268,6 @@ export function ManagementWizard({
         <fieldset disabled={pending || !ready} className="min-w-0">
           <div hidden={step !== 1}>
             <WizardCard icon="tree" title={steps[0]!} description={w('selectFarmNote')}>
-              <BilingualFields
-                value={localizedContent}
-                onChange={(v) => {
-                  setLocalizedContent(v);
-                  setDirty(true);
-                  setData((d) => ({
-                    ...d,
-                    currentSituation: v.en?.currentSituation || v.ar?.currentSituation || d.currentSituation,
-                    outcomes: v.en?.outcomes || v.ar?.outcomes || d.outcomes,
-                    additionalInformation:
-                      v.en?.additionalInformation || v.ar?.additionalInformation || d.additionalInformation,
-                  }));
-                }}
-                fields={[
-                  { key: 'currentSituation', label: t('currentSituation') },
-                  { key: 'outcomes', label: t('outcomes') },
-                  { key: 'additionalInformation', label: t('additionalInformation') },
-                ]}
-              />
               <div className="flex flex-col gap-12">
                 {farms.map((f) => (
                   <Choice
@@ -369,13 +360,14 @@ export function ManagementWizard({
                 <option value="custom">{t('customTerm')}</option>
               </Select>
               {customTerm && (
-                <TextInput
-                  label={t('customTerm')}
-                  name="customTerm"
-                  value={data.term}
-                  maxLength={100}
-                  onChange={(e) => update('term', e.target.value)}
-                  fieldStyle="form"
+                <BilingualFields
+                  value={localizedContent}
+                  legacy={{ term: data.term }}
+                  fields={[{ key: 'term', label: t('customTerm'), maxLength: 100 }]}
+                  onChange={(v) => {
+                    setLocalizedContent(v);
+                    update('term', v.en?.term || v.ar?.term || '');
+                  }}
                 />
               )}
             </WizardCard>
@@ -393,8 +385,8 @@ export function ManagementWizard({
                   setLocalizedContent(v);
                   setData((d) => ({
                     ...d,
-                    currentSituation: v.en?.currentSituation || v.ar?.currentSituation || d.currentSituation,
-                    outcomes: v.en?.outcomes || v.ar?.outcomes || d.outcomes,
+                    currentSituation: authoredText(v, 'currentSituation', d.currentSituation),
+                    outcomes: authoredText(v, 'outcomes', d.outcomes),
                   }));
                   setDirty(true);
                 }}
@@ -456,39 +448,56 @@ export function ManagementWizard({
                   />
                 ))}
               </div>
-              <TextArea
-                label={t('customGoals')}
-                name="goals"
-                rows={4}
-                value={customGoals}
-                onChange={(e) =>
+              <BilingualFields
+                value={localizedContent}
+                fields={[{ key: 'goals', label: t('customGoals') }]}
+                legacy={{ goals: customGoals }}
+                onChange={(v) => {
+                  setLocalizedContent(v);
                   update(
                     'goals',
                     [
                       ...goals.filter((g) => managementGoals.includes(g as (typeof managementGoals)[number])),
-                      e.target.value,
+                      v.en?.goals || v.ar?.goals || '',
                     ]
                       .filter(Boolean)
                       .join('\n'),
-                  )
-                }
-                fieldStyle="form"
+                  );
+                }}
               />
             </WizardCard>
           </div>
           <div hidden={step !== 4}>
             <WizardCard icon="clipboard-tick" title={steps[3]!}>
-              <p className="type-body-default text-text-muted">{w('responsibilitiesUnavailable')}</p>
+              <BilingualFields
+                value={localizedContent}
+                onChange={(v) => {
+                  setLocalizedContent(v);
+                  update('experienceLevel', v.en?.experienceLevel || v.ar?.experienceLevel || '');
+                  update('onSitePresence', v.en?.onSitePresence || v.ar?.onSitePresence || '');
+                }}
+                fields={[
+                  { key: 'experienceLevel', label: w('experienceLevel'), maxLength: 30 },
+                  { key: 'onSitePresence', label: w('onSitePresence'), maxLength: 100 },
+                ]}
+                legacy={{ experienceLevel: data.experienceLevel, onSitePresence: data.onSitePresence }}
+              />
               <div className="flex flex-col gap-12">
                 {(['operations', 'irrigation', 'harvest', 'reporting'] as const).map((value) => (
                   <Choice
                     key={value}
-                    name="unsupportedResponsibility"
+                    name="responsibilities"
                     value={value}
                     label={w(`responsibilityLabels.${value}`)}
-                    checked={false}
-                    disabled
-                    onChange={() => {}}
+                    checked={data.responsibilities.includes(value)}
+                    onChange={() =>
+                      update(
+                        'responsibilities',
+                        data.responsibilities.includes(value)
+                          ? data.responsibilities.filter((item) => item !== value)
+                          : [...data.responsibilities, value],
+                      )
+                    }
                   />
                 ))}
               </div>
@@ -496,7 +505,120 @@ export function ManagementWizard({
           </div>
           <div hidden={step !== 5} className="flex flex-col gap-24">
             <WizardCard icon="building" title={steps[4]!}>
-              <p className="type-body-caption text-text-muted">{w('resourcesUnavailable')}</p>
+              <p className="type-body-caption text-text-muted">{w('requestResourcesNote')}</p>
+              {data.currentTeam.map((member, index) => (
+                <div key={index} className="flex flex-wrap gap-12">
+                  <BilingualFields
+                    value={member.localizedContent ?? {}}
+                    legacy={{ role: member.role }}
+                    fields={[{ key: 'role', label: w('teamRole'), maxLength: 100 }]}
+                    onChange={(v) =>
+                      update(
+                        'currentTeam',
+                        data.currentTeam.map((m, i) =>
+                          i === index ? { ...m, localizedContent: v, role: v.en?.role || v.ar?.role || '' } : m,
+                        ),
+                      )
+                    }
+                  />
+                  <TextInput
+                    label={w('teamCount')}
+                    type="number"
+                    min={1}
+                    max={10000}
+                    value={member.count}
+                    onChange={(e) =>
+                      update(
+                        'currentTeam',
+                        data.currentTeam.map((m, i) => (i === index ? { ...m, count: Number(e.target.value) } : m)),
+                      )
+                    }
+                  />
+                  <Button
+                    variant="ghost"
+                    onClick={() =>
+                      update(
+                        'currentTeam',
+                        data.currentTeam.filter((_, i) => i !== index),
+                      )
+                    }
+                  >
+                    {w('removeEntry')}
+                  </Button>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                disabled={data.currentTeam.length >= 50}
+                onClick={() => update('currentTeam', [...data.currentTeam, { role: '', count: 1 }])}
+              >
+                {w('addTeam')}
+              </Button>
+              {data.resourcesAndFacilities.map((facility, index) => (
+                <div key={index} className="flex flex-col gap-12">
+                  <Select
+                    label={w('facilityType')}
+                    value={facility.facilityType}
+                    onChange={(e) =>
+                      update(
+                        'resourcesAndFacilities',
+                        data.resourcesAndFacilities.map((f, i) =>
+                          i === index ? { ...f, facilityType: e.target.value } : f,
+                        ),
+                      )
+                    }
+                  >
+                    {[
+                      'cold_storage_freezing',
+                      'produce_storage',
+                      'agricultural_processing_packing',
+                      'agricultural_service_facility',
+                    ].map((type) => (
+                      <option key={type} value={type}>
+                        {(facilitiesT as (key: string) => string)('types.' + type)}
+                      </option>
+                    ))}
+                  </Select>
+                  <BilingualFields
+                    value={facility.localizedContent ?? {}}
+                    legacy={{ details: facility.details }}
+                    fields={[{ key: 'details', label: w('facilityDetails'), maxLength: 1000 }]}
+                    onChange={(v) =>
+                      update(
+                        'resourcesAndFacilities',
+                        data.resourcesAndFacilities.map((f, i) =>
+                          i === index
+                            ? { ...f, localizedContent: v, details: v.en?.details || v.ar?.details || '' }
+                            : f,
+                        ),
+                      )
+                    }
+                  />
+                  <Button
+                    variant="ghost"
+                    onClick={() =>
+                      update(
+                        'resourcesAndFacilities',
+                        data.resourcesAndFacilities.filter((_, i) => i !== index),
+                      )
+                    }
+                  >
+                    {w('removeEntry')}
+                  </Button>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                disabled={data.resourcesAndFacilities.length >= 50}
+                onClick={() =>
+                  update('resourcesAndFacilities', [
+                    ...data.resourcesAndFacilities,
+                    { facilityType: 'produce_storage', details: '' },
+                  ])
+                }
+              >
+                {w('addFacility')}
+              </Button>
             </WizardCard>
             {farmId && <FarmFacilitiesPanel farmId={farmId} canEdit={false} />}
           </div>
@@ -510,8 +632,7 @@ export function ManagementWizard({
                   setLocalizedContent(v);
                   setData((d) => ({
                     ...d,
-                    additionalInformation:
-                      v.en?.additionalInformation || v.ar?.additionalInformation || d.additionalInformation,
+                    additionalInformation: authoredText(v, 'additionalInformation', d.additionalInformation),
                   }));
                   setDirty(true);
                 }}
@@ -519,6 +640,7 @@ export function ManagementWizard({
             </WizardCard>
           </div>
           <div hidden={step !== 7} className="flex flex-col gap-24">
+            <ManagementRequirements value={{ ...data, localizedContent }} />
             {[1, 2, 3].map((n) => (
               <WizardCard key={n} icon="clipboard-tick" title={steps[n - 1]!}>
                 <dl className="flex flex-col gap-16">
@@ -569,12 +691,7 @@ export function ManagementWizard({
                           [w('outcomes'), contentText(localizedContent, locale, 'outcomes', data.outcomes)],
                           [
                             w('additional'),
-                            contentText(
-                              localizedContent,
-                              locale,
-                              'additionalInformation',
-                              data.additionalInformation,
-                            ),
+                            contentText(localizedContent, locale, 'additionalInformation', data.additionalInformation),
                           ],
                         ]
                   ).map(([label, value]) => (

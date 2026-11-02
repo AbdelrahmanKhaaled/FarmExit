@@ -1,3 +1,4 @@
+import { mergeLocalizedContent } from '../../common/localized-content';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type ProfessionalVerificationDetail, type Request } from '../../generated/prisma/client';
 import { RequestType, RequestVisibility, VerificationStatus } from '../../generated/prisma/enums';
@@ -28,7 +29,10 @@ export class ProfessionalVerificationRequestsService {
     private readonly profiles: ProfessionalProfilesService,
   ) {}
 
-  async create(userId: bigint, dto: CreateProfessionalVerificationRequestDto): Promise<ProfessionalVerificationRequestResponseDto> {
+  async create(
+    userId: bigint,
+    dto: CreateProfessionalVerificationRequestDto,
+  ): Promise<ProfessionalVerificationRequestResponseDto> {
     const capabilityId = BigInt(dto.professionalCapabilityId);
     const capability = await this.prisma.professionalCapability.findFirst({
       where: { id: capabilityId, profile: { userId } },
@@ -93,10 +97,16 @@ export class ProfessionalVerificationRequestsService {
     if (!OWNER_EDITABLE_STATUSES.has(request.status)) {
       throw new ConflictException('Only a draft or a request with requested changes can be updated');
     }
-    if (dto.verificationSummary !== undefined) {
+    if (dto.verificationSummary !== undefined || dto.localizedContent !== undefined) {
+      const detail = await this.prisma.professionalVerificationDetail.findUniqueOrThrow({ where: { requestId } });
       await this.prisma.professionalVerificationDetail.update({
         where: { requestId },
-        data: { verificationSummary: dto.verificationSummary ?? null },
+        data: {
+          ...(dto.verificationSummary !== undefined ? { verificationSummary: dto.verificationSummary } : {}),
+          ...(dto.localizedContent !== undefined
+            ? { localizedContent: mergeLocalizedContent(detail.localizedContent, dto.localizedContent) }
+            : {}),
+        },
       });
     }
     return this.present(requestId);
@@ -209,6 +219,7 @@ export class ProfessionalVerificationRequestsService {
       status: request.status,
       professionalCapabilityId: detail.professionalCapabilityId.toString(),
       professionalType: detail.capability.professionalType,
+      localizedContent: detail.localizedContent,
       verificationSummary: detail.verificationSummary,
       reviews: reviews.get(requestId) ?? [],
       createdAt: request.createdAt?.toISOString() ?? null,

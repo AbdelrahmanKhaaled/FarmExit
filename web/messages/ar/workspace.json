@@ -504,7 +504,9 @@
       "approved": "مقبول",
       "rejected": "مرفوض",
       "withdrawn": "ملغى"
-    }
+    },
+    "chooseListing": "اختر إعلان مزرعة ثم اطلب التفاصيل من صفحة الإعلان.",
+    "browseFarms": "استكشف المزارع"
   },
   "documents": {
     "gapNote": "لا يوجد بعد API لعرض كل المستندات. افتح طلبًا محددًا لتنزيل مستنداته الخاصة."
@@ -947,7 +949,17 @@
     "keepEditing": "مواصلة التعديل",
     "chooseGovernorate": "اختر المحافظات",
     "otherGovernorate": "محافظة أخرى",
-    "addArea": "أضف محافظة"
+    "addArea": "أضف محافظة",
+    "experienceLevel": "الخبرة المتوقعة",
+    "onSitePresence": "متطلبات التواجد",
+    "requestResourcesNote": "الموارد المتاحة لهذا الطلب. مرافق المزرعة المسجلة أدناه لا تتغير.",
+    "teamRole": "دور الفريق",
+    "teamCount": "عدد الأفراد المتاحين",
+    "removeEntry": "حذف البند",
+    "addTeam": "إضافة دور للفريق",
+    "facilityType": "نوع المرفق",
+    "facilityDetails": "تفاصيل الموارد والمرافق",
+    "addFacility": "إضافة مرفق للطلب"
   },
   "unifiedRequests": {
     "intro": "كل طلب تبدأه مع FarmExit يظهر هنا. نراجع كل طلب وننسّقه — الموافقة لا تعني النشر للعامة.",

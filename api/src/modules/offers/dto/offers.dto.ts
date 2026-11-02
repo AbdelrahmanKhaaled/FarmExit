@@ -1,3 +1,4 @@
+import { LocalizedContentDto } from '../../../common/dto/localized-content.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
@@ -124,6 +125,7 @@ export class ProposalComponentDto {
 }
 
 export class CreateProposalDto {
+  @IsOptional() @ValidateNested() @Type(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiProperty({ enum: Object.values(ProposalKind) })
   @Transform(kind)
   @IsIn(Object.values(ProposalKind))
@@ -174,6 +176,7 @@ export class ProposalComponentResponseDto {
 }
 
 export class ProposalResponseDto {
+  localizedContent?: unknown;
   @ApiPropertyOptional({ type: SaleTermsResponseDto, nullable: true }) saleEligibility?: SaleTermsResponseDto | null;
   @ApiProperty() id: string;
   @ApiProperty() requestNumber: string;

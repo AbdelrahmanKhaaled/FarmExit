@@ -1,3 +1,6 @@
+import { Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
+import { LocalizedContentDto } from '../../../common/dto/localized-content.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, Matches, MaxLength, ValidateIf } from 'class-validator';
@@ -16,6 +19,7 @@ export class CreatePartnershipApplicationDto {
 }
 
 export class UpdatePartnershipApplicationDto {
+  @IsOptional() @ValidateNested() @Type(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiPropertyOptional()
   @IsOptional()
   @Transform(trim)
@@ -88,6 +92,7 @@ export class PartnershipApplicationReviewFeedbackDto {
 }
 
 export class PartnershipApplicationResponseDto {
+  localizedContent?: unknown;
   @ApiProperty() id!: string;
   @ApiProperty() requestNumber!: string;
   @ApiProperty() status!: string;

@@ -1,5 +1,6 @@
 'use client';
 
+import { SingleRequestDecision } from './SingleRequestDecision';
 import { useMemo, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui';
@@ -54,7 +55,13 @@ export function RequestActions({
   return (
     <div className="admin-action-panel space-y-6">
       <h2 className="text-sm font-semibold">{t('actionsTitle')}</h2>
-      {specialized && showSpecializedHint ? (
+      <SingleRequestDecision
+        id={requestId}
+        type={requestType}
+        status={status}
+        allowed={canReview && (requestType !== 'partnershipApplication' || showSpecializedHint)}
+      />
+      {specialized && showSpecializedHint && status !== 'underFarmExitReview' ? (
         <p className="text-sm text-[var(--admin-text-muted)]">
           {t('specializedWorkflow', {
             type: enums.has('requestType.' + requestType) ? enums('requestType.' + requestType) : enums('unknown'),

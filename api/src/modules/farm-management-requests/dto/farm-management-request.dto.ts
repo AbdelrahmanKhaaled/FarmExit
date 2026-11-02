@@ -3,11 +3,63 @@ import { ValidateNested as ContentNested } from 'class-validator';
 import { LocalizedContentDto } from '../../../common/dto/localized-content.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsArray, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsIn,
+  IsInt,
+  Min,
+  Max,
+  ValidateNested,
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { ProfessionalNeed } from '../../../generated/prisma/enums';
 import { trim } from '../../farms/dto/create-farm.dto';
 
-export class CreateFarmManagementRequestDto {
+export const MANAGEMENT_RESPONSIBILITIES = ['operations', 'irrigation', 'harvest', 'reporting'] as const;
+export const MANAGEMENT_FACILITY_TYPES = [
+  'cold_storage_freezing',
+  'produce_storage',
+  'agricultural_processing_packing',
+  'agricultural_service_facility',
+] as const;
+export class ManagementTeamDto {
+  @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
+  @IsString() @MaxLength(100) role!: string;
+  @IsInt() @Min(1) @Max(10000) count!: number;
+}
+export class ManagementFacilityDto {
+  @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
+  @IsIn(MANAGEMENT_FACILITY_TYPES) facilityType!: string;
+  @IsString() @MaxLength(1000) details!: string;
+}
+export class ManagementRequirementsDto {
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(4)
+  @ArrayUnique()
+  @IsIn(MANAGEMENT_RESPONSIBILITIES, { each: true })
+  responsibilities?: string[];
+  @IsOptional() @IsString() @MaxLength(30) experienceLevel?: string;
+  @IsOptional() @IsString() @MaxLength(100) onSitePresence?: string;
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @ContentType(() => ManagementTeamDto)
+  currentTeam?: ManagementTeamDto[];
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @ContentType(() => ManagementFacilityDto)
+  resourcesAndFacilities?: ManagementFacilityDto[];
+}
+export class CreateFarmManagementRequestDto extends ManagementRequirementsDto {
   @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiProperty({ enum: ProfessionalNeed })
   @IsEnum(ProfessionalNeed)
@@ -60,7 +112,7 @@ export class CreateFarmManagementRequestDto {
   additionalInformation?: string;
 }
 
-export class UpdateFarmManagementRequestDto {
+export class UpdateFarmManagementRequestDto extends ManagementRequirementsDto {
   @IsOptional() @ContentNested() @ContentType(() => LocalizedContentDto) localizedContent?: LocalizedContentDto;
   @ApiPropertyOptional({ enum: ProfessionalNeed })
   @IsOptional()
@@ -121,6 +173,11 @@ export class FarmManagementReviewFeedbackDto {
 }
 
 export class FarmManagementRequestResponseDto {
+  responsibilities?: string[] | null;
+  experienceLevel?: string | null;
+  onSitePresence?: string | null;
+  currentTeam?: unknown;
+  resourcesAndFacilities?: unknown;
   @ApiProperty({ nullable: true }) localizedContent?: unknown;
   @ApiProperty() id!: string;
   @ApiProperty() requestNumber!: string;

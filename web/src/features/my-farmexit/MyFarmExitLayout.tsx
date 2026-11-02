@@ -29,8 +29,11 @@ export async function MyFarmExitLayout({ session, children, title }: Props) {
         <Navbar user={navUser} />
         <main className="min-h-[calc(100dvh-78px)] bg-bg-page py-24 tablet:py-40" data-testid="my-farmexit">
           <h1 className="sr-only">{title ?? t('title')}</h1>
-          <Container size="app" className="grid items-stretch gap-24 desktop:grid-cols-[310px_minmax(0,1fr)]">
-            <aside className="flex min-w-0 flex-col gap-16 desktop:rounded-card desktop:border desktop:border-border-hairline desktop:bg-bg-surface desktop:p-16 desktop:effect-premium-rest">
+          <Container size="app" className="grid items-start gap-24 desktop:grid-cols-[310px_minmax(0,1fr)]">
+            <aside
+              data-testid="account-sidebar"
+              className="desktop:sticky desktop:top-[96px] desktop:h-fit desktop:max-h-[calc(100dvh-112px)] desktop:overflow-y-auto flex min-w-0 flex-col gap-16 desktop:rounded-card desktop:border desktop:border-border-hairline desktop:bg-bg-surface desktop:p-16 desktop:effect-premium-rest"
+            >
               <div className="flex flex-wrap items-center gap-12 desktop:block">
                 <div className="hidden items-center gap-12 px-8 py-8 tablet:flex">
                   <Avatar initials={navUser.initials} size="md" />

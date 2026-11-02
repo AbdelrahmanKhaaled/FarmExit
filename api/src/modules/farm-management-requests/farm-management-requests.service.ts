@@ -149,6 +149,13 @@ export class FarmManagementRequestsService {
         ...(dto.localizedContent !== undefined
           ? { localizedContent: mergeLocalizedContent(detail.localizedContent, dto.localizedContent) }
           : {}),
+        ...(dto.responsibilities !== undefined ? { responsibilities: dto.responsibilities } : {}),
+        ...(dto.experienceLevel !== undefined ? { experienceLevel: dto.experienceLevel } : {}),
+        ...(dto.onSitePresence !== undefined ? { onSitePresence: dto.onSitePresence } : {}),
+        ...(dto.currentTeam !== undefined ? { currentTeam: JSON.parse(JSON.stringify(dto.currentTeam)) } : {}),
+        ...(dto.resourcesAndFacilities !== undefined
+          ? { resourcesAndFacilities: JSON.parse(JSON.stringify(dto.resourcesAndFacilities)) }
+          : {}),
         ...(dto.professionalNeed !== undefined ? { professionalNeed: dto.professionalNeed } : {}),
         ...(dto.managementTypes !== undefined ? { managementTypes: dto.managementTypes } : {}),
         ...(dto.term !== undefined ? { term: dto.term ?? null } : {}),
@@ -264,6 +271,14 @@ export class FarmManagementRequestsService {
             data: {
               requestId: request.id,
               localizedContent: dto.localizedContent ? JSON.parse(JSON.stringify(dto.localizedContent)) : undefined,
+              responsibilities: dto.responsibilities !== undefined ? dto.responsibilities : undefined,
+              experienceLevel: dto.experienceLevel !== undefined ? dto.experienceLevel : undefined,
+              onSitePresence: dto.onSitePresence !== undefined ? dto.onSitePresence : undefined,
+              currentTeam: dto.currentTeam !== undefined ? JSON.parse(JSON.stringify(dto.currentTeam)) : undefined,
+              resourcesAndFacilities:
+                dto.resourcesAndFacilities !== undefined
+                  ? JSON.parse(JSON.stringify(dto.resourcesAndFacilities))
+                  : undefined,
               professionalNeed: dto.professionalNeed,
               managementTypes: dto.managementTypes ?? undefined,
               term: dto.term ?? null,
@@ -326,6 +341,11 @@ function toResponse(
     farmId: farm.id.toString(),
     farmName: farm.name,
     localizedContent: detail.localizedContent,
+    responsibilities: jsonStrings(detail.responsibilities),
+    experienceLevel: detail.experienceLevel,
+    onSitePresence: detail.onSitePresence,
+    currentTeam: detail.currentTeam,
+    resourcesAndFacilities: detail.resourcesAndFacilities,
     professionalNeed: detail.professionalNeed,
     status: request.status,
     visibility: request.visibility,

@@ -1,5 +1,7 @@
 'use client';
 
+import { BilingualFields } from '@/components/content/BilingualFields';
+import { authoredText, type LocalizedContent } from '@/lib/content/localized';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -42,6 +44,7 @@ function assetOptions(terms: SaleTerms | null): string[] {
 
 export function NewPurchaseProposalForm({ slug, farmName }: { slug: string; farmName?: string }) {
   const t = useTranslations('workspace.proposals');
+  const [localizedContent, setLocalizedContent] = useState<LocalizedContent>({});
   const router = useRouter();
   const [terms, setTerms] = useState<SaleTerms | null>(null);
   const [kind, setKind] = useState<ProposalKind>('cash');
@@ -81,7 +84,7 @@ export function NewPurchaseProposalForm({ slug, farmName }: { slug: string; farm
     setError(null);
     const form = new FormData(e.currentTarget);
     const proposalKind = String(form.get('proposalKind')) as ProposalKind;
-    const notes = String(form.get('notes') ?? '').trim() || undefined;
+    const notes = authoredText(localizedContent, 'proposalNotes', '');
     const components: Record<string, unknown>[] = [];
     let proposedTotalValue: number | undefined;
     let requestedSharePercent: number | undefined;
@@ -102,7 +105,7 @@ export function NewPurchaseProposalForm({ slug, farmName }: { slug: string; farm
     } else if (proposalKind === 'exchange' || proposalKind === 'mixed') {
       const assetValue = Number(form.get('assetValue'));
       const assetType = String(form.get('assetType'));
-      const assetDescription = String(form.get('assetDescription') ?? '').trim() || undefined;
+      const assetDescription = authoredText(localizedContent, 'assetDescription', '') || undefined;
       components.push({
         componentType: 'exchangeAsset',
         proposedValue: assetValue,
@@ -137,6 +140,7 @@ export function NewPurchaseProposalForm({ slug, farmName }: { slug: string; farm
           proposalKind,
           proposedTotalValue,
           requestedSharePercent,
+          localizedContent,
           proposalNotes: notes,
           components,
         }),
@@ -244,10 +248,20 @@ export function NewPurchaseProposalForm({ slug, farmName }: { slug: string; farm
                   required
                   fieldStyle="form"
                 />
-                <TextInput label={t('assetDescription')} name="assetDescription" fieldStyle="form" />
+                <BilingualFields
+                  value={localizedContent}
+                  onChange={setLocalizedContent}
+                  legacy={{ assetDescription: '' }}
+                  fields={[{ key: 'assetDescription', label: t('assetDescription'), maxLength: 2000 }]}
+                />
               </>
             )}
-            <TextInput label={t('notes')} name="notes" fieldStyle="form" />
+            <BilingualFields
+              value={localizedContent}
+              onChange={setLocalizedContent}
+              legacy={{ proposalNotes: '' }}
+              fields={[{ key: 'proposalNotes', label: t('notes'), maxLength: 4000 }]}
+            />
             <Button type="submit" variant="primary">
               {t('submit')}
             </Button>

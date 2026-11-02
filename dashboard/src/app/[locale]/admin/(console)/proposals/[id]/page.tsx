@@ -1,3 +1,4 @@
+import { contentText } from '@/lib/content/localized';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -24,6 +25,7 @@ type Proposal = {
   currency: string;
   requestedSharePercent: string | null;
   proposalNotes: string | null;
+  localizedContent?: unknown;
   status: string;
   components: { id: string; componentType: string; proposedValue: number | null; assetDescription: string | null }[];
 };
@@ -59,7 +61,10 @@ export default async function ProposalDetailPage({ params }: PageProps<'/[locale
                 <div>
                   <dt>{t('listing')}</dt>
                   <dd>
-                    <Link href={`/admin/listings/${p.listingId}`} className="font-medium text-[var(--admin-brand-primary)] hover:underline">
+                    <Link
+                      href={`/admin/listings/${p.listingId}`}
+                      className="font-medium text-[var(--admin-brand-primary)] hover:underline"
+                    >
                       {p.listingId}
                     </Link>
                   </dd>
@@ -67,7 +72,9 @@ export default async function ProposalDetailPage({ params }: PageProps<'/[locale
                 {p.proposedTotalValue != null ? (
                   <div>
                     <dt>{t('totalValue')}</dt>
-                    <dd className="tabular-nums">{p.proposedTotalValue} {p.currency}</dd>
+                    <dd className="tabular-nums">
+                      {p.proposedTotalValue} {p.currency}
+                    </dd>
                   </div>
                 ) : null}
                 {p.requestedSharePercent ? (
@@ -77,12 +84,22 @@ export default async function ProposalDetailPage({ params }: PageProps<'/[locale
                   </div>
                 ) : null}
               </dl>
-              {p.proposalNotes ? <p className="mt-4 whitespace-pre-wrap text-sm">{p.proposalNotes}</p> : null}
+              {p.proposalNotes ? (
+                <p className="mt-4 whitespace-pre-wrap text-sm">
+                  {contentText(p.localizedContent, locale, 'proposalNotes', p.proposalNotes)}
+                </p>
+              ) : null}
             </div>
             <div className="admin-detail-panel">
               <h2 className="mb-3 text-sm font-semibold">{t('components')}</h2>
               <DataTable embedded>
-                <thead><tr><Th>{t('col.type')}</Th><Th>{t('col.value')}</Th><Th>{t('col.notes')}</Th></tr></thead>
+                <thead>
+                  <tr>
+                    <Th>{t('col.type')}</Th>
+                    <Th>{t('col.value')}</Th>
+                    <Th>{t('col.notes')}</Th>
+                  </tr>
+                </thead>
                 <tbody>
                   {p.components.map((c) => (
                     <tr key={c.id}>
@@ -94,7 +111,10 @@ export default async function ProposalDetailPage({ params }: PageProps<'/[locale
                 </tbody>
               </DataTable>
             </div>
-            <Link href={`/admin/requests/${p.id}`} className="text-xs font-semibold text-[var(--admin-brand-primary)] hover:underline">
+            <Link
+              href={`/admin/requests/${p.id}`}
+              className="text-xs font-semibold text-[var(--admin-brand-primary)] hover:underline"
+            >
               {t('unifiedRequest')}
             </Link>
             <EmbeddedRequestForwardingSection

@@ -16,16 +16,31 @@ export default async function NewFarmDetailsRequestPage({
   const { locale } = await params;
   const { slug } = await searchParams;
   if (!hasLocale(routing.locales, locale)) notFound();
-  if (!slug) notFound();
+
   setRequestLocale(locale);
   const t = await getTranslations('workspace.farmDetails');
-  await requireCompletedProfile(locale, `/${locale}/my/farm-details-requests/new?slug=${encodeURIComponent(slug)}`);
+  await requireCompletedProfile(
+    locale,
+    `/${locale}/my/farm-details-requests/new?slug=${encodeURIComponent(slug ?? '')}`,
+  );
+  if (!slug)
+    return (
+      <div className="flex flex-col gap-16">
+        <h2 className="type-display-h4">{t('newTitle')}</h2>
+        <p>{t('chooseListing')}</p>
+        <Link href="/farms" className="type-label-button text-text-brand">
+          {t('browseFarms')}
+        </Link>
+      </div>
+    );
   const listing = await loadPublicListingBySlug(slug);
   const farmName = listing?.name[locale as 'en' | 'ar'];
 
   return (
     <div className="flex flex-col gap-16">
-      <Link href={`/farms/${slug}`} className="type-label-button text-text-brand">{t('backToListing')}</Link>
+      <Link href={`/farms/${slug}`} className="type-label-button text-text-brand">
+        {t('backToListing')}
+      </Link>
       <h2 className="type-display-h4">{t('newTitle')}</h2>
       <FarmDetailsRequestForm slug={slug} farmName={farmName} />
     </div>

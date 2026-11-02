@@ -1,3 +1,7 @@
+import {
+  ManagementRequirements,
+  type ManagementRequirementsData,
+} from '@/features/admin/requests/ManagementRequirements';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -16,7 +20,7 @@ import { apiFetchAdminResult } from '@/lib/admin/session.server';
 import { requireConsolePage } from '@/lib/admin/console-page';
 import { routing } from '@/i18n/routing';
 
-type Item = {
+type Item = ManagementRequirementsData & {
   id: string;
   requestNumber: string;
   farmId: string;
@@ -56,6 +60,7 @@ export default async function FarmManagementDetailPage({ params }: PageProps<'/[
       <DetailWorkspace
         main={
           <div className="space-y-6">
+            <ManagementRequirements value={item} />
             <AdminDetailSection title={tc('summary')}>
               <p className="mb-4 text-xs leading-relaxed text-[var(--admin-text-muted)]">{t('noAutoManager')}</p>
               <dl className="admin-detail-dl sm:grid-cols-2">
@@ -66,7 +71,10 @@ export default async function FarmManagementDetailPage({ params }: PageProps<'/[
                 <div>
                   <dt>{t('farm')}</dt>
                   <dd>
-                    <Link href={`/admin/farms/${item.farmId}`} className="font-medium text-[var(--admin-brand-primary)] hover:underline">
+                    <Link
+                      href={`/admin/farms/${item.farmId}`}
+                      className="font-medium text-[var(--admin-brand-primary)] hover:underline"
+                    >
                       {item.farmName}
                     </Link>
                   </dd>
@@ -74,7 +82,9 @@ export default async function FarmManagementDetailPage({ params }: PageProps<'/[
               </dl>
               {item.managementTypes && item.managementTypes.length > 0 ? (
                 <div className="mt-4">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">{t('managementTypes')}</p>
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">
+                    {t('managementTypes')}
+                  </p>
                   <ul className="mt-1 list-inside list-disc text-sm">
                     {item.managementTypes.map((type) => (
                       <li key={type}>{type}</li>
@@ -84,7 +94,9 @@ export default async function FarmManagementDetailPage({ params }: PageProps<'/[
               ) : null}
               {item.goals && item.goals.length > 0 ? (
                 <div className="mt-4">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">{t('goals')}</p>
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">
+                    {t('goals')}
+                  </p>
                   <ul className="mt-1 list-inside list-disc text-sm">
                     {item.goals.map((goal) => (
                       <li key={goal}>{goal}</li>
@@ -94,7 +106,9 @@ export default async function FarmManagementDetailPage({ params }: PageProps<'/[
               ) : null}
               {item.currentSituation ? (
                 <div className="mt-4">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">{t('situation')}</p>
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--admin-text-muted)]">
+                    {t('situation')}
+                  </p>
                   <p className="mt-1 whitespace-pre-wrap text-sm">{item.currentSituation}</p>
                 </div>
               ) : null}

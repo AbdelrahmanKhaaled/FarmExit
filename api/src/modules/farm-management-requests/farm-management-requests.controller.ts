@@ -10,6 +10,7 @@ import { PublicOpportunityQueryDto } from '../marketplace/dto/public-opportunity
 import { PublicOpportunityDto } from '../marketplace/dto/public-opportunity.dto';
 import {
   CreateFarmManagementRequestDto,
+  ManagementPublicationConsentDto,
   FarmManagementRequestListResponseDto,
   FarmManagementRequestResponseDto,
   UpdateFarmManagementRequestDto,
@@ -68,6 +69,13 @@ export class FarmManagementRequestsController {
     @Body() dto: UpdateFarmManagementRequestDto,
   ): Promise<FarmManagementRequestResponseDto> {
     return this.management.update(auth.userId, id, dto);
+  }
+
+  @Post(':id/publication-consent')
+  @ApiOkResponse({ type: FarmManagementRequestResponseDto })
+  grantConsent(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint,
+    @Body() _dto: ManagementPublicationConsentDto): Promise<FarmManagementRequestResponseDto> {
+    return this.management.grantPublicationConsent(auth.userId, id);
   }
 
   @Post(':id/submit')

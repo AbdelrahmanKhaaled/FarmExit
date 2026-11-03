@@ -59,6 +59,7 @@ export function RequestActions({
         id={requestId}
         type={requestType}
         status={status}
+        isAdmin={isAdmin}
         allowed={canReview && (requestType !== 'partnershipApplication' || showSpecializedHint)}
       />
       {specialized && showSpecializedHint && status !== 'underFarmExitReview' ? (

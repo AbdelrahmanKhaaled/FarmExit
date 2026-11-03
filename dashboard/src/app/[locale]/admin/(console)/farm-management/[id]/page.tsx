@@ -134,6 +134,7 @@ export default async function FarmManagementDetailPage({ params }: PageProps<'/[
               reviewerOptions={staff.reviewerOptions}
               caseAgentOptions={staff.caseAgentOptions}
               onDecide={decideFarmManagementAction}
+              approveAndPublish={session.isAdmin}
             />
             <OpportunityPublishPanel
               requestId={item.id}

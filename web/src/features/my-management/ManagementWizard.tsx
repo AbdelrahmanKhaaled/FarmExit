@@ -1,4 +1,5 @@
 'use client';
+import { WizardLocaleBoundary, useWizardStep, WizardFeedback } from '@/components/ui/WizardLocaleBoundary';
 import { ManagementRequirements } from './ManagementRequirements';
 import { BilingualFields } from '@/components/content/BilingualFields';
 import { authoredText, contentText, type LocalizedContent } from '@/lib/content/localized';
@@ -24,7 +25,8 @@ import { managementGoals, managementChallenges, formatManagementChoices } from '
 export type ManagementFarmOption = Pick<Farm, 'id' | 'name'> &
   Partial<Pick<Farm, 'governorate' | 'areaName' | 'areaFeddan' | 'farmType' | 'waterSource' | 'irrigationMethod'>>;
 
-export function ManagementWizard({
+export function ManagementWizard(props: Parameters<typeof ManagementWizardContent>[0]) { return <WizardLocaleBoundary><ManagementWizardContent {...props} /></WizardLocaleBoundary>; }
+function ManagementWizardContent({
   farms,
   initialFarmId,
   initial,
@@ -39,6 +41,7 @@ export function ManagementWizard({
     w = useTranslations('workspace.phase7'),
     locale = useLocale(),
     router = useRouter();
+  const [publicationConsent, setPublicationConsent] = useState(Boolean(initial?.publicationConsentAt));
   const [localizedContent, setLocalizedContent] = useState<LocalizedContent>(initial?.localizedContent ?? {});
   const [req, setReq] = useState(initial),
     [step, setStep] = useState(Math.max(1, Math.min(7, initialStep))),
@@ -69,6 +72,7 @@ export function ManagementWizard({
     outcomes: initial?.outcomes ?? '',
     additionalInformation: initial?.additionalInformation ?? '',
   });
+  useWizardStep(step, setStep, 7);
   const steps = ([1, 2, 3, 4, 5, 6, 7] as const).map((i) => w(`managementSteps.s${i}`));
   const context = farms.find((f) => f.id === farmId)?.name ?? initial?.farmName;
   const farmContext = farms.find((f) => f.id === farmId);
@@ -115,6 +119,7 @@ export function ManagementWizard({
     if (!farmId || !data.professionalNeed) throw new Error('validation');
     const body = {
       localizedContent,
+      publicationConsent,
       ...data,
       term: authoredText(localizedContent, 'term', data.term.trim()),
       currentSituation: authoredText(localizedContent, 'currentSituation', data.currentSituation.trim()),
@@ -641,6 +646,10 @@ export function ManagementWizard({
           </div>
           <div hidden={step !== 7} className="flex flex-col gap-24">
             <ManagementRequirements value={{ ...data, localizedContent }} />
+            <label className="flex items-start gap-12 rounded-lg border border-border-hairline bg-bg-surface p-16">
+              <input type="checkbox" name="publicationConsent" checked={publicationConsent} onChange={(e) => { setPublicationConsent(e.target.checked); setDirty(true); }} />
+              <span>{w('publicationConsent')}</span>
+            </label>
             {[1, 2, 3].map((n) => (
               <WizardCard key={n} icon="clipboard-tick" title={steps[n - 1]!}>
                 <dl className="flex flex-col gap-16">
@@ -726,13 +735,13 @@ export function ManagementWizard({
             role="alert"
             className="rounded-lg border border-status-error bg-bg-surface p-16 type-body-caption text-status-error"
           >
-            {error}
+            <WizardFeedback message={error} />
           </p>
         )}
         <Dialog open={leave} onOpenChange={setLeave} title={w('leaveTitle')} description={w('leaveNote')}>
           {error && (
             <p role="alert" className="type-body-caption text-status-error">
-              {error}
+              <WizardFeedback message={error} />
             </p>
           )}
           <Button disabled={pending || docsBusy} onClick={() => void act('exit')}>

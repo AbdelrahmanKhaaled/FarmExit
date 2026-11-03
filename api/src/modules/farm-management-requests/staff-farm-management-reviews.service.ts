@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { OpportunityPublicationService } from '../requests/opportunity-publication.service';
 import { Prisma } from '../../generated/prisma/client';
 import { RequestStaffAssignmentType, RequestType, StaffRole } from '../../generated/prisma/enums';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -22,6 +23,7 @@ export class StaffFarmManagementReviewsService {
     private readonly prisma: PrismaService,
     private readonly staffAuth: StaffAuthorizationService,
     private readonly management: FarmManagementRequestsService,
+    private readonly publication: OpportunityPublicationService,
   ) {}
 
   async list(userId: bigint, query: ListFarmsQueryDto): Promise<FarmManagementRequestListResponseDto> {
@@ -67,8 +69,20 @@ export class StaffFarmManagementReviewsService {
     if (decision !== 'approved' && !comment) {
       throw new BadRequestException('A comment is required when requesting changes or rejecting');
     }
-    await this.assertMayDecide(userId, requestId);
-    await this.prisma.$transaction((tx) => this.decideOnce(tx, userId, requestId, decision, comment));
+    const publish = await this.assertMayDecide(userId, requestId);
+    await this.prisma.$transaction(async (tx) => {
+      if (decision === 'approved' && publish) {
+        const existing = await tx.request.findFirst({ where: { id: requestId, requestType: RequestType.farmManagement } });
+        if (existing?.status === 'approved' && existing.visibility === 'public' && existing.publishedAt) {
+          await this.publication.publishManagementInTransaction(tx, userId, requestId);
+          return;
+        }
+      }
+      await this.decideOnce(tx, userId, requestId, decision, comment, publish);
+      if (decision === 'approved' && publish) {
+        await this.publication.publishManagementInTransaction(tx, userId, requestId);
+      }
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted });
     return this.management.getById(requestId);
   }
 
@@ -96,7 +110,7 @@ export class StaffFarmManagementReviewsService {
     if (!slot) throw notFound();
   }
 
-  private async assertMayDecide(userId: bigint, requestId: bigint): Promise<void> {
+  private async assertMayDecide(userId: bigint, requestId: bigint): Promise<boolean> {
     const staff = await this.staffAuth.loadContext(userId);
     if (!staff?.permissions.includes(StaffPermission.RequestsReview)) throw forbidden();
     if (!staffHasAdminScope(staff.roles) && !staff.roles.includes(StaffRole.reviewer)) throw forbidden();
@@ -106,6 +120,7 @@ export class StaffFarmManagementReviewsService {
       });
       if (!slot) throw notFound();
     }
+    return staffHasAdminScope(staff.roles);
   }
 
   private async decideOnce(
@@ -114,13 +129,20 @@ export class StaffFarmManagementReviewsService {
     requestId: bigint,
     decision: DecideListingReviewDto['decision'],
     comment: string | null,
-  ): Promise<void> {
+    publish: boolean,
+  ): Promise<boolean> {
     const status = decision;
     const locked = await tx.request.updateMany({
       where: { id: requestId, requestType: RequestType.farmManagement, status: REQUEST_STATUS_UNDER_REVIEW },
       data: { status },
     });
-    if (locked.count !== 1) throw new ConflictException('This management request is no longer under review');
+    if (locked.count !== 1) {
+      if (decision === 'approved' && publish) {
+        const current = await tx.request.findFirst({ where: { id: requestId, requestType: RequestType.farmManagement } });
+        if (current?.status === 'approved' && current.visibility === 'public' && current.publishedAt) return false;
+      }
+      throw new ConflictException('This management request is no longer under review');
+    }
     await tx.requestReview.create({
       data: {
         requestId,
@@ -144,8 +166,9 @@ export class StaffFarmManagementReviewsService {
         entityType: 'request',
         entityId: requestId,
         action: 'management_review_decided',
-        changes: { decision, comment },
+        changes: { decision, comment, ...(decision === 'approved' && publish ? { publication: 'combined_approve_and_publish' } : {}) },
       },
     });
+    return true;
   }
 }

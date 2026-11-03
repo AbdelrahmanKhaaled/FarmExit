@@ -12,6 +12,8 @@ import {
   Max,
   ValidateNested,
   IsArray,
+  IsBoolean,
+  Equals,
   IsEnum,
   IsOptional,
   IsString,
@@ -37,7 +39,11 @@ export class ManagementFacilityDto {
   @IsIn(MANAGEMENT_FACILITY_TYPES) facilityType!: string;
   @IsString() @MaxLength(1000) details!: string;
 }
+export class ManagementPublicationConsentDto {
+  @Equals(true) consent!: boolean;
+}
 export class ManagementRequirementsDto {
+  @IsOptional() @IsBoolean() publicationConsent?: boolean;
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(4)
@@ -173,6 +179,7 @@ export class FarmManagementReviewFeedbackDto {
 }
 
 export class FarmManagementRequestResponseDto {
+  @ApiPropertyOptional({ nullable: true, type: String }) publicationConsentAt?: string | null;
   responsibilities?: string[] | null;
   experienceLevel?: string | null;
   onSitePresence?: string | null;

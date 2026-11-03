@@ -874,7 +874,9 @@
     "submitDecision": "إرسال القرار",
     "decisionHint": "فقط عندما تكون الحالة underFarmExitReview.",
     "success": "تم الحفظ.",
-    "error": "فشل الإجراء."
+    "error": "فشل الإجراء.",
+    "approvePublish": "موافقة ونشر",
+    "approvedPublished": "تمت الموافقة والنشر"
   },
   "proposalsPage": {
     "eyebrow": "اهتمام المشترين",

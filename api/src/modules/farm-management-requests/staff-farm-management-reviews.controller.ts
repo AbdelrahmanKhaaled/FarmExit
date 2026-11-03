@@ -46,6 +46,12 @@ export class StaffFarmManagementReviewsController {
     return this.reviews.decide(auth.userId, id, dto);
   }
 
+  @Get(':id/publication-readiness')
+  @StaffRoles(StaffRole.admin)
+  readiness(@CurrentAuth() auth: AuthContext, @Param('id', ParseBigIntIdPipe) id: bigint) {
+    return this.publication.managementReadiness(auth.userId, id);
+  }
+
   @Post(':id/publish')
   @HttpCode(HttpStatus.OK)
   @StaffRoles(StaffRole.admin)

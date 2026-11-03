@@ -7,10 +7,12 @@ import { Button } from '@/components/ui';
 export function DecideWorkflowForm({
   enabled,
   hint,
+  approveAndPublish = false,
   onDecide,
 }: {
   enabled: boolean;
   hint?: string;
+  approveAndPublish?: boolean;
   onDecide: (
     decision: 'approved' | 'changesRequested' | 'rejected',
     comment?: string,
@@ -35,7 +37,7 @@ export function DecideWorkflowForm({
         setMessage(null);
         start(async () => {
           const res = await onDecide(decision, comment.trim() || undefined);
-          setMessage(res.ok ? t('success') : (res.message ?? t('error')));
+          setMessage(res.ok ? t(approveAndPublish && decision === 'approved' ? 'approvedPublished' : 'success') : (res.message ?? t('error')));
         });
       }}
     >
@@ -43,7 +45,7 @@ export function DecideWorkflowForm({
       <label className="flex flex-col gap-1 text-xs">
         {t('decision')}
         <select name="decision" className="rounded border border-[var(--admin-border-subtle)] px-2 py-1.5 text-sm">
-          <option value="approved">{t('decisionApproved')}</option>
+          <option value="approved">{t(approveAndPublish ? 'approvePublish' : 'decisionApproved')}</option>
           <option value="changesRequested">{t('decisionChanges')}</option>
           <option value="rejected">{t('decisionRejected')}</option>
         </select>

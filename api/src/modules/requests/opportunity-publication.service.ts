@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import {
   FarmRelationshipRole,
@@ -33,6 +33,23 @@ export class OpportunityPublicationService {
     );
   }
 
+  /** Domain composition: caller already holds the review transaction. Never starts a second transaction. */
+  async publishManagementInTransaction(tx: Prisma.TransactionClient, userId: bigint, requestId: bigint): Promise<void> {
+    await this.requireAdminScope(userId);
+    await this.publishOnce(tx, userId, requestId, RequestType.farmManagement, 'Farm management');
+  }
+
+  async managementReadiness(userId: bigint, requestId: bigint): Promise<{ eligible: boolean; reason?: string }> {
+    await this.requireAdminScope(userId);
+    try {
+      await this.prisma.$transaction(tx => this.publishOnce(tx, userId, requestId, RequestType.farmManagement, 'Farm management', true));
+      return { eligible: true };
+    } catch (error) {
+      if (error instanceof HttpException && [400, 404, 409].includes(error.getStatus())) return { eligible: false, reason: error.message };
+      throw error;
+    }
+  }
+
   async publishPartnership(userId: bigint, requestId: bigint): Promise<void> {
     await this.requireAdminScope(userId);
     await this.prisma.$transaction(
@@ -52,13 +69,15 @@ export class OpportunityPublicationService {
     requestId: bigint,
     requestType: typeof RequestType.farmManagement | typeof RequestType.partnership,
     label: string,
+    dryRun = false,
   ): Promise<void> {
     const request = await tx.request.findFirst({
       where: { id: requestId, requestType },
     });
     if (!request?.farmId) throw notFound(label);
 
-    if (request.visibility === RequestVisibility.public && request.publishedAt !== null) {
+    const alreadyPublished = request.visibility === RequestVisibility.public && request.publishedAt !== null;
+    if (alreadyPublished && requestType !== RequestType.farmManagement) {
       throw new ConflictException('This opportunity is already published');
     }
     if (request.status !== REQUEST_STATUS_APPROVED) {
@@ -67,7 +86,7 @@ export class OpportunityPublicationService {
     if (request.submittedAt === null) {
       throw new BadRequestException('The owner has not submitted this opportunity for FarmExit review');
     }
-    if (request.publishedAt !== null) {
+    if (request.publishedAt !== null && !alreadyPublished) {
       throw new ConflictException('This opportunity is already published');
     }
 
@@ -81,7 +100,10 @@ export class OpportunityPublicationService {
 
     if (requestType === RequestType.farmManagement) {
       const detail = await tx.farmManagementDetail.findUnique({ where: { requestId } });
-      if (!detail?.professionalNeed) {
+      if (!detail?.publicationConsentAt) {
+        throw new BadRequestException('The owner must explicitly authorize public publication of this management opportunity');
+      }
+      if (!detail.professionalNeed || !detail.currentSituation?.trim()) {
         throw new BadRequestException('Management details are incomplete for publication');
       }
     } else {
@@ -89,12 +111,21 @@ export class OpportunityPublicationService {
       if (!detail) throw new BadRequestException('Partnership details are incomplete for publication');
     }
 
+    if (requestType === RequestType.farmManagement) {
+      const farm = await tx.farm.findFirst({ where: { id: request.farmId, deletedAt: null } });
+      if (!farm || farm.farmStatus !== 'active' || !farm.name.trim() || !farm.governorate.trim() || Number(farm.areaFeddan) <= 0) {
+        throw new BadRequestException('Publication requires an active farm with a name, governorate and positive area');
+      }
+    }
+    if (!dryRun) {
     const locked = await tx.farm.updateMany({
       where: { id: request.farmId, deletedAt: null },
       data: { updatedAt: new Date() },
     });
     if (locked.count !== 1) throw new BadRequestException('The farm is no longer available');
+    }
     await this.requireCurrentOwner(tx, request.createdBy, request.farmId);
+    if (alreadyPublished || dryRun) return;
 
     const publishedAt = new Date();
     const updated = await tx.request.updateMany({

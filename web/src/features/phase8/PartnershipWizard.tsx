@@ -1,4 +1,5 @@
 'use client';
+import { WizardLocaleBoundary, useWizardStep, WizardFeedback } from '@/components/ui/WizardLocaleBoundary';
 import { BilingualFields } from '@/components/content/BilingualFields';
 import { contentText, type LocalizedContent } from '@/lib/content/localized';
 
@@ -79,7 +80,8 @@ const subscribeReady = () => () => {};
 const clientReady = () => true;
 const serverReady = () => false;
 
-export function PartnershipWizard({
+export function PartnershipWizard(props: Parameters<typeof PartnershipWizardContent>[0]) { return <WizardLocaleBoundary><PartnershipWizardContent {...props} /></WizardLocaleBoundary>; }
+function PartnershipWizardContent({
   initial,
   farms = [],
   initialFarmId,
@@ -128,6 +130,7 @@ export function PartnershipWizard({
   const [complete, setComplete] = useState(false);
   const [notice, setNotice] = useState('');
   const steps = application ? c.appSteps : c.ownerSteps;
+  useWizardStep(step, setStep, steps.length);
   const base = application ? '/my/applications' : '/my/partnerships';
   const endpoint = application ? '/api/partnership-applications' : '/api/partnership-requests';
   const canEdit = !record || editable.has(record.status);
@@ -696,7 +699,7 @@ export function PartnershipWizard({
             )}
             {error && (
               <p role="alert" className="type-body-caption text-status-error">
-                {error}
+                <WizardFeedback message={error} />
               </p>
             )}
           </div>

@@ -26,11 +26,13 @@ export function SingleRequestDecision({
   type,
   status,
   allowed,
+  isAdmin = false,
 }: {
   id: string;
   type: string;
   status: string;
   allowed: boolean;
+  isAdmin?: boolean;
 }) {
   const router = useRouter();
   if (!allowed || status !== 'underFarmExitReview' || !(type in decisions)) return null;
@@ -38,6 +40,7 @@ export function SingleRequestDecision({
   return (
     <DecideWorkflowForm
       enabled
+      approveAndPublish={type === 'farmManagement' && isAdmin}
       onDecide={async (decision, comment) => {
         const result = await decide(id, decision, comment);
         if (result.ok) router.refresh();

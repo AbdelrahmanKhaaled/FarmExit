@@ -1,4 +1,5 @@
 'use client';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Logo } from '@/components/brand/Logo';
@@ -75,7 +76,8 @@ export function TaskFrame({
             </span>
             <p className="type-label-small-strong">{title}</p>
           </div>
-          <div className="flex shrink-0 items-center gap-16">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-8 tablet:gap-16">
+            <LanguageToggle disabled={pending} />
             {onSaveExit && (
               <span role="status" className="hidden type-label-caption text-text-muted tablet:block">
                 {saved ? t('saved') : t('unsaved')}

@@ -4,7 +4,7 @@
   setupFilesAfterEnv: ['<rootDir>/jest.six.setup.mjs'],
   moduleNameMapper: { '^(\\.{1,2}/.*)\\.js$': '$1' },
   testRegex:
-    '(request-narrative-locales|management-requirements|management-decisions|staff-permissions|staff.guard)\\.spec\\.ts$',
+    '(opportunity-publication.service|request-narrative-locales|management-requirements|management-decisions|staff-permissions|staff.guard)\\.spec\\.ts$',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
     '^.+\\.ts$': [

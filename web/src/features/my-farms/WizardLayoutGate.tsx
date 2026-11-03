@@ -3,6 +3,6 @@ import type { ReactNode } from 'react';
 import { usePathname } from '@/i18n/navigation';
 /** Only the approved Add Farm wizard uses its compact task header; the portal stays unchanged. */
 export function WizardLayoutGate({ children, wizard }: { children: ReactNode; wizard: ReactNode }) {
-  const path = usePathname();
+  const path = usePathname().replace(/^\/(ar|en)(?=\/|$)/, '');
   return path === '/my/farms/new' || /^\/my\/farms\/[^/]+\/list$/.test(path) ? wizard : children;
 }

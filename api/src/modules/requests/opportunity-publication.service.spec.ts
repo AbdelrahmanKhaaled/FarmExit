@@ -17,9 +17,9 @@ describe('OpportunityPublicationService', () => {
         updateMany: jest.fn().mockResolvedValue({ count: overrides.updateCount ?? 1 }),
       },
       requestReview: { findFirst: jest.fn().mockResolvedValue({ id: 1n }) },
-      farmManagementDetail: { findUnique: jest.fn().mockResolvedValue({ professionalNeed: 'agronomist' }) },
+      farmManagementDetail: { findUnique: jest.fn().mockResolvedValue({ professionalNeed: 'farmManager', currentSituation: 'Public description', publicationConsentAt: new Date() }) },
       partnershipDetail: { findUnique: jest.fn().mockResolvedValue({ id: 1n }) },
-      farm: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+      farm: { findFirst: jest.fn().mockResolvedValue({ farmStatus: 'active', name: 'Farm', governorate: 'Giza', areaFeddan: 20 }), updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
       farmRelationship: {
         findMany: jest.fn().mockResolvedValue([{ startsAt: null, endsAt: null }]),
       },

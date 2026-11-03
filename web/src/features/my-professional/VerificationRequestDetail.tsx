@@ -1,4 +1,5 @@
 'use client';
+import { WizardLocaleBoundary, useWizardStep, WizardFeedback } from '@/components/ui/WizardLocaleBoundary';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -25,7 +26,8 @@ export type VerificationRequest = {
   localizedContent?: LocalizedContent;
   reviews: { decision: string; comment: string | null; createdAt: string | null }[];
 };
-export function VerificationRequestDetail({
+export function VerificationRequestDetail(props: Parameters<typeof VerificationRequestDetailContent>[0]) { return <WizardLocaleBoundary><VerificationRequestDetailContent {...props} /></WizardLocaleBoundary>; }
+function VerificationRequestDetailContent({
   initial,
   initialStep = 4,
   history,
@@ -47,6 +49,7 @@ export function VerificationRequestDetail({
     [docsPending, setDocsPending] = useState(false),
     [error, setError] = useState<string | null>(null),
     [success, setSuccess] = useState(false);
+  useWizardStep(step, setStep, 5, 4);
   const router = useRouter();
   const ready = useFormReady();
   const busy = useRef(false),
@@ -220,7 +223,7 @@ export function VerificationRequestDetail({
             role="alert"
             className="rounded-lg border border-status-error bg-bg-surface p-16 type-body-caption text-status-error"
           >
-            {error}
+            <WizardFeedback message={error} />
           </p>
         )}
       </div>

@@ -874,7 +874,9 @@
     "submitDecision": "Submit decision",
     "decisionHint": "Only while status is underFarmExitReview.",
     "success": "Saved.",
-    "error": "Action failed."
+    "error": "Action failed.",
+    "approvePublish": "Approve & Publish",
+    "approvedPublished": "Approved & Published"
   },
   "proposalsPage": {
     "eyebrow": "Buyer interest",

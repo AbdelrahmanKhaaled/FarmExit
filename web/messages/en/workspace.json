@@ -959,7 +959,10 @@
     "addTeam": "Add team role",
     "facilityType": "Facility type",
     "facilityDetails": "Resources and facility details",
-    "addFacility": "Add request facility"
+    "addFacility": "Add request facility",
+    "publicationConsent": "I authorize FarmExit to publish this management opportunity after approval, including the farm name, area, activity and management description. Private documents, precise location and contact details stay private.",
+    "authorizePublication": "Authorize publication",
+    "publicationConsentError": "Could not save publication consent. Please retry."
   },
   "unifiedRequests": {
     "intro": "Every request you start with FarmExit appears here. We review and mediate each one — approval does not mean public publication.",

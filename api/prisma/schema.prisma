@@ -576,6 +576,7 @@ model FarmListingDetail {
 }
 
 model FarmManagementDetail {
+  publicationConsentAt DateTime? @map("publication_consent_at") @db.DateTime(3)
   requestId              BigInt           @id @map("request_id")
   professionalNeed       ProfessionalNeed @map("professional_need")
   localizedContent       Json?            @map("localized_content")

@@ -44,6 +44,7 @@ export async function RequestWorkspace({
 }) {
   const t = await getTranslations('admin.requestWorkspace');
   const detail = await getTranslations('admin.requestDetail');
+  const workflow = await getTranslations('admin.workflows');
   const common = await getTranslations('batch');
   const enums = await getTranslations('admin.enums');
   const canReview = session.staff.permissions.includes('requests.review');
@@ -77,7 +78,7 @@ export async function RequestWorkspace({
       new Date(value),
     );
   const publicationApplies = ['farmListing', 'partnership', 'farmManagement'].includes(request.requestType);
-  const published = request.status === 'published' && request.visibility === 'public' && Boolean(request.publishedAt);
+  const published = ['approved', 'published'].includes(request.status) && request.visibility === 'public' && Boolean(request.publishedAt);
   const navigation = [
     { id: 'overview', label: t('overview') },
     ...(receivesApplications ? [{ id: 'applications', label: t('applications') }] : []),
@@ -110,7 +111,7 @@ export async function RequestWorkspace({
               <div className="request-hero-meta">
                 <EnumLabel group="requestType" value={request.requestType} />
                 <span aria-hidden="true">·</span>
-                <StatusBadge status={request.status} />
+                {request.requestType === 'farmManagement' && published ? <span>{workflow('approvedPublished')}</span> : <StatusBadge status={request.status} />}
               </div>
             </div>
           </div>

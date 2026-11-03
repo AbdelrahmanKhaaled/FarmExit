@@ -1,5 +1,6 @@
 'use client';
 import { useLocale, useTranslations } from 'next-intl';
+import { PublicationConsent } from './PublicationConsent';
 import { ManagementRequirements } from './ManagementRequirements';
 import { contentText } from '@/lib/content/localized';
 import { ManagementWizard, type ManagementFarmOption } from './ManagementWizard';
@@ -15,6 +16,8 @@ export type ManagementRequest = {
   resourcesAndFacilities?:
     | { facilityType: string; details: string; localizedContent?: import('@/lib/content/localized').LocalizedContent }[]
     | null;
+  publicationConsentAt?: string | null;
+  visibility?: string;
   id: string;
   requestNumber: string;
   farmId: string;
@@ -53,6 +56,7 @@ export function ManagementRequestDetail({
     />
   ) : (
     <div className="flex flex-col gap-24">
+      {initial.status === 'approved' && initial.visibility !== 'public' && !initial.publicationConsentAt && <PublicationConsent requestId={initial.id} />}
       <ManagementRequirements value={initial} />
       <RequestTracking
         id={initial.id}

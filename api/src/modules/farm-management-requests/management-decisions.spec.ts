@@ -1,3 +1,4 @@
+import type { OpportunityPublicationService } from '../requests/opportunity-publication.service';
 import { StaffFarmManagementReviewsService } from './staff-farm-management-reviews.service';
 import type { PrismaService } from '../../prisma/prisma.service';
 import type { StaffAuthorizationService } from '../authorization/staff-authorization.service';
@@ -9,6 +10,7 @@ describe('management domain decisions', () => {
     let status = 'underFarmExitReview';
     const tx = {
       request: {
+        findFirst: jest.fn().mockImplementation(() => Promise.resolve({ status, visibility: status === 'approved' ? 'public' : 'private', publishedAt: status === 'approved' ? new Date() : null })),
         updateMany: jest.fn().mockImplementation(() => {
           if (status !== 'underFarmExitReview') return Promise.resolve({ count: 0 });
           status = 'approved';
@@ -33,10 +35,11 @@ describe('management domain decisions', () => {
       prisma as unknown as PrismaService,
       auth as unknown as StaffAuthorizationService,
       management as unknown as FarmManagementRequestsService,
+      { publishManagementInTransaction: jest.fn().mockResolvedValue(undefined) } as unknown as OpportunityPublicationService,
     );
     return { service, tx, prisma };
   }
-  it('allows superAdmin without assigning or publishing', async () => {
+  it('allows superAdmin approval through coordinated publication without reassignment', async () => {
     const { service, tx, prisma } = setup();
     await expect(service.decide(1n, 3n, { decision: 'approved' })).resolves.toMatchObject({ status: 'approved' });
     expect(tx.request.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: { status: 'approved' } }));
@@ -57,7 +60,7 @@ describe('management domain decisions', () => {
       service.decide(1n, 3n, { decision: 'approved' }),
       service.decide(1n, 3n, { decision: 'approved' }),
     ]);
-    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(2);
     expect(tx.requestReview.create).toHaveBeenCalledTimes(1);
   });
 });

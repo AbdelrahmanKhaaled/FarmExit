@@ -15,6 +15,7 @@ export function SpecializedWorkflowPanel({
   caseAgentOptions,
   onDecide,
   nonBindingNote,
+  approveAndPublish = false,
 }: {
   requestId: string;
   status: string;
@@ -22,6 +23,7 @@ export function SpecializedWorkflowPanel({
   caseAgentOptions: StaffOption[];
   onDecide: (requestId: string, decision: Decision, comment?: string) => Promise<{ ok: boolean; message?: string }>;
   nonBindingNote?: string;
+  approveAndPublish?: boolean;
 }) {
   const t = useTranslations('admin.workflows');
   const [role, setRole] = useState<'reviewer' | 'caseAgent'>('reviewer');
@@ -42,6 +44,7 @@ export function SpecializedWorkflowPanel({
         onAssign={(staffId) => assignRequestStaffAction(requestId, role, staffId)}
       />
       <DecideWorkflowForm
+        approveAndPublish={approveAndPublish}
         enabled={status === 'underFarmExitReview'}
         hint={t('decisionHint')}
         onDecide={(decision, comment) => onDecide(requestId, decision, comment)}

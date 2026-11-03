@@ -22,7 +22,7 @@ export function buildPublicOpportunityWhere(
   requestType: typeof RequestType.farmManagement | typeof RequestType.partnership,
   query: PublicOpportunityQueryDto,
 ): Prisma.RequestWhereInput {
-  const farm: Prisma.FarmWhereInput = { deletedAt: null };
+  const farm: Prisma.FarmWhereInput = { deletedAt: null, ...(requestType === 'farmManagement' ? { farmStatus: 'active' } : {}) };
   if (query.governorate) farm.governorate = query.governorate;
   if (query.area) farm.areaName = query.area;
   if (query.farmType) farm.farmType = query.farmType;
@@ -37,6 +37,10 @@ export function buildPublicOpportunityWhere(
       { name: { contains: query.q } },
       { governorate: { contains: query.q } },
       { areaName: { contains: query.q } },
+      { localizedContent: { path: '$.ar.name', string_contains: query.q } },
+      { localizedContent: { path: '$.en.name', string_contains: query.q } },
+      { localizedContent: { path: '$.ar.areaName', string_contains: query.q } },
+      { localizedContent: { path: '$.en.areaName', string_contains: query.q } },
     ];
   }
 
@@ -47,7 +51,7 @@ export function buildPublicOpportunityWhere(
   };
 
   if (requestType === 'farmManagement') {
-    const detail: Prisma.FarmManagementDetailWhereInput = {};
+    const detail: Prisma.FarmManagementDetailWhereInput = { publicationConsentAt: { not: null } };
     if (query.professionalNeed) detail.professionalNeed = query.professionalNeed;
     if (query.experienceLevel) detail.experienceLevel = query.experienceLevel;
     if (query.managementType) {

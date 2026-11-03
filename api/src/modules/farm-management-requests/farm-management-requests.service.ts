@@ -149,6 +149,7 @@ export class FarmManagementRequestsService {
         ...(dto.localizedContent !== undefined
           ? { localizedContent: mergeLocalizedContent(detail.localizedContent, dto.localizedContent) }
           : {}),
+        ...(dto.publicationConsent !== undefined ? { publicationConsentAt: dto.publicationConsent ? new Date() : null } : {}),
         ...(dto.responsibilities !== undefined ? { responsibilities: dto.responsibilities } : {}),
         ...(dto.experienceLevel !== undefined ? { experienceLevel: dto.experienceLevel } : {}),
         ...(dto.onSitePresence !== undefined ? { onSitePresence: dto.onSitePresence } : {}),
@@ -207,6 +208,22 @@ export class FarmManagementRequestsService {
     const refreshed = await this.prisma.request.findUniqueOrThrow({ where: { id: requestId } });
     const reviews = await this.ownerReviews([requestId]);
     return toResponse(refreshed, detail, farm, reviews.get(requestId) ?? []);
+  }
+
+  async grantPublicationConsent(userId: bigint, requestId: bigint): Promise<FarmManagementRequestResponseDto> {
+    await this.owned(userId, requestId);
+    await this.prisma.$transaction(async (tx) => {
+      const locked = await tx.request.updateMany({
+        where: { id: requestId, createdBy: userId, requestType: RequestType.farmManagement,
+          status: { in: ['draft', 'changesRequested', 'underFarmExitReview', 'approved'] } },
+        data: { updatedAt: new Date() },
+      });
+      if (locked.count !== 1) throw new ConflictException('This request no longer accepts publication consent');
+      await tx.farmManagementDetail.update({ where: { requestId }, data: { publicationConsentAt: new Date() } });
+      await tx.auditLog.create({ data: { actorUserId: userId, entityType: 'request', entityId: requestId,
+        action: 'management_publication_consent_granted', changes: { consent: true } } });
+    });
+    return this.get(userId, requestId);
   }
 
   private async ownedFarm(userId: bigint, farmId: bigint): Promise<Farm> {
@@ -270,6 +287,7 @@ export class FarmManagementRequestsService {
           const detail = await tx.farmManagementDetail.create({
             data: {
               requestId: request.id,
+              publicationConsentAt: dto.publicationConsent === true ? new Date() : null,
               localizedContent: dto.localizedContent ? JSON.parse(JSON.stringify(dto.localizedContent)) : undefined,
               responsibilities: dto.responsibilities !== undefined ? dto.responsibilities : undefined,
               experienceLevel: dto.experienceLevel !== undefined ? dto.experienceLevel : undefined,
@@ -340,6 +358,7 @@ function toResponse(
     requestNumber: request.requestNumber,
     farmId: farm.id.toString(),
     farmName: farm.name,
+    publicationConsentAt: detail.publicationConsentAt?.toISOString() ?? null,
     localizedContent: detail.localizedContent,
     responsibilities: jsonStrings(detail.responsibilities),
     experienceLevel: detail.experienceLevel,

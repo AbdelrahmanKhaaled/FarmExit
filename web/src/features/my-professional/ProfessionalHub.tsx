@@ -1,4 +1,5 @@
 'use client';
+import { WizardLocaleBoundary, useWizardStep, WizardFeedback } from '@/components/ui/WizardLocaleBoundary';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -34,7 +35,8 @@ export type ProfessionalProfile = {
   capabilities: Capability[];
 };
 const types = ['farmManager', 'agriculturalEngineer'] as const;
-export function ProfessionalHub({
+export function ProfessionalHub(props: Parameters<typeof ProfessionalHubContent>[0]) { return <WizardLocaleBoundary><ProfessionalHubContent {...props} /></WizardLocaleBoundary>; }
+function ProfessionalHubContent({
   initial,
   name,
   initialStep,
@@ -67,6 +69,7 @@ export function ProfessionalHub({
     [areas, setAreas] = useState((capability?.serviceAreas ?? []).join(', '));
   const router = useRouter();
   const ready = useFormReady();
+  useWizardStep(step, setStep, request ? 0 : 3);
   const steps = ([1, 2, 3, 4, 5] as const).map((i) => w(`professionalSteps.s${i}`));
   useEffect(() => {
     const guard = (e: BeforeUnloadEvent) => {
@@ -508,7 +511,7 @@ export function ProfessionalHub({
             role="alert"
             className="rounded-lg border border-status-error bg-bg-surface p-16 type-body-caption text-status-error"
           >
-            {error}
+            <WizardFeedback message={error} />
           </p>
         )}
       </div>

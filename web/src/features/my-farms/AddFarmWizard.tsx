@@ -1,6 +1,8 @@
 'use client';
 import { saveEntryMode, entryStorageKey, type EntryMode } from './entry-mode';
 
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
+import { WizardLocaleBoundary, useWizardStep, WizardFeedback } from '@/components/ui/WizardLocaleBoundary';
 import { BilingualFields } from '@/components/content/BilingualFields';
 import type { LocalizedContent } from '@/lib/content/localized';
 import { useEffect, useRef, useState } from 'react';
@@ -66,7 +68,8 @@ function storedAvailabilityDate(value: string | null | undefined): string {
     ? date
     : '';
 }
-export function AddFarmWizard({
+export function AddFarmWizard(props: Parameters<typeof AddFarmWizardContent>[0]) { return <WizardLocaleBoundary><AddFarmWizardContent {...props} /></WizardLocaleBoundary>; }
+function AddFarmWizardContent({
   user,
   entryMode,
   initialFarm,
@@ -177,6 +180,7 @@ export function AddFarmWizard({
   const [amenities, setAmenities] = useState(initialSpecification?.amenities ?? []);
   const canEdit = (!farm || farm.myRoles.includes('owner')) && (!listing || editableListing(listing.status));
   const uploading = mediaBusy || docsBusy;
+  useWizardStep(step, setStep, 7);
   const current = wizardSteps[step - 1]!;
   const update = (key: keyof typeof data, value: string) => {
     if (key === 'listingType' && entryMode) return;
@@ -595,8 +599,8 @@ export function AddFarmWizard({
               </span>
             </span>
           </div>
-          <div className="flex items-center gap-12">
-            <LanguageToggle />
+          <div className="flex flex-wrap items-center justify-end gap-8 tablet:gap-12">
+            <LanguageToggle disabled={pending || uploading} />
             <span
               role="status"
               className="hidden rounded-full bg-bg-muted px-12 py-6 type-label-caption text-text-brand tablet:block"
@@ -1220,7 +1224,7 @@ export function AddFarmWizard({
                   role="alert"
                   className="mt-24 rounded-lg border border-status-favorite bg-bg-surface p-16 type-body-caption text-status-error"
                 >
-                  {error}
+                  <WizardFeedback message={error} />
                 </p>
               )}
               <div
@@ -1284,7 +1288,7 @@ export function AddFarmWizard({
       <Dialog open={leave} onOpenChange={setLeave} title={t('leaveTitle')} description={t('leaveBody')}>
         {error && (
           <p role="alert" className="type-body-caption text-status-error">
-            {error}
+            <WizardFeedback message={error} />
           </p>
         )}
         <Button

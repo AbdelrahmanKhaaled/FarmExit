@@ -1,3 +1,4 @@
+import { contentText } from '@/lib/content/localized';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -22,6 +23,7 @@ type Item = {
   professionalType: string;
   professionalCapabilityId: string;
   verificationSummary: string | null;
+  localizedContent?: unknown;
   reviews: { decision: string; comment: string | null }[];
 };
 
@@ -54,15 +56,21 @@ export default async function VerificationDetailPage({ params }: PageProps<'/[lo
               <dl className="admin-detail-dl sm:grid-cols-2">
                 <div>
                   <dt>{t('type')}</dt>
-                  <dd><EnumLabel value={item.professionalType} group="professionalType" /></dd>
+                  <dd>
+                    <EnumLabel value={item.professionalType} group="professionalType" />
+                  </dd>
                 </div>
                 <div>
                   <dt>{t('capability')}</dt>
-                  <dd className="font-mono text-xs break-all" title={item.professionalCapabilityId}>{item.professionalCapabilityId}</dd>
+                  <dd className="font-mono text-xs break-all" title={item.professionalCapabilityId}>
+                    {item.professionalCapabilityId}
+                  </dd>
                 </div>
               </dl>
               {item.verificationSummary ? (
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed">{item.verificationSummary}</p>
+                <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed">
+                  {contentText(item.localizedContent, locale, 'verificationSummary', item.verificationSummary)}
+                </p>
               ) : null}
               <p className="mt-4">
                 <UnifiedRequestLink requestId={item.id} label={t('unifiedRequest')} />

@@ -1,3 +1,4 @@
+import { mergeLocalizedContent } from '../../common/localized-content';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { Prisma } from '../../generated/prisma/client';
@@ -78,6 +79,7 @@ export class PurchaseProposalsService {
                 proposalKind: dto.proposalKind,
                 proposedTotalValue: total,
                 requestedSharePercent: share,
+                localizedContent: dto.localizedContent ? mergeLocalizedContent(null, dto.localizedContent) : undefined,
                 proposalNotes: dto.proposalNotes ?? null,
                 submittedAt,
               },
@@ -143,6 +145,9 @@ export class PurchaseProposalsService {
           proposalKind: dto.proposalKind,
           proposedTotalValue: total,
           requestedSharePercent: share,
+          ...(dto.localizedContent !== undefined
+            ? { localizedContent: mergeLocalizedContent(current.detail.localizedContent, dto.localizedContent) }
+            : {}),
           proposalNotes: dto.proposalNotes ?? null,
         },
       });
@@ -360,6 +365,7 @@ export class PurchaseProposalsService {
       proposedTotalValue: moneyOut(row.detail.proposedTotalValue),
       currency: row.detail.currency,
       requestedSharePercent: row.detail.requestedSharePercent ? row.detail.requestedSharePercent.toFixed(2) : null,
+      localizedContent: row.detail.localizedContent,
       proposalNotes: row.detail.proposalNotes,
       status: row.request.status,
       submittedAt: row.detail.submittedAt?.toISOString() ?? null,
@@ -388,6 +394,7 @@ type LoadedProposal = {
     requestType: string;
   };
   detail: {
+    localizedContent?: unknown;
     proposalKind: ProposalKind;
     proposedTotalValue: { toFixed(digits: number): string } | null;
     currency: string;

@@ -106,7 +106,12 @@ export function PartnershipWizard({
       Object.fromEntries(
         [...ownerFields, ...applicantFields].map((key) => [
           key,
-          (initial?.[key as keyof PartnershipRecord] as string) ?? '',
+          contentText(
+            initial?.localizedContent,
+            locale,
+            key,
+            (initial?.[key as keyof PartnershipRecord] as string) ?? '',
+          ),
         ]),
       ) as Values,
   );
@@ -192,8 +197,8 @@ export function PartnershipWizard({
       for (const key of ['companyName', 'companyContactName']) {
         if (!values[key] && !current[key as keyof PartnershipRecord]) delete body[key];
       }
+    body.localizedContent = localizedContent;
     if (!application) {
-      body.localizedContent = localizedContent;
       body.objective = objectives;
       body.acceptedPartnerTypes = accepted;
     }
@@ -249,7 +254,27 @@ export function PartnershipWizard({
     else setStep(target);
   }
   const input = (key: string, label: string, maxLength = 8000, multiline = true) =>
-    multiline ? (
+    [
+      'applicationMessage',
+      'whyGoodFit',
+      'relevantExperience',
+      'approach',
+      'description',
+      'contributionDetails',
+      'operations',
+      'extraInformation',
+    ].includes(key) ? (
+      <BilingualFields
+        key={key}
+        value={localizedContent}
+        fields={[{ key, label, maxLength }]}
+        legacy={{ [key]: values[key] ?? '' }}
+        onChange={(v) => {
+          setLocalizedContent(v);
+          change(key, v.en?.[key] || v.ar?.[key] || '');
+        }}
+      />
+    ) : multiline ? (
       <TextArea
         key={key}
         label={label}
@@ -335,7 +360,10 @@ export function PartnershipWizard({
           c.accepted,
           accepted.map((k) => (k === 'individual' ? c.individual : k === 'company' ? c.company : k)).join(' · '),
         ],
-        [c.contributionDetails, contentText(record?.localizedContent, locale, 'contributionDetails', values.contributionDetails)],
+        [
+          c.contributionDetails,
+          contentText(record?.localizedContent, locale, 'contributionDetails', values.contributionDetails),
+        ],
         [c.operations, contentText(record?.localizedContent, locale, 'operations', values.operations)],
         [c.salesChannel, contentText(record?.localizedContent, locale, 'salesChannel', values.salesChannel)],
         [c.extra, contentText(record?.localizedContent, locale, 'extraInformation', values.extraInformation)],

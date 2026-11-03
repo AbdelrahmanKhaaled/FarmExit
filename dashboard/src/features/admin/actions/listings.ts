@@ -50,7 +50,13 @@ export async function decideListingReviewAction(
     body: { decision, ...(comment ? { comment } : {}) },
   });
   if (!res.ok) return { ok: false, message: res.message ?? `Error ${res.status}` };
-  revalidateAdminPages('/admin/listings', `/admin/listings/${listingId}`, '/admin/listing-pipeline');
+  revalidateAdminPages(
+    '/admin/requests',
+    `/admin/requests/${listingId}`,
+    '/admin/listings',
+    `/admin/listings/${listingId}`,
+    '/admin/listing-pipeline',
+  );
   return { ok: true };
 }
 

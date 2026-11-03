@@ -504,7 +504,9 @@
       "approved": "Approved",
       "rejected": "Rejected",
       "withdrawn": "Withdrawn"
-    }
+    },
+    "chooseListing": "Choose a farm listing, then request details from its listing page.",
+    "browseFarms": "Browse farms"
   },
   "documents": {
     "gapNote": "There is no global document inbox API yet. Open a specific request to download its private documents."
@@ -947,7 +949,17 @@
     "keepEditing": "Keep editing",
     "chooseGovernorate": "Select governorates",
     "otherGovernorate": "Other governorate",
-    "addArea": "Add governorate"
+    "addArea": "Add governorate",
+    "experienceLevel": "Expected experience",
+    "onSitePresence": "Presence requirements",
+    "requestResourcesNote": "Resources offered for this request. Registered farm facilities below remain unchanged.",
+    "teamRole": "Team role",
+    "teamCount": "People available",
+    "removeEntry": "Remove entry",
+    "addTeam": "Add team role",
+    "facilityType": "Facility type",
+    "facilityDetails": "Resources and facility details",
+    "addFacility": "Add request facility"
   },
   "unifiedRequests": {
     "intro": "Every request you start with FarmExit appears here. We review and mediate each one — approval does not mean public publication.",

@@ -1,3 +1,4 @@
+import { mergeLocalizedContent } from '../../common/localized-content';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Request, type RequestApplicationDetail } from '../../generated/prisma/client';
 import { ApplicantKind, FarmRelationshipRole, RequestType, RequestVisibility } from '../../generated/prisma/enums';
@@ -83,6 +84,25 @@ export class PartnershipApplicationsService {
     await this.prisma.requestApplicationDetail.update({
       where: { requestId },
       data: {
+        ...(dto.localizedContent !== undefined
+          ? {
+              proposalDetails: {
+                ...(detail.proposalDetails &&
+                typeof detail.proposalDetails === 'object' &&
+                !Array.isArray(detail.proposalDetails)
+                  ? detail.proposalDetails
+                  : {}),
+                localizedContent: mergeLocalizedContent(
+                  detail.proposalDetails &&
+                    typeof detail.proposalDetails === 'object' &&
+                    !Array.isArray(detail.proposalDetails)
+                    ? detail.proposalDetails.localizedContent
+                    : null,
+                  dto.localizedContent,
+                ),
+              },
+            }
+          : {}),
         ...(dto.applicationMessage !== undefined ? { applicationMessage: dto.applicationMessage ?? null } : {}),
         ...(dto.whyGoodFit !== undefined ? { whyGoodFit: dto.whyGoodFit ?? null } : {}),
         ...(dto.relevantExperience !== undefined ? { relevantExperience: dto.relevantExperience ?? null } : {}),
@@ -236,6 +256,10 @@ export class PartnershipApplicationsService {
       status: request.status,
       parentPartnershipRequestId: request.parentRequestId.toString(),
       applicantKind: detail.applicantKind,
+      localizedContent:
+        detail.proposalDetails && typeof detail.proposalDetails === 'object' && !Array.isArray(detail.proposalDetails)
+          ? detail.proposalDetails.localizedContent
+          : null,
       applicationMessage: detail.applicationMessage,
       whyGoodFit: detail.whyGoodFit,
       companyName: detail.companyName,
@@ -251,9 +275,7 @@ export class PartnershipApplicationsService {
     };
   }
 
-  private async ownerReviews(
-    requestIds: bigint[],
-  ): Promise<Map<bigint, PartnershipApplicationReviewFeedbackDto[]>> {
+  private async ownerReviews(requestIds: bigint[]): Promise<Map<bigint, PartnershipApplicationReviewFeedbackDto[]>> {
     const rows = await this.prisma.requestReview.findMany({
       where: { requestId: { in: requestIds } },
       orderBy: { id: 'asc' },
@@ -290,10 +312,7 @@ function assertSubmitShape(detail: RequestApplicationDetail): void {
   }
 }
 
-function validateCompanyFieldsOnUpdate(
-  dto: UpdatePartnershipApplicationDto,
-  detail: RequestApplicationDetail,
-): void {
+function validateCompanyFieldsOnUpdate(dto: UpdatePartnershipApplicationDto, detail: RequestApplicationDetail): void {
   if (detail.applicantKind !== ApplicantKind.company) return;
   const name = dto.companyName !== undefined ? dto.companyName : detail.companyName;
   if (!name?.trim()) throw new BadRequestException('Company name is required for company applications');

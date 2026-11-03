@@ -790,6 +790,7 @@ model FarmExchangePreference {
 
 /// Child request of a SALE listing. Buyer-declared intent only: no checkout, payment, escrow or title transfer.
 model FarmPurchaseProposalDetail {
+  localizedContent Json? @map("localized_content")
   requestId             BigInt       @id @map("request_id")
   proposalKind          ProposalKind @map("proposal_kind")
   proposedTotalValue    Decimal?     @map("proposed_total_value") @db.Decimal(15, 2)
@@ -994,6 +995,7 @@ model ProfessionalServiceArea {
 }
 
 model ProfessionalVerificationDetail {
+  localizedContent Json? @map("localized_content")
   requestId                BigInt    @id @map("request_id")
   professionalCapabilityId BigInt    @map("professional_capability_id")
   profileSnapshot          Json      @map("profile_snapshot")

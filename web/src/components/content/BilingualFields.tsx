@@ -13,8 +13,9 @@ export function BilingualFields({
   fields: { key: string; label: string; maxLength?: number }[];
   legacy?: Record<string, string>;
 }) {
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const ar = useLocale() === 'ar';
+  const uiLocale = useLocale();
+  const [language, setLanguage] = useState<'en' | 'ar'>(uiLocale === 'ar' ? 'ar' : 'en');
+  const ar = uiLocale === 'ar';
   return (
     <section
       className="rounded-xl border border-border-hairline bg-bg-surface p-16"

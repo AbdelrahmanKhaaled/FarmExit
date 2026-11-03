@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button, ButtonLink } from '@/components/ui/Button';
-import { TextArea } from '@/components/ui/Field';
+import { BilingualFields } from '@/components/content/BilingualFields';
+import { authoredText, contentText, type LocalizedContent } from '@/lib/content/localized';
 import { Card } from '@/components/ui/Surface';
 import { Icon } from '@/components/icons/Icon';
 import { TaskFrame } from '@/features/phase7/TaskFrame';
@@ -21,6 +22,7 @@ export type VerificationRequest = {
   professionalCapabilityId: string;
   professionalType: string;
   verificationSummary: string | null;
+  localizedContent?: LocalizedContent;
   reviews: { decision: string; comment: string | null; createdAt: string | null }[];
 };
 export function VerificationRequestDetail({
@@ -32,6 +34,8 @@ export function VerificationRequestDetail({
   initialStep?: number;
   history?: { toStatus: string; reason: string | null; createdAt: string | null }[];
 }) {
+  const locale = useLocale();
+  const [localizedContent, setLocalizedContent] = useState<LocalizedContent>(initial.localizedContent ?? {});
   const t = useTranslations('workspace.professionalVerification'),
     w = useTranslations('workspace.phase7');
   const [req, setReq] = useState(initial),
@@ -72,7 +76,8 @@ export function VerificationRequestDetail({
       let updated = req;
       if (dirty) {
         updated = await jsonRequest<VerificationRequest>(`/api/professional-verification-requests/${req.id}`, 'PATCH', {
-          verificationSummary: summary.trim(),
+          localizedContent,
+          verificationSummary: authoredText(localizedContent, 'verificationSummary', summary.trim()),
         });
         if (updated?.id !== req.id) throw new Error('confirmation');
         setReq(updated);
@@ -114,7 +119,7 @@ export function VerificationRequestDetail({
         history={history}
         fields={[
           [t('type'), (t as (key: string) => string)(`types.${req.professionalType}`)],
-          [t('summary'), req.verificationSummary],
+          [t('summary'), contentText(req.localizedContent, locale, 'verificationSummary', req.verificationSummary)],
         ]}
       />
     );
@@ -190,19 +195,18 @@ export function VerificationRequestDetail({
         />
         <div hidden={step !== 4}>
           <WizardDisclosure icon="document-text" title={t('summary')} description={w('optionalNote')}>
-            <TextArea
-              label={t('summary')}
-              name="verificationSummary"
-              disabled={pending || !ready}
-              value={summary}
-              maxLength={8000}
-              rows={5}
-              onChange={(e) => {
-                setSummary(e.target.value);
-                setDirty(true);
-              }}
-              fieldStyle="form"
-            />
+            <fieldset disabled={pending || !ready}>
+              <BilingualFields
+                value={localizedContent}
+                legacy={{ verificationSummary: summary }}
+                fields={[{ key: 'verificationSummary', label: t('summary'), maxLength: 8000 }]}
+                onChange={(v) => {
+                  setLocalizedContent(v);
+                  setSummary(authoredText(v, 'verificationSummary', summary));
+                  setDirty(true);
+                }}
+              />
+            </fieldset>
             <Button variant="outline" disabled={pending || docsBusy} onClick={() => void save(false, false, true)}>
               {t('save')}
             </Button>

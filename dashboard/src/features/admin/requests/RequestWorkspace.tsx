@@ -1,3 +1,4 @@
+import { contentText } from '@/lib/content/localized';
 import { getTranslations } from 'next-intl/server';
 import { PageContainer } from '@/components/ui';
 import { DetailWorkspace } from '@/components/ui/workspace/DetailWorkspace';
@@ -19,6 +20,7 @@ import { specializedAdminPath } from '@/lib/admin/specialized-request-path';
 import { SPECIALIZED_REQUEST_TYPES, type StaffRequestDetail } from '@/lib/api/types/staff';
 
 type ApplicationAnswers = {
+  localizedContent?: unknown;
   applicationMessage: string | null;
   whyGoodFit: string | null;
   relevantExperience: string | null;
@@ -216,7 +218,10 @@ export async function RequestWorkspace({
                       ).map((key) => (
                         <div key={key}>
                           <h4>{t(key)}</h4>
-                          <p>{answers.data[key] || t('notStated')}</p>
+                          <p>
+                            {contentText(answers.data.localizedContent, locale, key, answers.data[key]) ||
+                              t('notStated')}
+                          </p>
                         </div>
                       ))}
                     </div>

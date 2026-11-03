@@ -66,7 +66,7 @@ export function parseOpportunityFilters(query: Record<string, string | string[] 
     const raw = Array.isArray(v) ? v[0] : v;
     if (!raw) return undefined;
     const n = Number(raw);
-    return Number.isFinite(n) ? n : undefined;
+    return Number.isFinite(n) && n >= 0 && n <= 9999999999.99 ? n : undefined;
   };
   const str = (key: string) => {
     const v = query[key];
@@ -77,7 +77,9 @@ export function parseOpportunityFilters(query: Record<string, string | string[] 
     page: Number.isSafeInteger(page) && page > 0 ? page : 1,
     governorate: str('governorate'),
     area: str('area'),
-    farmType: str('farmType'),
+    farmType: ['vegetable', 'fruit', 'livestock', 'mixed'].includes(str('farmType') ?? '')
+      ? str('farmType')
+      : undefined,
     minArea: num('minArea'),
     maxArea: num('maxArea'),
     professionalNeed: str('professionalNeed'),
@@ -86,7 +88,9 @@ export function parseOpportunityFilters(query: Record<string, string | string[] 
     objective: str('objective'),
     partnerType: str('partnerType'),
     q: str('q'),
-    sort: (str('sort') as OpportunityFilters['sort']) || 'newest',
+    sort: (['newest', 'areaAsc', 'areaDesc'].includes(str('sort') ?? '')
+      ? str('sort')
+      : 'newest') as OpportunityFilters['sort'],
   };
 }
 

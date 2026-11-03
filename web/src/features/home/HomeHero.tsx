@@ -17,7 +17,13 @@ import { HeroSearch } from './HeroSearch';
  * "Own a farm?" strip, then the Search Bar and the Proof Panel.
  * Padding 112/48 · 96/40 · 56/24; copy gap 28 · 24 · 20; search gap 44 · 40 · 32; proof gap 40 · 32 · 24.
  */
-export function HomeHero({ data }: { data: HomeData | null }) {
+export function HomeHero({
+  data,
+  partnershipOptions,
+}: {
+  data: HomeData | null;
+  partnershipOptions?: Record<string, string[]>;
+}) {
   const t = useTranslations('home.hero');
 
   return (
@@ -52,8 +58,8 @@ export function HomeHero({ data }: { data: HomeData | null }) {
           </div>
         </div>
 
-        <div className="mt-32 tablet:mt-40 desktop:mt-44">
-          <HeroSearch />
+        <div className="relative z-10 mt-32 tablet:mt-40 desktop:mt-44">
+          <HeroSearch partnershipOptions={partnershipOptions} />
         </div>
 
         <ProofPanel data={data} />

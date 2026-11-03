@@ -1,9 +1,12 @@
 'use client';
+import { saveEntryMode, entryStorageKey, type EntryMode } from './entry-mode';
+
 import { BilingualFields } from '@/components/content/BilingualFields';
 import type { LocalizedContent } from '@/lib/content/localized';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { Logo } from '@/components/brand/Logo';
 import { Icon } from '@/components/icons/Icon';
 import { Button, ButtonLink } from '@/components/ui/Button';
@@ -29,7 +32,8 @@ import { RequestDocumentsPanel } from './RequestDocumentsPanel';
 import { editableListing, jsonRequest, type Farm, type ListingDraft, type FarmSpecification } from './types';
 
 export const wizardSteps = ['basics', 'location', 'agriculture', 'listing', 'photos', 'documents', 'review'] as const;
-type Props = {
+export type AddFarmWizardProps = {
+  entryMode?: EntryMode;
   user: AuthUser;
   initialFarm?: Farm;
   initialListing?: ListingDraft;
@@ -64,13 +68,15 @@ function storedAvailabilityDate(value: string | null | undefined): string {
 }
 export function AddFarmWizard({
   user,
+  entryMode,
   initialFarm,
   initialListing,
   initialSpecification,
   initialLocation,
   initialStep = 1,
-}: Props) {
+}: AddFarmWizardProps) {
   const t = useTranslations('workspace.wizard');
+  const entryText = useTranslations('home.hero.search');
   const ft = useTranslations('marketplace.options.farmTypes');
   const options = useTranslations('marketplace.options');
   const router = useRouter();
@@ -126,7 +132,7 @@ export function AddFarmWizard({
     waterSource: initialFarm?.waterSource ?? '',
     energySource: initialFarm?.energySource ?? '',
     farmDescription: initialFarm?.description ?? '',
-    listingType: initialListing?.listingType ?? 'sale',
+    listingType: entryMode ? (entryMode === 'rent' ? 'rent' : 'sale') : (initialListing?.listingType ?? 'sale'),
     askingPrice: initialListing?.askingPrice?.toString() ?? '',
     statedSalePricePerFeddan: initialListing?.statedSalePricePerFeddan?.toString() ?? '',
     annualRentPerFeddan: initialListing?.annualRentPerFeddan?.toString() ?? '',
@@ -173,6 +179,7 @@ export function AddFarmWizard({
   const uploading = mediaBusy || docsBusy;
   const current = wizardSteps[step - 1]!;
   const update = (key: keyof typeof data, value: string) => {
+    if (key === 'listingType' && entryMode) return;
     setData((old) => ({ ...old, [key]: value }));
     setDirty(true);
     setSaved(false);
@@ -204,6 +211,7 @@ export function AddFarmWizard({
   }, [dirty, uploading, mediaPending, docsPending, facilityPending]);
   const go = (next: number) => {
     setStep(next);
+    if (farm) syncUrl(farm.id, listing?.id, next);
     setVisited((old) => (old.includes(next) ? old : [...old, next]));
     setInvalid(false);
     setError(null);
@@ -231,13 +239,19 @@ export function AddFarmWizard({
           Number(value) <= 9999999999999),
     );
   }
-  const syncUrl = (farmId: string, requestId?: string, next = step) =>
-    window.history.replaceState(
-      null,
-      '',
-      `/${locale}/my/farms/${farmId}/list?step=${next}${requestId ? `&listingId=${encodeURIComponent(requestId)}` : ''}`,
-    );
+  const syncUrl = (farmId: string, requestId?: string, next = step, remember = false) => {
+    if (entryMode && remember) {
+      saveEntryMode(user.id, requestId ?? `farm:${farmId}`, entryMode);
+      if (requestId) localStorage.removeItem(entryStorageKey(user.id, `farm:${farmId}`));
+    }
+    const query = new URLSearchParams({ step: String(next) });
+    if (requestId) query.set('listingId', requestId);
+    if (entryMode) query.set('entryMode', entryMode);
+    window.history.replaceState(null, '', `/${locale}/my/farms/${farmId}/list?${query}`);
+  };
   async function persist(includeListing = step >= 4) {
+    if (entryMode && data.listingType !== (entryMode === 'rent' ? 'rent' : 'sale')) throw new Error('entry conflict');
+    if (data.listingType === 'sale') saleTermsRef.current?.validate(includeListing);
     if (!locationReady) throw new Error('location unavailable');
     if (data.roadDistanceKm && (!Number.isFinite(Number(data.roadDistanceKm)) || Number(data.roadDistanceKm) < 0)) {
       throw new Error('invalid road distance');
@@ -270,7 +284,7 @@ export function AddFarmWizard({
       farmBody,
     );
     setFarm(stored);
-    syncUrl(stored.id, listing?.id);
+    syncUrl(stored.id, listing?.id, step, true);
     if (locationDirty) {
       const confirmed = await jsonRequest<PrivateFarmLocation>(`/api/farms/${stored.id}/private-location`, 'PATCH', {
         ...(pinDirty ? { privatePinLatitude: pin?.latitude ?? null, privatePinLongitude: pin?.longitude ?? null } : {}),
@@ -318,7 +332,7 @@ export function AddFarmWizard({
       );
       setListing(request);
       setListingDirty(false);
-      syncUrl(stored.id, request.id);
+      syncUrl(stored.id, request.id, step, true);
     }
     if (includeListing && request?.listingType === 'sale') await saleTermsRef.current?.save(request.id);
     setDirty(false);
@@ -582,6 +596,7 @@ export function AddFarmWizard({
             </span>
           </div>
           <div className="flex items-center gap-12">
+            <LanguageToggle />
             <span
               role="status"
               className="hidden rounded-full bg-bg-muted px-12 py-6 type-label-caption text-text-brand tablet:block"
@@ -950,6 +965,11 @@ export function AddFarmWizard({
                 <div hidden={step !== 4}>
                   <div className="flex flex-col gap-24">
                     <WizardCard icon="category" title={t('purpose')}>
+                      {entryMode && (
+                        <p role="note">
+                          {entryText(`entry.${entryMode}`)} {entryText('locked')}
+                        </p>
+                      )}
                       <div className="grid grid-cols-2 gap-16">
                         {(['sale', 'rent'] as const).map((type) => (
                           <label
@@ -961,6 +981,7 @@ export function AddFarmWizard({
                               <input
                                 type="radio"
                                 name="listingType"
+                                disabled={Boolean(entryMode)}
                                 checked={data.listingType === type}
                                 onChange={() => update('listingType', type)}
                                 className="size-18 accent-brand-primary"
@@ -976,6 +997,9 @@ export function AddFarmWizard({
                     </WizardCard>
                     <SaleTermsEditor
                       ref={saleTermsRef}
+                      entryMode={entryMode}
+                      storageId={initialListing?.id ?? initialFarm?.id ?? 'new'}
+                      userId={user.id}
                       listingId={initialListing?.id}
                       visible={data.listingType === 'sale'}
                       disabled={pending || !canEdit}

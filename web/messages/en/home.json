@@ -15,8 +15,12 @@
       "label": "Search farms and management requests",
       "modesLabel": "What are you looking for?",
       "modes": {
-        "buy": "Buy",
+        "quickBuy": "Quick Buy",
+        "buy": "Standard Buy",
+        "quickSale": "Quick Sale",
+        "standardSale": "Standard Sale",
         "rent": "Rent",
+        "partnership": "Partnership",
         "management": "Management"
       },
       "location": {
@@ -42,7 +46,41 @@
       "submit": {
         "farms": "Search farms",
         "requests": "Find requests"
-      }
+      },
+      "availableCash": "Available cash (EGP)",
+      "installmentAmount": "Desired installment amount (EGP)",
+      "exchange": "Exchange assets",
+      "approximateValue": "Approximate value (EGP)",
+      "otherDescription": "Describe the item",
+      "criteriaOnly": "Amounts and Farm / Other assets are preferences only. Supported installment and exchange filters apply to results.",
+      "assets": {
+        "factory": "Factory",
+        "villa": "Villa",
+        "car": "Car",
+        "apartment": "Apartment",
+        "farm": "Farm",
+        "other": "Other"
+      },
+      "startListing": "Start listing",
+      "entry": {
+        "quickSale": "List your farm for sale with cash only. Sale and cash payment stay locked.",
+        "standardSale": "List your farm for sale with installment and exchange preferences. Sale stays locked.",
+        "rent": "List your farm for rent. Rent stays locked."
+      },
+      "locked": "This listing mode is locked for this draft.",
+      "conflict": "This draft conflicts with the selected listing mode. No changes have been saved. Resume the original draft or start a new listing.",
+      "original": "Resume original draft",
+      "newListing": "Start a new listing",
+      "localOnly": "Farm and Other exchange preferences are saved only in this browser, not sent to the API. Select at least one supported asset (Factory, Villa, Car or Apartment) for server exchange terms.",
+      "storageError": "Browser storage is unavailable. Enable it to preserve the locked listing mode before continuing.",
+      "cashOnly": "Cash only",
+      "paymentRequired": "Choose installments, exchange, or both. Exchange requires at least one API-supported asset: Factory, Villa, Car or Apartment.",
+      "flexible": "Installment / exchange",
+      "termsConflict": "The saved sale terms conflict with this entry mode. No changes have been saved. Resume the original draft from My Farms.",
+      "chooseFarm": "Choose an existing farm or create a new one",
+      "createFarm": "Create a new farm",
+      "loading": "Loading?",
+      "draftsUnavailable": "Could not load existing drafts. Retry before selecting an existing farm."
     },
     "proof": {
       "header": "FarmExit in numbers",

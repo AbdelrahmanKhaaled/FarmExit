@@ -1,9 +1,12 @@
 'use client';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import type { EntryMode } from './entry-mode';
+import { exchangeItems } from '@/features/home/QuickBuyFields';
 import { Choice } from '@/features/phase7/TaskFrame';
 import { WizardCard } from './WizardCard';
 import { Button } from '@/components/ui/Button';
+import { Link } from '@/i18n/navigation';
 export type SaleTerms = {
   saleMode: string;
   acceptsCashProposals: boolean;
@@ -13,7 +16,7 @@ export type SaleTerms = {
   exchangeAssetTypes: string[];
   configured: boolean;
 };
-export type SaleTermsHandle = { save: (id: string) => Promise<void> };
+export type SaleTermsHandle = { validate: (required?: boolean) => void; save: (id: string) => Promise<void> };
 export class SaleTermsError extends Error {}
 export const assets = ['factory', 'villa', 'apartment', 'car'] as const;
 export const saleLabels = {
@@ -50,14 +53,27 @@ export const saleLabels = {
 };
 export const SaleTermsEditor = forwardRef<
   SaleTermsHandle,
-  { listingId?: string; onDirty: () => void; disabled?: boolean; visible?: boolean }
->(function SaleTermsEditor({ listingId, onDirty, disabled, visible = true }, ref) {
+  {
+    listingId?: string;
+    onDirty: () => void;
+    disabled?: boolean;
+    visible?: boolean;
+    entryMode?: EntryMode;
+    storageId?: string;
+    userId?: string;
+  }
+>(function SaleTermsEditor({ listingId, onDirty, disabled, visible = true, entryMode, storageId, userId }, ref) {
   const locale = useLocale();
+  const t = useTranslations('home.hero.search');
+  const lockedMode =
+    entryMode === 'quickSale' ? 'standardCash' : entryMode === 'standardSale' ? 'quickSale' : undefined;
+  const extraKey = (id: string) => `fx:listing-assets:v1:${userId}:${id}`;
   const c = saleLabels[locale === 'ar' ? 'ar' : 'en'];
   const [stored, setStored] = useState<SaleTerms | null>(null);
-  const [mode, setMode] = useState(listingId ? '' : 'standardCash');
+  const [mode, setMode] = useState(lockedMode ?? (listingId ? '' : 'standardCash'));
   const [choice, setChoice] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [conflict, setConflict] = useState(false);
   const [ready, setReady] = useState(!listingId);
   const [failed, setFailed] = useState(false);
   const [invalid, setInvalid] = useState(false);
@@ -83,7 +99,16 @@ export const SaleTermsEditor = forwardRef<
         loaded.current = listingId;
         setStored(value);
         if (value) {
-          setMode(value.saleMode);
+          const incompatible = Boolean(
+            value.configured !== false &&
+            lockedMode &&
+            (value.saleMode !== lockedMode ||
+              (lockedMode === 'standardCash'
+                ? !value.acceptsCashProposals || value.acceptsInstallmentProposals || value.acceptsExchangeProposals
+                : value.acceptsCashProposals)),
+          );
+          setConflict(incompatible);
+          setMode(lockedMode ?? value.saleMode);
           setChoice(
             value.acceptsInstallmentProposals && value.acceptsExchangeProposals
               ? 'both'
@@ -93,7 +118,20 @@ export const SaleTermsEditor = forwardRef<
                   ? 'exchange'
                   : '',
           );
-          setSelected(value.exchangeAssetTypes);
+          let extra: string[] = [];
+          try {
+            const raw: unknown = JSON.parse(
+              localStorage.getItem(`fx:listing-assets:v1:${userId}:${listingId}`) ?? '[]',
+            );
+            if (Array.isArray(raw)) extra = raw.filter((v) => v === 'farm' || v === 'other');
+          } catch {
+            /* No saved browser-only assets. */
+          }
+          setSelected([...value.exchangeAssetTypes, ...extra]);
+        }
+        if ((!value || value.configured === false) && lockedMode) {
+          touched.current = true;
+          setEdited(true);
         }
         setReady(true);
       })
@@ -103,23 +141,34 @@ export const SaleTermsEditor = forwardRef<
     return () => {
       active = false;
     };
-  }, [listingId, c.error]);
+  }, [listingId, c.error, lockedMode, userId]);
+  const validate = (required = true) => {
+    if (!ready || failed) throw new SaleTermsError(c.error);
+    if (conflict) throw new SaleTermsError(t('termsConflict'));
+    const exchange = mode === 'quickSale' && (choice === 'exchange' || choice === 'both');
+    if (
+      required &&
+      touched.current &&
+      mode === 'quickSale' &&
+      (!choice || (exchange && !selected.some((v) => assets.includes(v as (typeof assets)[number]))))
+    ) {
+      setInvalid(true);
+      throw new SaleTermsError(lockedMode ? t('paymentRequired') : c.required);
+    }
+  };
   useImperativeHandle(ref, () => ({
+    validate,
     save: async (id) => {
-      if (!ready || failed) throw new SaleTermsError(c.error);
+      validate();
       if (!touched.current) return;
       const exchange = mode === 'quickSale' && (choice === 'exchange' || choice === 'both');
-      if (mode === 'quickSale' && (!choice || (exchange && !selected.length))) {
-        setInvalid(true);
-        throw new SaleTermsError(c.required);
-      }
       const body = {
         saleMode: mode,
         acceptsCashProposals: mode === 'standardCash',
         acceptsInstallmentProposals: mode === 'quickSale' && (choice === 'installment' || choice === 'both'),
         acceptsExchangeProposals: exchange,
         exchangePreferenceScope: exchange ? 'selected' : 'any',
-        exchangeAssetTypes: exchange ? selected : [],
+        exchangeAssetTypes: exchange ? selected.filter((v) => assets.includes(v as (typeof assets)[number])) : [],
       };
       const r = await fetch(`/api/listing-requests/${id}/sale-terms`, {
         method: 'PUT',
@@ -130,6 +179,7 @@ export const SaleTermsEditor = forwardRef<
       const saved: SaleTerms = await r.json();
       if (Object.entries(body).some(([k, v]) => JSON.stringify(saved[k as keyof SaleTerms]) !== JSON.stringify(v)))
         throw new SaleTermsError(c.error);
+      localStorage.setItem(extraKey(id), JSON.stringify(selected.filter((v) => v === 'farm' || v === 'other')));
       loaded.current = id;
       touched.current = false;
       setEdited(false);
@@ -167,12 +217,19 @@ export const SaleTermsEditor = forwardRef<
           </Button>
         )}
         {!stored && listingId && ready && <p className="type-body-caption text-text-muted">{c.unknown}</p>}
-        <fieldset disabled={disabled || !ready || failed} className="flex flex-col gap-12">
+        {conflict && (
+          <div className="flex flex-col gap-12">
+            <p role="alert">{t('termsConflict')}</p>
+            <Link href="/my/farms">{t('original')}</Link>
+          </div>
+        )}
+        <fieldset disabled={disabled || !ready || failed || conflict} className="flex flex-col gap-12">
           <Choice
             type="radio"
             name="saleMode"
             value="standardCash"
-            label={c.normal}
+            disabled={Boolean(lockedMode)}
+            label={lockedMode ? t('cashOnly') : c.normal}
             checked={mode === 'standardCash'}
             onChange={() => {
               setMode('standardCash');
@@ -183,7 +240,8 @@ export const SaleTermsEditor = forwardRef<
             type="radio"
             name="saleMode"
             value="quickSale"
-            label={c.quick}
+            disabled={Boolean(lockedMode)}
+            label={lockedMode ? t('flexible') : c.quick}
             checked={mode === 'quickSale'}
             onChange={() => {
               setMode('quickSale');
@@ -209,15 +267,24 @@ export const SaleTermsEditor = forwardRef<
               {(choice === 'exchange' || choice === 'both') && (
                 <fieldset className="flex flex-col gap-12">
                   <legend className="mb-12 type-label-small-strong">{c.accepted}</legend>
-                  {assets.map((v, i) => (
+                  {(entryMode ? exchangeItems : assets).map((v) => (
                     <Choice
                       key={v}
                       name="acceptedExchangeAsset"
                       value={v}
-                      label={c.assets[i]!}
+                      label={t(`assets.${v}`)}
                       checked={selected.includes(v)}
                       onChange={() => {
                         setSelected((s) => (s.includes(v) ? s.filter((a) => a !== v) : [...s, v]));
+                        if (storageId)
+                          localStorage.setItem(
+                            extraKey(storageId),
+                            JSON.stringify(
+                              (selected.includes(v) ? selected.filter((a) => a !== v) : [...selected, v]).filter(
+                                (a) => a === 'farm' || a === 'other',
+                              ),
+                            ),
+                          );
                         change();
                       }}
                     />
@@ -227,9 +294,10 @@ export const SaleTermsEditor = forwardRef<
             </>
           )}
         </fieldset>
+        {entryMode === 'standardSale' && <p className="type-body-caption text-text-muted">{t('localOnly')}</p>}
         {invalid && (
           <p role="alert" className="type-body-caption text-status-error">
-            {c.required}
+            {lockedMode ? t('paymentRequired') : c.required}
           </p>
         )}
       </WizardCard>

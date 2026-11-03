@@ -26,7 +26,7 @@ export function SearchTabs<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className={cn('gap-4', options.length === 4 ? 'grid grid-cols-4 tablet:flex' : 'flex')}
+      className={cn('gap-4', options.length >= 4 ? 'grid grid-cols-2 tablet:flex tablet:flex-wrap' : 'flex')}
     >
       {options.map((option) => (
         <button
@@ -48,12 +48,13 @@ export function SearchTabs<T extends string>({
   );
 }
 
-export function SearchPanel({ children }: { children: ReactNode }) {
+export function SearchPanel({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
       className={cn(
         'grid grid-cols-1 gap-8 rounded-3xl rounded-ss-none border border-overlay-glass-light-border bg-overlay-glass-light p-12',
         'effect-hero-panel tablet:grid-cols-2 desktop:flex',
+        className,
       )}
     >
       {children}
@@ -85,7 +86,7 @@ export function SearchField({
   );
 }
 
-export function SearchSubmit({ children }: { children: ReactNode }) {
+export function SearchSubmit({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <button
       type="submit"
@@ -93,6 +94,7 @@ export function SearchSubmit({ children }: { children: ReactNode }) {
         'flex h-52 items-center justify-center gap-10 rounded-xl bg-brand-accent px-20 type-label-large text-text-on-dark',
         'transition-colors duration-150 hover:bg-brand-primary active:bg-brand-accent-pressed',
         'tablet:col-span-2 tablet:h-56 desktop:h-auto desktop:flex-1',
+        className,
       )}
     >
       <Icon name="search" size={18} />

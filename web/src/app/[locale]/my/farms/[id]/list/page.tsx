@@ -6,11 +6,16 @@ import { connection } from 'next/server';
 import { routing } from '@/i18n/routing';
 import { requireCompletedProfile } from '@/lib/auth/require-session';
 import { apiFetchWebsite } from '@/lib/auth/session.server';
-import { AddFarmWizard } from '@/features/my-farms/AddFarmWizard';
+import { EntryModeWizard } from '@/features/my-farms/EntryModeWizard';
+import { parseEntryMode } from '@/features/my-farms/entry-mode';
 import type { Farm, ListingDraft, FarmSpecification, PrivateFarmLocation } from '@/features/my-farms/types';
 export const instant = false;
 export default function ResumeListingPage(props: Parameters<typeof ResumeListing>[0]) {
-  return <Suspense fallback={null}><ResumeListing {...props} /></Suspense>;
+  return (
+    <Suspense fallback={null}>
+      <ResumeListing {...props} />
+    </Suspense>
+  );
 }
 
 async function ResumeListing({
@@ -18,17 +23,19 @@ async function ResumeListing({
   searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ listingId?: string; step?: string }>;
+  searchParams: Promise<{ listingId?: string; step?: string; entryMode?: string }>;
 }) {
   await connection();
   const { locale, id } = await params;
   const query = await searchParams;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const session = await requireCompletedProfile(
-    locale,
-    `/${locale}/my/farms/${id}/list${query.listingId ? `?listingId=${encodeURIComponent(query.listingId)}` : ''}`,
-  );
+  const entryMode = parseEntryMode(query.entryMode);
+  const returnQuery = new URLSearchParams();
+  if (query.listingId) returnQuery.set('listingId', query.listingId);
+  if (entryMode) returnQuery.set('entryMode', entryMode);
+  if (query.step) returnQuery.set('step', query.step);
+  const session = await requireCompletedProfile(locale, `/${locale}/my/farms/${id}/list?${returnQuery}`);
   const farm = await apiFetchWebsite<Farm>(`/farms/${id}`, session.accessToken).catch(() => null);
   if (!farm || !farm.myRoles.includes('owner')) notFound();
   const location = await apiFetchWebsite<PrivateFarmLocation>(
@@ -47,7 +54,8 @@ async function ResumeListing({
     session.accessToken,
   ).catch(() => null);
   return (
-    <AddFarmWizard
+    <EntryModeWizard
+      entryMode={entryMode}
       user={session.user}
       initialFarm={farm}
       initialListing={listing ?? undefined}

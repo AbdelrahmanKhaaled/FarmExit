@@ -30,16 +30,24 @@ export function PartnershipHeroSearch({
     router.push('/partnerships?' + filtersToSearchParams(next));
   }
   return (
-    <form className="om-hero-search" onSubmit={submit} role="search" aria-label={t('hero.find')}>
+    <form
+      key={JSON.stringify(filters)}
+      className="om-hero-search"
+      onSubmit={submit}
+      role="search"
+      aria-label={t('hero.find')}
+    >
       <label>
         {t('hero.location')}
         <select name="governorate" defaultValue={filters.governorate ?? ''}>
           <option value="">{t('filters.any')}</option>
-          {(options.governorate ?? []).map((v) => (
-            <option key={v} value={v}>
-              {v}
-            </option>
-          ))}
+          {[...new Set([...(options.governorate ?? []), ...(filters.governorate ? [filters.governorate] : [])])].map(
+            (v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ),
+          )}
         </select>
       </label>
       <label>
@@ -69,7 +77,7 @@ export function PartnershipHeroSearch({
         {t('hero.objective')}
         <select name="objective" defaultValue={filters.objective ?? ''}>
           <option value="">{t('filters.any')}</option>
-          {(options.objective ?? []).map((v) => (
+          {[...new Set([...(options.objective ?? []), ...(filters.objective ? [filters.objective] : [])])].map((v) => (
             <option key={v} value={v}>
               {optionLabel(v, locale)}
             </option>

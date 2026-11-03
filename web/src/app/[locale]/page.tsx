@@ -1,3 +1,4 @@
+import { fetchPublicOpportunities } from '@/lib/opportunities/public-opportunity';
 import { Suspense } from 'react';
 import { loadHome } from '@/features/home/home-data';
 import type { Metadata } from 'next';
@@ -56,10 +57,13 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
 }
 
 async function HomeContent({ locale }: { locale: string }) {
-  const data = await loadHome(locale);
+  const [data, partnerships] = await Promise.all([
+    loadHome(locale),
+    fetchPublicOpportunities('partnerships', { page: 1 }, locale),
+  ]);
   return (
     <>
-      <HomeHero data={data} />
+      <HomeHero data={data} partnershipOptions={partnerships?.filterOptions} />
       <AboutSection data={data} />
       <JourneysSection />
       <FeaturedFarms data={data} />

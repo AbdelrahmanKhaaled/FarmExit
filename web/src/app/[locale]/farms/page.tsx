@@ -1,3 +1,4 @@
+import { QuickBuySummary } from '@/features/marketplace/QuickBuySummary';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
@@ -59,6 +60,7 @@ export default async function FarmsPage({ params }: PageProps<'/[locale]/farms'>
             </div>
             <Suspense fallback={<MarketplaceSearchStatic />}>
               <MarketplaceSearch />
+              <QuickBuySummary />
             </Suspense>
           </Container>
         </section>

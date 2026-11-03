@@ -1,4 +1,5 @@
 'use client';
+import { intentKeys } from '@/features/home/QuickBuyFields';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -32,7 +33,10 @@ export function useMarketplaceState() {
 
   const setState = useCallback((next: MarketplaceState) => {
     setLocal(next);
-    const query = new URLSearchParams(toSearchParams(next)).toString();
+    const params = new URLSearchParams(toSearchParams(next));
+    const current = new URLSearchParams(window.location.search);
+    for (const key of intentKeys) if (current.has(key)) params.set(key, current.get(key)!);
+    const query = params.toString();
     window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
   }, []);
 

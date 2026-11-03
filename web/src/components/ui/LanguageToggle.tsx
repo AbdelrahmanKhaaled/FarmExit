@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
@@ -33,7 +34,8 @@ function ToggleLink({ href, className }: { href: string; className?: string }) {
 }
 
 function CurrentPathToggle({ className }: { className?: string }) {
-  return <ToggleLink href={usePathname()} className={className} />;
+  const query = useSearchParams().toString();
+  return <ToggleLink href={usePathname() + (query ? '?' + query : '')} className={className} />;
 }
 
 /**

@@ -19,6 +19,7 @@ export function FilterSidebar({ kind, filters, options = {}, onChange, onClear, 
   const t = useTranslations('opportunityMarketplace');
   const locale = useLocale();
   const dialog = useRef<HTMLDialogElement>(null);
+  const areaMax = Math.max(500, filters.minArea ?? 0, filters.maxArea ?? 500);
   useEffect(() => {
     if (mobileOpen) dialog.current?.showModal();
     else dialog.current?.close();
@@ -27,7 +28,7 @@ export function FilterSidebar({ kind, filters, options = {}, onChange, onClear, 
     onChange({ ...filters, page: 1, [key]: value });
   const choices = (key: 'managementType' | 'objective' | 'partnerType', title: string) => (
     <FilterSection title={title} gap="md">
-      {(options[key] ?? []).map((v) => (
+      {[...new Set([...(options[key] ?? []), ...(filters[key] ? [filters[key]!] : [])])].map((v) => (
         <ChoiceOption
           key={v}
           type="checkbox"
@@ -53,7 +54,7 @@ export function FilterSidebar({ kind, filters, options = {}, onChange, onClear, 
             {t(('filters.' + key) as 'filters.area')}
             <select value={filters[key] ?? ''} onChange={(e) => set(key, e.target.value || undefined)}>
               <option value="">{t('filters.any')}</option>
-              {(options[key] ?? []).map((v) => (
+              {[...new Set([...(options[key] ?? []), ...(filters[key] ? [filters[key]!] : [])])].map((v) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
@@ -77,11 +78,11 @@ export function FilterSidebar({ kind, filters, options = {}, onChange, onClear, 
       <FilterSection title={t('filters.farmSize')} gap="sm">
         <RangeSlider
           min={0}
-          max={500}
-          step={1}
-          value={[filters.minArea ?? 0, filters.maxArea ?? 500]}
+          max={areaMax}
+          step={0.01}
+          value={[filters.minArea ?? 0, filters.maxArea ?? areaMax]}
           onChange={([min, max]) =>
-            onChange({ ...filters, page: 1, minArea: min || undefined, maxArea: max === 500 ? undefined : max })
+            onChange({ ...filters, page: 1, minArea: min || undefined, maxArea: max === areaMax ? undefined : max })
           }
           format={(v) => v + ' ' + t('feddans')}
           minCaption={t('filters.minFeddans')}

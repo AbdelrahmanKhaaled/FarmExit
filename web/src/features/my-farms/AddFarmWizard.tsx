@@ -8,7 +8,6 @@ import type { LocalizedContent } from '@/lib/content/localized';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { Logo } from '@/components/brand/Logo';
 import { Icon } from '@/components/icons/Icon';
 import { Button, ButtonLink } from '@/components/ui/Button';
